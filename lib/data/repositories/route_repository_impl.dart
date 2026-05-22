@@ -6,7 +6,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../domain/entities/entities.dart';
 import '../../../../domain/repositories/repositories.dart';
-import '../datasources/mapbox_datasource.dart';
+import '../datasources/mapbox_datasource.dart' hide Fmt;
 
 class RouteRepositoryImpl implements RouteRepository {
   final MapboxDatasource _mapbox;

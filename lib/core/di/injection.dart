@@ -10,14 +10,18 @@ import '../../../../data/repositories/location_repository_impl.dart';
 import '../../../../data/repositories/plan_repository_impl.dart';
 import '../../../../data/repositories/route_repository_impl.dart';
 import '../../../../domain/repositories/repositories.dart';
-import '../../../../domain/usecases/usecases.dart';
 import '../../../../presentation/bloc/location_search/location_search_bloc.dart';
 import '../../../../presentation/bloc/route_builder/route_builder_bloc.dart';
+import '../../domain/usecases/suggest_waypoints.dart';
+import '../../domain/usecases/build_plan.dart';
+import '../../domain/usecases/build_route.dart';
+import '../../domain/usecases/export_plan.dart';
+import '../../domain/usecases/get_current_location.dart';
+import '../../domain/usecases/search_places.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  // ── External ──────────────────────────────────────────────────────────────
   final prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
 
@@ -33,11 +37,9 @@ Future<void> init() async {
       )),
   );
 
-  // ── Datasources ───────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => MapboxDatasource(sl<Dio>()));
   sl.registerLazySingleton(() => LocationDatasource());
 
-  // ── Repositories ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<LocationRepository>(
     () => LocationRepositoryImpl(sl<LocationDatasource>(), sl<MapboxDatasource>()),
   );
@@ -51,7 +53,6 @@ Future<void> init() async {
     () => ExportRepositoryImpl(),
   );
 
-  // ── Use cases ─────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetCurrentLocation(sl<LocationRepository>()));
   sl.registerLazySingleton(() => SearchPlaces(sl<LocationRepository>()));
   sl.registerLazySingleton(() => BuildRoute(sl<RouteRepository>()));
@@ -59,7 +60,6 @@ Future<void> init() async {
   sl.registerLazySingleton(() => BuildPlan(sl<PlanRepository>()));
   sl.registerLazySingleton(() => ExportPlan(sl<ExportRepository>()));
 
-  // ── BLoCs (factory = new instance per BlocProvider) ───────────────────────
   sl.registerFactory(
     () => RouteBuilderBloc(
       buildRoute: sl<BuildRoute>(),

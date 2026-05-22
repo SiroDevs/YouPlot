@@ -1,0 +1,41 @@
+import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
+
+import '../../../../core/errors/failures.dart';
+import '../../../../core/usecases/usecase.dart';
+import '../../core/constants/app_constants.dart';
+import '../entities/entities.dart';
+import '../repositories/repositories.dart';
+
+class BuildRoute extends UseCase<Route, BuildRouteParams> {
+  final RouteRepository _repo;
+  BuildRoute(this._repo);
+
+  @override
+  Future<Either<Failure, Route>> call(BuildRouteParams p) => _repo.buildRoute(
+        origin: p.origin,
+        destination: p.destination,
+        viaPoints: p.viaPoints,
+        sport: p.sport,
+        unit: p.unit,
+      );
+}
+
+class BuildRouteParams extends Equatable {
+  final Location origin;
+  final Location destination;
+  final List<Location> viaPoints;
+  final SportType sport;
+  final DistanceUnit unit;
+
+  const BuildRouteParams({
+    required this.origin,
+    required this.destination,
+    required this.viaPoints,
+    required this.sport,
+    required this.unit,
+  });
+
+  @override
+  List<Object?> get props => [origin, destination, sport, unit];
+}

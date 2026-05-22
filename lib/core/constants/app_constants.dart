@@ -4,10 +4,8 @@ const String kMapboxStyleDark = 'mapbox://styles/mapbox/dark-v11';
 const String kMapboxDirections = 'https://api.mapbox.com/directions/v5/mapbox';
 const String kMapboxGeocode = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
 
-const String kAppName = 'TrailForge';
+const String kAppName = 'YouPlot';
 const String kSavedPlansKey = 'saved_plans_v1';
-
-// ─── Enums ────────────────────────────────────────────────────────────────────
 
 enum SportType {
   walking('Walking', '🚶', 'walking', 5.0),

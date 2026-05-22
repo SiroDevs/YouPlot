@@ -1,4 +1,4 @@
-# TrailForge — Setup Guide
+# YouPlot — Setup Guide
 
 ## 1. Get a Mapbox token
 

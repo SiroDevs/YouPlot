@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/app_constants.dart';
@@ -9,8 +10,6 @@ import '../../../../domain/entities/entities.dart';
 class MapboxDatasource {
   final Dio _dio;
   MapboxDatasource(this._dio);
-
-  // ── Geocoding ─────────────────────────────────────────────────────────────
 
   Future<List<Location>> searchPlaces(String query) async {
     try {
@@ -24,7 +23,9 @@ class MapboxDatasource {
         },
       );
       final features = (resp.data['features'] as List);
-      return features.map(_locationFromFeature).toList();
+      return features
+          .map((f) => _locationFromFeature(f as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       throw NetworkException(e.message ?? 'Geocoding request failed');
     }
@@ -48,18 +49,18 @@ class MapboxDatasource {
     }
   }
 
-  // ── Directions ────────────────────────────────────────────────────────────
-
-  Future<_DirectionsResult> getDirections({
+  Future<DirectionsResult> getDirections({
     required Location origin,
     required Location destination,
     required List<Location> via,
     required String profile,
   }) async {
     try {
-      final coords = [origin, ...via, destination]
-          .map((p) => '${p.lng},${p.lat}')
-          .join(';');
+      final coords = [
+        origin,
+        ...via,
+        destination,
+      ].map((p) => '${p.lng},${p.lat}').join(';');
 
       final resp = await _dio.get(
         '$kMapboxDirections/$profile/$coords',
@@ -78,33 +79,24 @@ class MapboxDatasource {
       final route = resp.data['routes'][0] as Map<String, dynamic>;
       final distM = (route['distance'] as num).toDouble();
       final coords2d = (route['geometry']['coordinates'] as List)
-          .map((c) => [
-                (c as List)[0].toDouble(),
-                c[1].toDouble(),
-              ])
-          .toList();
+          .map((c) => [(c as List)[0].toDouble(), c[1].toDouble()])
+          .toList()
+          .cast<List<double>>();
 
-      return _DirectionsResult(
-        geometry: coords2d,
-        distanceKm: distM / 1000.0,
-      );
+      return DirectionsResult(geometry: coords2d, distanceKm: distM / 1000.0);
     } on DioException catch (e) {
       throw NetworkException(e.message ?? 'Directions request failed');
     }
   }
 
-  // ── Elevation (Open-Elevation fallback, no extra token needed) ────────────
-
   Future<List<ElevationPoint>> getElevationProfile(
     List<List<double>> geometry,
     int samples,
   ) async {
-    // Sample the geometry evenly
     final sampled = _sampleGeometry(geometry, samples);
     final result = <ElevationPoint>[];
     double cumDist = 0;
 
-    // Use Open-Elevation (free, no token, good accuracy)
     try {
       final body = {
         'locations': sampled
@@ -121,22 +113,27 @@ class MapboxDatasource {
       for (int i = 0; i < results.length; i++) {
         if (i > 0) {
           cumDist += Fmt.haversineKm(
-            sampled[i - 1][1], sampled[i - 1][0],
-            sampled[i][1], sampled[i][0],
+            sampled[i - 1][1],
+            sampled[i - 1][0],
+            sampled[i][1],
+            sampled[i][0],
           );
         }
-        result.add(ElevationPoint(
-          distanceKm: cumDist,
-          elevationM: (results[i]['elevation'] as num).toDouble(),
-        ));
+        result.add(
+          ElevationPoint(
+            distanceKm: cumDist,
+            elevationM: (results[i]['elevation'] as num).toDouble(),
+          ),
+        );
       }
     } catch (_) {
-      // If elevation API is unavailable, return flat profile
       for (int i = 0; i < sampled.length; i++) {
         if (i > 0) {
           cumDist += Fmt.haversineKm(
-            sampled[i - 1][1], sampled[i - 1][0],
-            sampled[i][1], sampled[i][0],
+            sampled[i - 1][1],
+            sampled[i - 1][0],
+            sampled[i][1],
+            sampled[i][0],
           );
         }
         result.add(ElevationPoint(distanceKm: cumDist, elevationM: 0));
@@ -145,8 +142,6 @@ class MapboxDatasource {
 
     return result;
   }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
 
   Location _locationFromFeature(Map<String, dynamic> f) {
     final coords = f['geometry']['coordinates'] as List;
@@ -161,24 +156,31 @@ class MapboxDatasource {
   List<List<double>> _sampleGeometry(List<List<double>> geom, int n) {
     if (geom.length <= n) return geom;
     final step = geom.length / n;
-    return List.generate(n, (i) => geom[min((i * step).floor(), geom.length - 1)]);
+    return List.generate(
+      n,
+      (i) => geom[min((i * step).floor(), geom.length - 1)],
+    );
   }
 }
 
-// Internal DTO
-class _DirectionsResult {
+class DirectionsResult {
   final List<List<double>> geometry;
   final double distanceKm;
-  _DirectionsResult({required this.geometry, required this.distanceKm});
+  DirectionsResult({required this.geometry, required this.distanceKm});
 }
 
-// Expose haversine for datasource use
 class Fmt {
-  static double haversineKm(double lat1, double lon1, double lat2, double lon2) {
+  static double haversineKm(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
     const r = 6371.0;
     final dLat = _r(lat2 - lat1);
     final dLon = _r(lon2 - lon1);
-    final a = sin(dLat / 2) * sin(dLat / 2) +
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
         cos(_r(lat1)) * cos(_r(lat2)) * sin(dLon / 2) * sin(dLon / 2);
     return r * 2 * atan2(sqrt(a), sqrt(1 - a));
   }

@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../core/constants/app_constants.dart';
 import '../../../../../../domain/entities/entities.dart';
-import '../../../../../../domain/usecases/usecases.dart';
+import '../../../domain/usecases/build_plan.dart';
+import '../../../domain/usecases/build_route.dart';
+import '../../../domain/usecases/export_plan.dart';
+import '../../../domain/usecases/suggest_waypoints.dart';
 
 part 'route_builder_event.dart';
 part 'route_builder_state.dart';

@@ -1,4 +1,4 @@
-package com.example.youplot
+package com.sirodevs.youplot
 
 import io.flutter.embedding.android.FlutterActivity
 

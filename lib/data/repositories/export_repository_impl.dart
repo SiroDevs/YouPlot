@@ -85,12 +85,12 @@ class ExportRepositoryImpl implements ExportRepository {
             padding: const pw.EdgeInsets.all(20),
             decoration: pw.BoxDecoration(color: PdfColors.teal700, borderRadius: pw.BorderRadius.circular(10)),
             child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-              pw.Text(kAppName, style: const pw.TextStyle(color: PdfColors.white70, fontSize: 10)),
+              pw.Text(kAppName, style: const pw.TextStyle(color: PdfColors.white, fontSize: 10)),
               pw.SizedBox(height: 4),
               pw.Text('${r.origin.name ?? "Start"} → ${r.destination.name ?? "End"}',
                   style: pw.TextStyle(color: PdfColors.white, fontSize: 20, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 2),
-              pw.Text(r.sport.label, style: const pw.TextStyle(color: PdfColors.white70, fontSize: 12)),
+              pw.Text(r.sport.label, style: const pw.TextStyle(color: PdfColors.white, fontSize: 12)),
             ]),
           ),
           pw.SizedBox(height: 20),
@@ -219,7 +219,7 @@ class ExportRepositoryImpl implements ExportRepository {
       ]);
 
   pw.Widget _statLight(String l, String v) => pw.Column(children: [
-        pw.Text(l, style: const pw.TextStyle(fontSize: 9, color: PdfColors.white60)),
+        pw.Text(l, style: const pw.TextStyle(fontSize: 9, color: PdfColors.white)),
         pw.SizedBox(height: 4),
         pw.Text(v, style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
       ]);

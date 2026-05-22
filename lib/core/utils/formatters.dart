@@ -5,7 +5,6 @@ import '../constants/app_constants.dart';
 class Fmt {
   Fmt._();
 
-  // ── Distance ──────────────────────────────────────────────────────────────
   static String distance(double km, DistanceUnit unit) {
     if (unit == DistanceUnit.miles) {
       final mi = km * 0.621371;
@@ -20,7 +19,6 @@ class Fmt {
     return '${meters.toStringAsFixed(0)} m';
   }
 
-  // ── Pace / Speed ──────────────────────────────────────────────────────────
   static String speed(double kmh, DistanceUnit unit) {
     if (unit == DistanceUnit.miles) return '${(kmh * 0.621371).toStringAsFixed(1)} mph';
     return '${kmh.toStringAsFixed(1)} km/h';
@@ -34,7 +32,6 @@ class Fmt {
     return '$mins:${secs.toString().padLeft(2, '0')} /${unit.symbol}';
   }
 
-  // ── Duration / Time ───────────────────────────────────────────────────────
   static String duration(Duration d) {
     final h = d.inHours;
     final m = d.inMinutes % 60;
@@ -47,7 +44,6 @@ class Fmt {
     return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
-  // ── Haversine ─────────────────────────────────────────────────────────────
   static double haversineKm(double lat1, double lon1, double lat2, double lon2) {
     const r = 6371.0;
     final dLat = _rad(lat2 - lat1);
@@ -58,4 +54,34 @@ class Fmt {
   }
 
   static double _rad(double deg) => deg * pi / 180;
+
+  static double minSpeed(SportType s) {
+    switch (s) {
+      case SportType.running:
+        return 4.0;
+      case SportType.cycling:
+      case SportType.skating:
+        return 8.0;
+      default:
+        return 2.0;
+    }
+  }
+
+  static double maxSpeed(SportType s) {
+    switch (s) {
+      case SportType.running:
+        return 22.0;
+      case SportType.cycling:
+        return 45.0;
+      case SportType.skating:
+        return 30.0;
+      default:
+        return 8.0;
+    }
+  }
+
+  static String speedLabel(SportType s, String end) {
+    if (end == 'slow') return '${minSpeed(s).toStringAsFixed(0)} km/h';
+    return '${maxSpeed(s).toStringAsFixed(0)} km/h';
+  }
 }

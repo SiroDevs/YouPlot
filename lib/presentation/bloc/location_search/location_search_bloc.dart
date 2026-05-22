@@ -2,7 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../domain/entities/entities.dart';
-import '../../../../../../domain/usecases/usecases.dart';
+import '../../../domain/usecases/get_current_location.dart';
+import '../../../domain/usecases/search_places.dart';
 
 part 'location_search_event.dart';
 part 'location_search_state.dart';

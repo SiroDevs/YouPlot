@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:dartz/dartz.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -29,7 +30,6 @@ class PlanRepositoryImpl implements PlanRepository {
 
       for (int d = 0; d < days; d++) {
         final dayStart = startTime.add(Duration(days: d));
-        DateTime cursor = dayStart;
         final dayStartKm = d * distPerDay;
         final dayEndKm = (d + 1) * distPerDay;
         final dayBreaks = <RouteBreak>[];
@@ -52,7 +52,6 @@ class PlanRepositoryImpl implements PlanRepository {
           );
           dayBreaks.add(br);
           allBreaks.add(br);
-          cursor = breakTime.add(Duration(minutes: bt.defaultMinutes));
         }
 
         final movingSec = (distPerDay / speedKmh * 3600).round();
@@ -110,7 +109,6 @@ class PlanRepositoryImpl implements PlanRepository {
 
   @override
   Future<Either<Failure, List<RoutePlan>>> loadPlans() async {
-    // Returns lightweight summaries only (full plans not persisted for brevity)
     return const Right([]);
   }
 
@@ -125,12 +123,10 @@ class PlanRepositoryImpl implements PlanRepository {
     }
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
   double _breakTriggerKm(BreakType bt, double dayStart, double dayDist) {
     switch (bt) {
       case BreakType.breakfast:
-        return dayStart + dayDist * 0.05;   // 5% in (before real effort)
+        return dayStart + dayDist * 0.05;
       case BreakType.pitStop:
         return dayStart + dayDist * 0.25;
       case BreakType.lunch:
