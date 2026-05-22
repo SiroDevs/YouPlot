@@ -49,8 +49,6 @@
     <string>YouPlot uses your location to set your starting point.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>YouPlot uses your location to set your starting point.</string>
-    <key>MBXAccessToken</key>
-    <string>YOUR_MAPBOX_ACCESS_TOKEN</string>
     <key>UIBackgroundModes</key>
     <array>
         <string>location</string>

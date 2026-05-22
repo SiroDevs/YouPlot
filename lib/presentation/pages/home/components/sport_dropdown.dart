@@ -78,13 +78,6 @@ class SportDropdown extends StatelessWidget {
                             color: AppColors.textPrimary(b),
                           ),
                         ),
-                        Text(
-                          '${s.defaultSpeedKmh.toStringAsFixed(0)} km/h avg',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary(b),
-                          ),
-                        ),
                       ],
                     ),
                   ],

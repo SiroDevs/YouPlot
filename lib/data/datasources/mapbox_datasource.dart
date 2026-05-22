@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/failures.dart';
@@ -16,7 +17,7 @@ class MapboxDatasource {
       final resp = await _dio.get(
         '$kMapboxGeocode/${Uri.encodeComponent(query)}.json',
         queryParameters: {
-          'access_token': kMapboxToken,
+          'access_token': dotenv.env['MAPBOX_TOKEN'],
           'types': 'place,locality,neighborhood,address',
           'limit': '8',
           'language': 'en',
@@ -36,7 +37,7 @@ class MapboxDatasource {
       final resp = await _dio.get(
         '$kMapboxGeocode/$lng,$lat.json',
         queryParameters: {
-          'access_token': kMapboxToken,
+          'access_token': dotenv.env['MAPBOX_TOKEN'],
           'types': 'place,locality',
           'limit': '1',
         },
@@ -65,7 +66,7 @@ class MapboxDatasource {
       final resp = await _dio.get(
         '$kMapboxDirections/$profile/$coords',
         queryParameters: {
-          'access_token': kMapboxToken,
+          'access_token': dotenv.env['MAPBOX_TOKEN'],
           'geometries': 'geojson',
           'overview': 'full',
           'steps': 'false',
@@ -79,9 +80,8 @@ class MapboxDatasource {
       final route = resp.data['routes'][0] as Map<String, dynamic>;
       final distM = (route['distance'] as num).toDouble();
       final coords2d = (route['geometry']['coordinates'] as List)
-          .map((c) => [(c as List)[0].toDouble(), c[1].toDouble()])
-          .toList()
-          .cast<List<double>>();
+          .map((c) => <double>[(c as List)[0].toDouble(), c[1].toDouble()])
+          .toList();
 
       return DirectionsResult(geometry: coords2d, distanceKm: distM / 1000.0);
     } on DioException catch (e) {

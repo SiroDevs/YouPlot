@@ -1,4 +1,3 @@
-const String kMapboxToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
 const String kMapboxStyleOutdoors = 'mapbox://styles/mapbox/outdoors-v12';
 const String kMapboxStyleDark = 'mapbox://styles/mapbox/dark-v11';
 const String kMapboxDirections = 'https://api.mapbox.com/directions/v5/mapbox';
