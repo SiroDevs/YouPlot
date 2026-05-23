@@ -7,6 +7,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../domain/entities/location.dart';
 import '../../../bloc/location_search/location_search_bloc.dart';
 import 'confirm_panel.dart';
+import 'cross_hair.dart';
 import 'glass_circle.dart';
 
 class MapPointPicker extends StatefulWidget {
@@ -111,7 +112,6 @@ class _MapPointPickerState extends State<MapPointPicker> {
       _picked = Location(lat: lat, lng: lng, name: 'Selected point');
     });
 
-    // Add a marker annotation
     await _map?.annotations.createPointAnnotationManager().then((mgr) async {
       await mgr.deleteAll();
       await mgr.create(
@@ -122,7 +122,6 @@ class _MapPointPickerState extends State<MapPointPicker> {
       );
     });
 
-    // Reverse geocode via LocationSearchBloc
     if (mounted) {
       context.read<LocationSearchBloc>().add(ReverseGeocode(lat, lng));
     }
