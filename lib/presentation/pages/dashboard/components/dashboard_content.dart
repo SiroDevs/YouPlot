@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+
+import '../../../bloc/dashboard/dashboard_bloc.dart';
+import 'empty_plan_slot.dart';
+import 'plan_card.dart';
+import 'plan_filter_chips.dart';
+import 'route_card.dart';
+import 'section_title.dart';
+
+class DashboardContent extends StatelessWidget {
+  final DashboardState state;
+  final Brightness brightness;
+  final VoidCallback onCreateNew;
+
+  const DashboardContent({super.key, 
+    required this.state,
+    required this.brightness,
+    required this.onCreateNew,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final b = brightness;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+      children: [
+        if (state.routes.isNotEmpty) ...[
+          SectionTitle(
+            icon: Icons.route_rounded,
+            label: 'Recent Routes',
+            brightness: b,
+          ),
+          const Gap(12),
+          SizedBox(
+            height: 140,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: state.routes.length,
+              separatorBuilder: (_, _) => const Gap(10),
+              itemBuilder: (_, i) => RouteCard(
+                route: state.routes[i],
+                brightness: b,
+                index: i,
+              ),
+            ),
+          ),
+          const Gap(28),
+        ],
+
+        SectionTitle(
+          icon: Icons.calendar_today_rounded,
+          label: 'Plans',
+          brightness: b,
+          trailing: PlanFilterChips(state: state),
+        ),
+        const Gap(12),
+        if (state.activePlans.isEmpty)
+          EmptyPlanSlot(
+            filter: state.planFilter,
+            brightness: b,
+            onCreateNew: onCreateNew,
+          )
+        else
+          ...state.activePlans.asMap().entries.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: PlanCard(
+                    plan: e.value,
+                    brightness: b,
+                    index: e.key,
+                  ),
+                ),
+              ),
+
+        const Gap(16),
+        Center(
+          child: ElevatedButton.icon(
+            onPressed: onCreateNew,
+            icon: const Icon(Icons.add_rounded, size: 18),
+            label: const Text('Create New Plan'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

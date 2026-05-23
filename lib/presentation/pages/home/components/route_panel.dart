@@ -13,7 +13,8 @@ class RoutePanel extends StatelessWidget {
   final bool isDark;
   final VoidCallback onPlan;
 
-  const RoutePanel({super.key, 
+  const RoutePanel({
+    super.key,
     required this.route,
     required this.brightness,
     required this.isDark,
@@ -34,65 +35,84 @@ class RoutePanel extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, -4)),
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
         ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 36, height: 4,
+            width: 36,
+            height: 4,
             margin: const EdgeInsets.only(top: 10),
             decoration: BoxDecoration(
-                color: AppColors.border(b),
-                borderRadius: BorderRadius.circular(2)),
+              color: AppColors.border(b),
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
           const Gap(14),
 
+          // Stats row
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(children: [
-              Expanded(child: StatCard(
-                label: 'Distance',
-                value: Fmt.distance(route.totalDistanceKm, unit),
-                icon: Icons.straighten_rounded,
-                color: AppColors.sport(sport),
-              )),
+              Expanded(
+                child: StatCard(
+                  label: 'Distance',
+                  value: Fmt.distance(route.totalDistanceKm, unit),
+                  icon: Icons.straighten_rounded,
+                  color: AppColors.sport(sport),
+                ),
+              ),
               const Gap(8),
-              Expanded(child: StatCard(
-                label: 'Ascent',
-                value: '+${Fmt.elevation(route.totalAscentM, unit)}',
-                icon: Icons.trending_up_rounded,
-                color: AppColors.warning,
-              )),
+              Expanded(
+                child: StatCard(
+                  label: 'Ascent',
+                  value: '+${Fmt.elevation(route.totalAscentM, unit)}',
+                  icon: Icons.trending_up_rounded,
+                  color: AppColors.warning,
+                ),
+              ),
               const Gap(8),
-              Expanded(child: StatCard(
-                label: 'Descent',
-                value: '-${Fmt.elevation(route.totalDescentM, unit)}',
-                icon: Icons.trending_down_rounded,
-                color: AppColors.accent,
-              )),
+              Expanded(
+                child: StatCard(
+                  label: 'Descent',
+                  value: '-${Fmt.elevation(route.totalDescentM, unit)}',
+                  icon: Icons.trending_down_rounded,
+                  color: AppColors.accent,
+                ),
+              ),
             ]),
           ),
 
+          // Elevation chart
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Elevation profile',
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textSecondary(b),
-                        fontWeight: FontWeight.w500)),
+                Text(
+                  'Elevation profile',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary(b),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const Gap(6),
-                ElevationChart(points: route.elevation, unit: unit, height: 100),
+                ElevationChart(
+                  points: route.elevation,
+                  unit: unit,
+                  height: 100,
+                ),
               ],
             ),
           ),
 
+          // Waypoint pills
           if (route.waypoints.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -100,27 +120,38 @@ class RoutePanel extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: route.waypoints
-                      .map((w) => Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.card(b),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                  color: AppColors.border(b), width: 0.5),
+                      .map(
+                        (w) => Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.card(b),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: AppColors.border(b),
+                              width: 0.5,
                             ),
-                            child: Text(w.label,
-                                style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textPrimary(b))),
-                          ))
+                          ),
+                          child: Text(
+                            w.label,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textPrimary(b),
+                            ),
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
             ),
 
           const Gap(16),
+
+          // CTA button
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
             child: SizedBox(
@@ -129,11 +160,17 @@ class RoutePanel extends StatelessWidget {
                 onPressed: onPlan,
                 icon: const Icon(Icons.tune_rounded, size: 16),
                 label: const Text('Plan this route'),
-                style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(14)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(14),
+                ),
               ),
             ),
           ),
-          const SafeArea(top: false, child: Gap(12)),
+
+          SafeArea(
+            top: false,
+            child: const SizedBox(height: 12),
+          ),
         ],
       ),
     );

@@ -5,7 +5,7 @@ import '../../core/errors/failures.dart';
 import '../../core/usecases/usecase.dart';
 import '../../core/constants/app_constants.dart';
 import '../entities/route_plan.dart';
-import '../repositories/repositories.dart';
+import '../repositories/export_repository.dart';
 
 class ExportPlan extends UseCase<String, ExportPlanParams> {
   final ExportRepository _repo;

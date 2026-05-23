@@ -10,7 +10,7 @@ import '../../domain/entities/daily_segment.dart';
 import '../../domain/entities/route_break.dart';
 import '../../domain/entities/route_map.dart';
 import '../../domain/entities/route_plan.dart';
-import '../../domain/repositories/repositories.dart';
+import '../../domain/repositories/plan_repository.dart';
 
 class PlanRepositoryImpl implements PlanRepository {
   final SharedPreferences _prefs;

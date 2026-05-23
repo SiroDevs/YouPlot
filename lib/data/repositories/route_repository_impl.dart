@@ -7,7 +7,7 @@ import '../../core/utils/formatters.dart';
 import '../../domain/entities/location.dart';
 import '../../domain/entities/route_map.dart';
 import '../../domain/entities/waypoint.dart';
-import '../../domain/repositories/repositories.dart';
+import '../../domain/repositories/route_repository.dart';
 import '../datasources/mapbox_datasource.dart' hide Fmt;
 
 class RouteRepositoryImpl implements RouteRepository {

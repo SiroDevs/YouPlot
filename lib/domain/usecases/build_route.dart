@@ -6,7 +6,7 @@ import '../../core/usecases/usecase.dart';
 import '../../core/constants/app_constants.dart';
 import '../entities/location.dart';
 import '../entities/route_map.dart';
-import '../repositories/repositories.dart';
+import '../repositories/route_repository.dart';
 
 class BuildRoute extends UseCase<RouteMap, BuildRouteParams> {
   final RouteRepository _repo;

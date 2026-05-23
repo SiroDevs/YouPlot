@@ -7,7 +7,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'core/di/injection.dart' as di;
 import 'presentation/bloc/location_search/location_search_bloc.dart';
 import 'presentation/bloc/route_builder/route_builder_bloc.dart';
-import 'presentation/pages/home/home_page.dart';
+import 'presentation/pages/splash/splash_screen.dart';
 import 'presentation/theme/app_theme.dart';
 
 void main() async {
@@ -67,7 +67,7 @@ class MainAppState extends State<MainApp> {
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: _themeMode,
-        home: const HomePage(),
+        home: const SplashScreen(),
       ),
     );
   }

@@ -3,7 +3,9 @@ part of 'location_search_bloc.dart';
 class LocationSearchState extends Equatable {
   final String query;
   final List<Location> results;
+  final List<Location> history;
   final Location? currentLocation;
+  final Location? reversedLocation; // result of ReverseGeocode
   final bool loading;
   final bool locating;
   final String? error;
@@ -11,7 +13,9 @@ class LocationSearchState extends Equatable {
   const LocationSearchState({
     this.query = '',
     this.results = const [],
+    this.history = const [],
     this.currentLocation,
+    this.reversedLocation,
     this.loading = false,
     this.locating = false,
     this.error,
@@ -20,15 +24,23 @@ class LocationSearchState extends Equatable {
   LocationSearchState copyWith({
     String? query,
     List<Location>? results,
+    List<Location>? history,
     Location? currentLocation,
+    Location? reversedLocation,
     bool? loading,
     bool? locating,
     String? error,
+    bool clearCurrentLocation = false,
+    bool clearReversed = false,
   }) =>
       LocationSearchState(
         query: query ?? this.query,
         results: results ?? this.results,
-        currentLocation: currentLocation ?? this.currentLocation,
+        history: history ?? this.history,
+        currentLocation:
+            clearCurrentLocation ? null : (currentLocation ?? this.currentLocation),
+        reversedLocation:
+            clearReversed ? null : (reversedLocation ?? this.reversedLocation),
         loading: loading ?? this.loading,
         locating: locating ?? this.locating,
         error: error,
@@ -36,5 +48,5 @@ class LocationSearchState extends Equatable {
 
   @override
   List<Object?> get props =>
-      [query, results, currentLocation, loading, locating, error];
+      [query, results, history, currentLocation, reversedLocation, loading, locating, error];
 }

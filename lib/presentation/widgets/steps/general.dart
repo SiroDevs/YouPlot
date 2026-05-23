@@ -4,7 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
-import '../maps/map_background.dart';
+import '../maps/map_search_field.dart';
 
 class FieldLabel extends StatelessWidget {
   final String label;

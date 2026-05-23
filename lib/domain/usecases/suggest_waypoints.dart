@@ -6,7 +6,7 @@ import '../../core/usecases/usecase.dart';
 import '../../core/constants/app_constants.dart';
 import '../entities/location.dart';
 import '../entities/waypoint.dart';
-import '../repositories/repositories.dart';
+import '../repositories/route_repository.dart';
 
 class SuggestWaypoints extends UseCase<List<Waypoint>, SuggestWaypointsParams> {
   final RouteRepository _repo;

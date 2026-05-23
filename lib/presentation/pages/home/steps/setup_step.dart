@@ -5,11 +5,12 @@ import 'package:gap/gap.dart';
 
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
+import '../../../widgets/maps/map_background.dart';
+import '../../../widgets/maps/map_search_field.dart';
 import '../../../widgets/state_widgets.dart';
+import '../../../widgets/steps/app_header.dart';
 import '../../../widgets/steps/badges.dart';
 import '../../../widgets/steps/general.dart';
-import '../../../widgets/steps/headers.dart';
-import '../../../widgets/maps/map_background.dart';
 import '../../../widgets/steps/sport_dropdown.dart';
 
 class SetupStep extends StatelessWidget {
@@ -28,7 +29,7 @@ class SetupStep extends StatelessWidget {
 
             Column(
               children: [
-                AppHeader(),
+                const AppHeader(showThemeToggle: true),
 
                 const Spacer(),
 

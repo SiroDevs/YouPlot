@@ -12,8 +12,8 @@ import 'steps/setup_step.dart';
 import 'steps/export_step.dart';
 import 'steps/waypoint_step.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +26,8 @@ class HomePage extends StatelessWidget {
             children: [
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 280),
-                transitionBuilder: (child, anim) => FadeTransition(
-                  opacity: anim,
-                  child: child,
-                ),
+                transitionBuilder: (child, anim) =>
+                    FadeTransition(opacity: anim, child: child),
                 child: KeyedSubtree(
                   key: ValueKey(state.step),
                   child: _pageForStep(state),
@@ -46,23 +44,35 @@ class HomePage extends StatelessWidget {
 
   Widget _pageForStep(RouteBuilderState state) {
     switch (state.step) {
-      case AppStep.setup:      return const SetupStep();
-      case AppStep.waypoints:  return const WaypointsStep();
-      case AppStep.generating: return const GeneratingStep();
-      case AppStep.map:        return const MapStep();
-      case AppStep.plan:       return const PlanStep();
-      case AppStep.review:     return const ReviewStep();
-      case AppStep.export:     return const ExportStep();
+      case AppStep.setup:
+        return const SetupStep();
+      case AppStep.waypoints:
+        return const WaypointsStep();
+      case AppStep.generating:
+        return const GeneratingStep();
+      case AppStep.map:
+        return const MapStep();
+      case AppStep.plan:
+        return const PlanStep();
+      case AppStep.review:
+        return const ReviewStep();
+      case AppStep.export:
+        return const ExportStep();
     }
   }
 
   String _loadingMessage(AppStep step) {
     switch (step) {
-      case AppStep.generating: return 'Building route…';
-      case AppStep.waypoints:  return 'Finding waypoints…';
-      case AppStep.plan:       return 'Scheduling plan…';
-      case AppStep.export:     return 'Exporting file…';
-      default:                 return 'Please wait…';
+      case AppStep.generating:
+        return 'Building route…';
+      case AppStep.waypoints:
+        return 'Finding waypoints…';
+      case AppStep.plan:
+        return 'Scheduling plan…';
+      case AppStep.export:
+        return 'Exporting file…';
+      default:
+        return 'Please wait…';
     }
   }
 }

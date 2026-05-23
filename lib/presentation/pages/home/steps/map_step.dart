@@ -16,13 +16,12 @@ class MapStep extends StatelessWidget {
         final route = state.route!;
         final b = Theme.of(ctx).brightness;
         final isDark = b == Brightness.dark;
-
         return Scaffold(
           backgroundColor:
               isDark ? const Color(0xFF0D1B2A) : const Color(0xFFE8E0D8),
-          body: Column(
+          body: Stack(
             children: [
-              Expanded(
+              Positioned.fill(
                 child: MapCanvas(
                   route: route,
                   brightness: b,
@@ -31,11 +30,17 @@ class MapStep extends StatelessWidget {
                   onReset: () => bloc.add(ResetAll()),
                 ),
               ),
-              RoutePanel(
-                route: route,
-                brightness: b,
-                isDark: isDark,
-                onPlan: () => bloc.add(GoToStep(AppStep.plan)),
+
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: RoutePanel(
+                  route: route,
+                  brightness: b,
+                  isDark: isDark,
+                  onPlan: () => bloc.add(GoToStep(AppStep.plan)),
+                ),
               ),
             ],
           ),

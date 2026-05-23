@@ -1,10 +1,12 @@
 const String kMapboxStyleOutdoors = 'mapbox://styles/mapbox/outdoors-v12';
 const String kMapboxStyleDark = 'mapbox://styles/mapbox/dark-v11';
 const String kMapboxDirections = 'https://api.mapbox.com/directions/v5/mapbox';
-const String kMapboxGeocode = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
+const String kMapboxGeocode =
+    'https://api.mapbox.com/geocoding/v5/mapbox.places';
 
 const String kAppName = 'YouPlot';
 const String kSavedPlansKey = 'saved_plans_v1';
+const String kAppCredits = "© Siro Devs";
 
 enum SportType {
   walking('Walking', '🚶', 'walking', 5.0),
@@ -13,7 +15,12 @@ enum SportType {
   skating('Skating', '⛸️', 'cycling', 15.0),
   hiking('Hiking', '🥾', 'walking', 4.0);
 
-  const SportType(this.label, this.emoji, this.mapboxProfile, this.defaultSpeedKmh);
+  const SportType(
+    this.label,
+    this.emoji,
+    this.mapboxProfile,
+    this.defaultSpeedKmh,
+  );
   final String label;
   final String emoji;
   final String mapboxProfile;

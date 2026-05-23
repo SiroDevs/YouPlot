@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../../core/constants/app_constants.dart';
+import '../../../main.dart';
+import '../../pages/settings/settings_screen.dart';
 import '../../theme/app_colors.dart';
-import '../../pages/settings/settings_page.dart';
 import 'buttons.dart';
 
 class AppHeader extends StatelessWidget {
   final bool showBack;
   final bool showNew;
+  final bool showThemeToggle;
   final VoidCallback? onBack;
   final VoidCallback? onNew;
 
@@ -16,6 +18,7 @@ class AppHeader extends StatelessWidget {
     super.key,
     this.showBack = false,
     this.showNew = false,
+    this.showThemeToggle = false,
     this.onBack,
     this.onNew,
   });
@@ -111,12 +114,32 @@ class AppHeader extends StatelessWidget {
                   ],
                 ),
               ),
+            // ── Theme toggle (shown on planning screens) ─────────────────
+            if (showThemeToggle) ...[
+              const Gap(8),
+              GlassBtn(
+                brightness: b,
+                onTap: () {
+                  final appState = MainApp.of(context);
+                  if (appState != null) {
+                    appState.setThemeMode(
+                      isDark ? ThemeMode.light : ThemeMode.dark,
+                    );
+                  }
+                },
+                child: Icon(
+                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                  size: 20,
+                  color: AppColors.textPrimary(b),
+                ),
+              ),
+            ],
             const Gap(8),
             GlassBtn(
               brightness: b,
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const SettingsPage()),
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               ),
               child: Icon(
                 Icons.settings_rounded,
@@ -127,37 +150,6 @@ class AppHeader extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class SectionHeader extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Brightness brightness;
-
-  const SectionHeader({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.brightness,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 15, color: AppColors.primary),
-        const Gap(7),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary(brightness),
-          ),
-        ),
-      ],
     );
   }
 }

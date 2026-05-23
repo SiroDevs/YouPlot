@@ -34,6 +34,11 @@ class RouteBuilderState extends Equatable {
   final String? error;
   final String? exportedPath;
 
+  /// The live Mapbox controller — non-null once the map widget reports ready.
+  /// Not included in props so state changes here don't trigger unnecessary
+  /// widget rebuilds.
+  final MapboxMap? mapController;
+
   const RouteBuilderState({
     this.step = AppStep.setup,
     this.sport = SportType.hiking,
@@ -52,6 +57,7 @@ class RouteBuilderState extends Equatable {
     this.loading = false,
     this.error,
     this.exportedPath,
+    this.mapController,
   });
 
   bool get canProceed => origin != null && destination != null;
@@ -81,6 +87,7 @@ class RouteBuilderState extends Equatable {
     bool clearExport = false,
     bool clearOrigin = false,
     bool clearDestination = false,
+    MapboxMap? mapController,
   }) {
     return RouteBuilderState(
       step: step ?? this.step,
@@ -100,6 +107,7 @@ class RouteBuilderState extends Equatable {
       loading: loading ?? this.loading,
       error: clearError ? null : (error ?? this.error),
       exportedPath: clearExport ? null : (exportedPath ?? this.exportedPath),
+      mapController: mapController ?? this.mapController,
     );
   }
 
@@ -109,5 +117,7 @@ class RouteBuilderState extends Equatable {
         viaPoints, suggestions, usingSuggestions,
         route, days, speedKmh, startTime, selectedBreaks,
         plan, loading, error, exportedPath,
+        // mapController intentionally excluded — it's a mutable object and
+        // including it would cause rebuild loops.
       ];
 }

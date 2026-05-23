@@ -8,8 +8,8 @@ import '../../theme/app_colors.dart';
 import 'components/general.dart';
 import 'components/theme_tile.dart';
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

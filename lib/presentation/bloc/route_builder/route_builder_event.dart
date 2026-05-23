@@ -71,3 +71,10 @@ class GoToStep extends RouteBuilderEvent {
 }
 
 class ResetAll extends RouteBuilderEvent {}
+
+/// Fired when the map controller is ready — stores it so the bloc can
+/// animate the camera whenever origin / destination / route change.
+class MapControllerReady extends RouteBuilderEvent {
+  final MapboxMap controller;
+  MapControllerReady(this.controller);
+}
