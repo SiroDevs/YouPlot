@@ -5,11 +5,11 @@ import 'package:gap/gap.dart';
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/tf_widgets.dart';
-import '../components/general.dart';
-import '../components/headers.dart';
-import '../components/home_rows.dart';
-import '../components/map_background.dart';
-import '../components/option_card.dart';
+import '../../../widgets/steps/general.dart';
+import '../../../widgets/steps/headers.dart';
+import '../../../widgets/steps/home_rows.dart';
+import '../../../widgets/maps/map_background.dart';
+import '../../../widgets/steps/option_card.dart';
 
 class WaypointsStep extends StatelessWidget {
   const WaypointsStep({super.key});

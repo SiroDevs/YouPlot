@@ -7,7 +7,7 @@ import '../../../../../../core/constants/app_constants.dart';
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/tf_widgets.dart';
-import '../components/headers.dart';
+import '../../../widgets/steps/headers.dart';
 
 class ExportStep extends StatelessWidget {
   const ExportStep({super.key});

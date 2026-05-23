@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../../../domain/entities/entities.dart';
-import '../../../theme/app_colors.dart';
-import 'full_page_search.dart';
+import '../../../domain/entities/location.dart';
+import '../../pages/home/components/full_page_search.dart';
+import '../../theme/app_colors.dart';
 
 class MapBackground extends StatelessWidget {
   final Brightness brightness;
@@ -94,9 +94,9 @@ class MapSearchField extends StatelessWidget {
         final loc = await Navigator.push<Location>(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) =>
+            pageBuilder: (_, _, _) =>
                 FullPageSearch(hint: hint, showGps: showGps, brightness: b),
-            transitionsBuilder: (_, anim, __, child) => FadeTransition(
+            transitionsBuilder: (_, anim, _, child) => FadeTransition(
               opacity: anim,
               child: SlideTransition(
                 position: Tween(

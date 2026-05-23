@@ -1,18 +1,19 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../core/errors/failures.dart';
+import '../../core/usecases/usecase.dart';
 import '../../core/constants/app_constants.dart';
-import '../entities/entities.dart';
+import '../entities/location.dart';
+import '../entities/route_map.dart';
 import '../repositories/repositories.dart';
 
-class BuildRoute extends UseCase<Route, BuildRouteParams> {
+class BuildRoute extends UseCase<RouteMap, BuildRouteParams> {
   final RouteRepository _repo;
   BuildRoute(this._repo);
 
   @override
-  Future<Either<Failure, Route>> call(BuildRouteParams p) => _repo.buildRoute(
+  Future<Either<Failure, RouteMap>> call(BuildRouteParams p) => _repo.buildRoute(
         origin: p.origin,
         destination: p.destination,
         viaPoints: p.viaPoints,

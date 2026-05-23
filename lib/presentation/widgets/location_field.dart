@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/entities.dart';
+import '../../domain/entities/location.dart';
 import '../bloc/location_search/location_search_bloc.dart';
 import '../theme/app_colors.dart';
 

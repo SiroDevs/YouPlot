@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../../core/constants/app_constants.dart';
-import '../../../../../../domain/entities/entities.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../domain/entities/location.dart';
+import '../../../domain/entities/route_map.dart';
+import '../../../domain/entities/route_plan.dart';
+import '../../../domain/entities/waypoint.dart';
 import '../../../domain/usecases/build_plan.dart';
 import '../../../domain/usecases/build_route.dart';
 import '../../../domain/usecases/export_plan.dart';

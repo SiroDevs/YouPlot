@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../core/errors/failures.dart';
+import '../../core/usecases/usecase.dart';
 import '../../core/constants/app_constants.dart';
-import '../entities/entities.dart';
+import '../entities/route_map.dart';
+import '../entities/route_plan.dart';
 import '../repositories/repositories.dart';
 
 class BuildPlan extends UseCase<RoutePlan, BuildPlanParams> {
@@ -22,7 +23,7 @@ class BuildPlan extends UseCase<RoutePlan, BuildPlanParams> {
 }
 
 class BuildPlanParams extends Equatable {
-  final Route route;
+  final RouteMap route;
   final int days;
   final double speedKmh;
   final DateTime startTime;

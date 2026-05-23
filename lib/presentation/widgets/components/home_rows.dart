@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../../../domain/entities/entities.dart';
-import '../../../theme/app_colors.dart';
+import '../../../domain/entities/location.dart';
+import '../../../domain/entities/waypoint.dart';
+import '../../theme/app_colors.dart';
 
 class ViaRow extends StatelessWidget {
   final int index;

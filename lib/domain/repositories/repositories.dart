@@ -1,8 +1,11 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/errors/failures.dart';
+import '../../core/errors/failures.dart';
 import '../../core/constants/app_constants.dart';
-import '../entities/entities.dart';
+import '../entities/location.dart';
+import '../entities/route_map.dart';
+import '../entities/route_plan.dart';
+import '../entities/waypoint.dart';
 
 abstract class LocationRepository {
   Future<Either<Failure, Location>> getCurrentLocation();
@@ -11,7 +14,7 @@ abstract class LocationRepository {
 }
 
 abstract class RouteRepository {
-  Future<Either<Failure, Route>> buildRoute({
+  Future<Either<Failure, RouteMap>> buildRoute({
     required Location origin,
     required Location destination,
     required List<Location> viaPoints,
@@ -28,7 +31,7 @@ abstract class RouteRepository {
 
 abstract class PlanRepository {
   Future<Either<Failure, RoutePlan>> buildPlan({
-    required Route route,
+    required RouteMap route,
     required int days,
     required double speedKmh,
     required DateTime startTime,

@@ -6,11 +6,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/errors/failures.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../domain/entities/entities.dart';
-import '../../../../domain/repositories/repositories.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/errors/failures.dart';
+import '../../core/utils/formatters.dart';
+import '../../domain/entities/route_plan.dart';
+import '../../domain/repositories/repositories.dart';
 
 class ExportRepositoryImpl implements ExportRepository {
   @override

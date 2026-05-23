@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../theme/app_colors.dart';
+import '../../theme/app_colors.dart';
 
 class OptionCard extends StatelessWidget {
   final String emoji;

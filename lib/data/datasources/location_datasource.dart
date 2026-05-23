@@ -1,8 +1,8 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../../../core/errors/failures.dart';
-import '../../../../domain/entities/entities.dart';
+import '../../core/errors/failures.dart';
+import '../../domain/entities/location.dart';
 
 class LocationDatasource {
   Future<Location> getCurrentLocation() async {

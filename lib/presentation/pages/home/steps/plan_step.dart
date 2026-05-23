@@ -8,8 +8,8 @@ import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/break_selector.dart';
 import '../../../widgets/tf_widgets.dart';
-import '../components/buttons.dart';
-import '../components/headers.dart';
+import '../../../widgets/steps/buttons.dart';
+import '../../../widgets/steps/headers.dart';
 
 class PlanStep extends StatelessWidget {
   const PlanStep({super.key});

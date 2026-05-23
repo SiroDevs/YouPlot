@@ -2,7 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart';
-import '../../domain/entities/entities.dart';
+import '../../domain/entities/elevation_point.dart';
 import '../theme/app_colors.dart';
 
 class ElevationChart extends StatelessWidget {

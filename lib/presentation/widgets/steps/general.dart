@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
-import '../../../bloc/route_builder/route_builder_bloc.dart';
-import '../../../theme/app_colors.dart';
-import 'map_background.dart';
+import '../../bloc/route_builder/route_builder_bloc.dart';
+import '../../theme/app_colors.dart';
+import '../maps/map_background.dart';
 
 class FieldLabel extends StatelessWidget {
   final String label;

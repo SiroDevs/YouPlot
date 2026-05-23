@@ -6,11 +6,11 @@ import 'package:gap/gap.dart';
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/tf_widgets.dart';
-import '../components/badges.dart';
-import '../components/general.dart';
-import '../components/headers.dart';
-import '../components/map_background.dart';
-import '../components/sport_dropdown.dart';
+import '../../../widgets/steps/badges.dart';
+import '../../../widgets/steps/general.dart';
+import '../../../widgets/steps/headers.dart';
+import '../../../widgets/maps/map_background.dart';
+import '../../../widgets/steps/sport_dropdown.dart';
 
 class SetupStep extends StatelessWidget {
   const SetupStep({super.key});

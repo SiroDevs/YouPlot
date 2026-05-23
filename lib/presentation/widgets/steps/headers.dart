@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../../../core/constants/app_constants.dart';
-import '../../../theme/app_colors.dart';
-import '../../settings/settings_page.dart';
+import '../../../../../core/constants/app_constants.dart';
+import '../../theme/app_colors.dart';
+import '../../pages/settings/settings_page.dart';
 import 'buttons.dart';
 
 class AppHeader extends StatelessWidget {

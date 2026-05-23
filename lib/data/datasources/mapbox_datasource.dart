@@ -4,9 +4,10 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/errors/failures.dart';
-import '../../../../domain/entities/entities.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/errors/failures.dart';
+import '../../domain/entities/elevation_point.dart';
+import '../../domain/entities/location.dart';
 
 class MapboxDatasource {
   final Dio _dio;

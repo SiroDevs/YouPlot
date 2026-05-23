@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../core/errors/failures.dart';
+import '../../core/usecases/usecase.dart';
 import '../../core/constants/app_constants.dart';
-import '../entities/entities.dart';
+import '../entities/route_plan.dart';
 import '../repositories/repositories.dart';
 
 class ExportPlan extends UseCase<String, ExportPlanParams> {

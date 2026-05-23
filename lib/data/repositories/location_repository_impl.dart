@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/errors/failures.dart';
-import '../../../../domain/entities/entities.dart';
-import '../../../../domain/repositories/repositories.dart';
+import '../../core/errors/failures.dart';
+import '../../domain/entities/location.dart';
+import '../../domain/repositories/repositories.dart';
 import '../datasources/location_datasource.dart';
 import '../datasources/mapbox_datasource.dart';
 

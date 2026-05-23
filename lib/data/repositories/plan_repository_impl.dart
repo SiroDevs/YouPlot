@@ -4,10 +4,13 @@ import 'package:dartz/dartz.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/errors/failures.dart';
-import '../../../../domain/entities/entities.dart';
-import '../../../../domain/repositories/repositories.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/errors/failures.dart';
+import '../../domain/entities/daily_segment.dart';
+import '../../domain/entities/route_break.dart';
+import '../../domain/entities/route_map.dart';
+import '../../domain/entities/route_plan.dart';
+import '../../domain/repositories/repositories.dart';
 
 class PlanRepositoryImpl implements PlanRepository {
   final SharedPreferences _prefs;
@@ -17,7 +20,7 @@ class PlanRepositoryImpl implements PlanRepository {
 
   @override
   Future<Either<Failure, RoutePlan>> buildPlan({
-    required Route route,
+    required RouteMap route,
     required int days,
     required double speedKmh,
     required DateTime startTime,
@@ -134,7 +137,7 @@ class PlanRepositoryImpl implements PlanRepository {
       case BreakType.supper:
         return dayStart + dayDist * 0.85;
       case BreakType.overnight:
-        return dayStart + dayDist * 1.0;    // end of day
+        return dayStart + dayDist * 1.0;
     }
   }
 

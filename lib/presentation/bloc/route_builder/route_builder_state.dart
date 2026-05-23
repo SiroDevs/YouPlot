@@ -11,31 +11,25 @@ enum AppStep {
 }
 
 class RouteBuilderState extends Equatable {
-  // Setup
   final AppStep step;
   final SportType sport;
   final DistanceUnit unit;
   final Location? origin;
   final Location? destination;
 
-  // Waypoints
   final List<Location> viaPoints;
   final List<Waypoint> suggestions;
   final bool usingSuggestions;
 
-  // Route
-  final Route? route;
+  final RouteMap? route;
 
-  // Plan inputs
   final int days;
   final double speedKmh;
   final DateTime startTime;
   final Set<BreakType> selectedBreaks;
 
-  // Plan
   final RoutePlan? plan;
 
-  // UI
   final bool loading;
   final String? error;
   final String? exportedPath;
@@ -74,7 +68,7 @@ class RouteBuilderState extends Equatable {
     List<Location>? viaPoints,
     List<Waypoint>? suggestions,
     bool? usingSuggestions,
-    Route? route,
+    RouteMap? route,
     int? days,
     double? speedKmh,
     DateTime? startTime,

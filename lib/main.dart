@@ -4,9 +4,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
-import '../core/di/injection.dart' as di;
-import '../presentation/bloc/location_search/location_search_bloc.dart';
-import '../presentation/bloc/route_builder/route_builder_bloc.dart';
+import 'core/di/injection.dart' as di;
+import 'presentation/bloc/location_search/location_search_bloc.dart';
+import 'presentation/bloc/route_builder/route_builder_bloc.dart';
 import 'presentation/pages/home/home_page.dart';
 import 'presentation/theme/app_theme.dart';
 

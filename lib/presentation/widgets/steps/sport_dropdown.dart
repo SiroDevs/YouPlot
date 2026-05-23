@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../../../core/constants/app_constants.dart';
-import '../../../theme/app_colors.dart';
+import '../../../../../core/constants/app_constants.dart';
+import '../../theme/app_colors.dart';
 
 class SportDropdown extends StatelessWidget {
   final Brightness brightness;

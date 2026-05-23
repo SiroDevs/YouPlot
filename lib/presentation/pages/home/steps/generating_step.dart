@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../theme/app_colors.dart';
-import '../components/map_background.dart';
+import '../../../widgets/maps/map_background.dart';
 
 class GeneratingStep extends StatelessWidget {
   const GeneratingStep({super.key});

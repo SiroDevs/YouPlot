@@ -1,11 +1,13 @@
 import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/errors/failures.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../domain/entities/entities.dart';
-import '../../../../domain/repositories/repositories.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/errors/failures.dart';
+import '../../core/utils/formatters.dart';
+import '../../domain/entities/location.dart';
+import '../../domain/entities/route_map.dart';
+import '../../domain/entities/waypoint.dart';
+import '../../domain/repositories/repositories.dart';
 import '../datasources/mapbox_datasource.dart' hide Fmt;
 
 class RouteRepositoryImpl implements RouteRepository {
@@ -15,7 +17,7 @@ class RouteRepositoryImpl implements RouteRepository {
   RouteRepositoryImpl(this._mapbox);
 
   @override
-  Future<Either<Failure, Route>> buildRoute({
+  Future<Either<Failure, RouteMap>> buildRoute({
     required Location origin,
     required Location destination,
     required List<Location> viaPoints,
@@ -44,7 +46,7 @@ class RouteRepositoryImpl implements RouteRepository {
       // Intermediate town labels from reverse geocoding
       final waypoints = await _reverseGeocodeWaypoints(dir.geometry, viaPoints);
 
-      return Right(Route(
+      return Right(RouteMap(
         id: _uuid.v4(),
         origin: origin,
         destination: destination,
@@ -73,7 +75,6 @@ class RouteRepositoryImpl implements RouteRepository {
     required SportType sport,
   }) async {
     try {
-      // Generate 4 intermediate points along great-circle path
       final pts = List.generate(4, (i) {
         final t = (i + 1) / 5.0;
         return Location(
@@ -113,7 +114,6 @@ class RouteRepositoryImpl implements RouteRepository {
   ) async {
     final result = <Waypoint>[];
 
-    // Use user-supplied via-points if any
     for (final loc in userVia) {
       result.add(Waypoint(
         id: _uuid.v4(),
