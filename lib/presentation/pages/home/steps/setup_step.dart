@@ -5,7 +5,7 @@ import 'package:gap/gap.dart';
 
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
-import '../../../widgets/tf_widgets.dart';
+import '../../../widgets/state_widgets.dart';
 import '../../../widgets/steps/badges.dart';
 import '../../../widgets/steps/general.dart';
 import '../../../widgets/steps/headers.dart';
@@ -129,7 +129,7 @@ class SetupStep extends StatelessWidget {
                         const Gap(20),
 
                         if (state.error != null) ...[
-                          TFErrorBar(
+                          ErrorBar(
                             message: state.error!,
                             onDismiss: () => bloc.add(ResetAll()),
                           ),

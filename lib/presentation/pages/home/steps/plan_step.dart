@@ -7,7 +7,7 @@ import '../../../../../../core/utils/formatters.dart';
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/break_selector.dart';
-import '../../../widgets/tf_widgets.dart';
+import '../../../widgets/state_widgets.dart';
 import '../../../widgets/steps/buttons.dart';
 import '../../../widgets/steps/headers.dart';
 
@@ -233,7 +233,7 @@ class PlanStep extends StatelessWidget {
                       const Gap(32),
 
                       if (state.error != null) ...[
-                        TFErrorBar(message: state.error!),
+                        ErrorBar(message: state.error!),
                         const Gap(12),
                       ],
 

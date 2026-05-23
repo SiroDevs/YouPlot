@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/tf_widgets.dart';
+import '../../widgets/state_widgets.dart';
 import 'steps/generating_step.dart';
 import 'steps/map_step.dart';
 import 'steps/plan_step.dart';
@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               if (state.loading)
-                TFLoadingOverlay(message: _loadingMessage(state.step)),
+                LoadingOverlay(message: _loadingMessage(state.step)),
             ],
           ),
         );

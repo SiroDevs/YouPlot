@@ -5,7 +5,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../domain/entities/route_map.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/elevation_chart.dart';
-import '../../../widgets/tf_widgets.dart';
+import '../../../widgets/state_widgets.dart';
 
 class RoutePanel extends StatelessWidget {
   final RouteMap route;
@@ -54,21 +54,21 @@ class RoutePanel extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(children: [
-              Expanded(child: TFStatCard(
+              Expanded(child: StatCard(
                 label: 'Distance',
                 value: Fmt.distance(route.totalDistanceKm, unit),
                 icon: Icons.straighten_rounded,
                 color: AppColors.sport(sport),
               )),
               const Gap(8),
-              Expanded(child: TFStatCard(
+              Expanded(child: StatCard(
                 label: 'Ascent',
                 value: '+${Fmt.elevation(route.totalAscentM, unit)}',
                 icon: Icons.trending_up_rounded,
                 color: AppColors.warning,
               )),
               const Gap(8),
-              Expanded(child: TFStatCard(
+              Expanded(child: StatCard(
                 label: 'Descent',
                 value: '-${Fmt.elevation(route.totalDescentM, unit)}',
                 icon: Icons.trending_down_rounded,

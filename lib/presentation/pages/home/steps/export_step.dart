@@ -6,7 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../../../core/constants/app_constants.dart';
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
-import '../../../widgets/tf_widgets.dart';
+import '../../../widgets/state_widgets.dart';
 import '../../../widgets/steps/headers.dart';
 
 class ExportStep extends StatelessWidget {
@@ -129,7 +129,7 @@ class ExportStep extends StatelessWidget {
 
                     if (state.error != null) ...[
                       const Gap(12),
-                      TFErrorBar(message: state.error!),
+                      ErrorBar(message: state.error!),
                     ],
                   ],
                 ),

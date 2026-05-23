@@ -4,7 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
-import '../../../widgets/tf_widgets.dart';
+import '../../../widgets/state_widgets.dart';
 import '../../../widgets/steps/general.dart';
 import '../../../widgets/steps/headers.dart';
 import '../../../widgets/steps/home_rows.dart';
@@ -133,7 +133,7 @@ class WaypointsStep extends StatelessWidget {
 
                     if (state.error != null) ...[
                       const Gap(12),
-                      TFErrorBar(message: state.error!),
+                      ErrorBar(message: state.error!),
                     ],
                     const Gap(8),
                   ],

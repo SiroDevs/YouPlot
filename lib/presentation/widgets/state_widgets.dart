@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-class TFStatCard extends StatelessWidget {
+class StatCard extends StatelessWidget {
   final String label;
   final String value;
   final String? sub;
   final IconData? icon;
   final Color? color;
 
-  const TFStatCard({
+  const StatCard({
     super.key,
     required this.label,
     required this.value,
@@ -60,11 +60,11 @@ class TFStatCard extends StatelessWidget {
   }
 }
 
-class TFErrorBar extends StatelessWidget {
+class ErrorBar extends StatelessWidget {
   final String message;
   final VoidCallback? onDismiss;
 
-  const TFErrorBar({super.key, required this.message, this.onDismiss});
+  const ErrorBar({super.key, required this.message, this.onDismiss});
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +95,9 @@ class TFErrorBar extends StatelessWidget {
   }
 }
 
-class TFLoadingOverlay extends StatelessWidget {
+class LoadingOverlay extends StatelessWidget {
   final String message;
-  const TFLoadingOverlay({super.key, this.message = 'Loading…'});
+  const LoadingOverlay({super.key, this.message = 'Loading…'});
 
   @override
   Widget build(BuildContext context) {
