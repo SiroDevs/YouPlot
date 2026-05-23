@@ -1,9 +1,7 @@
-// dart run build_runner build --delete-conflicting-outputs
-// to regenerate app_database.g.dart after any entity / DAO changes.
-
 import 'dart:async';
 
 import 'package:froom/froom.dart';
+import 'package:sqflite/sqflite.dart' as sqflite; 
 
 import 'dao/plan_dao.dart';
 import 'dao/route_dao.dart';
