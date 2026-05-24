@@ -27,7 +27,7 @@ class PlanStep1 extends StatelessWidget {
             MapBackground(),
             Column(
               children: [
-                const StepHeader(showBack: true, showThemeToggle: true),
+                const StepHeader(showBack: true, showThemeToggle: true, stepNumber: 1, totalSteps: 5),
                 const Spacer(),
                 Container(
                   margin: const EdgeInsets.all(20),

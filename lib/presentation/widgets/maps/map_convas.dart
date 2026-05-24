@@ -11,6 +11,8 @@ class MapCanvas extends StatelessWidget {
   final bool isDark;
   final VoidCallback onBack;
   final VoidCallback onReset;
+  final int? stepNumber;
+  final int? totalSteps;
 
   const MapCanvas({
     super.key,
@@ -19,6 +21,8 @@ class MapCanvas extends StatelessWidget {
     required this.isDark,
     required this.onBack,
     required this.onReset,
+    this.stepNumber,
+    this.totalSteps,
   });
 
   @override
@@ -35,6 +39,8 @@ class MapCanvas extends StatelessWidget {
             onBack: onBack,
             showNew: true,
             onNew: onReset,
+            stepNumber: stepNumber,
+            totalSteps: totalSteps,
           ),
         ),
 

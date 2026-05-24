@@ -7,12 +7,11 @@ import '../../../theme/app_colors.dart';
 class EmptyPlanSlot extends StatelessWidget {
   final PlanFilter filter;
   final Brightness brightness;
-  final VoidCallback onCreateNew;
 
-  const EmptyPlanSlot({super.key, 
+  const EmptyPlanSlot({
+    super.key,
     required this.filter,
     required this.brightness,
-    required this.onCreateNew,
   });
 
   @override
@@ -23,9 +22,14 @@ class EmptyPlanSlot extends StatelessWidget {
       PlanFilter.past => 'No past plans',
       PlanFilter.all => 'No plans yet',
     };
+    final sub = switch (filter) {
+      PlanFilter.upcoming => 'Create a plan to get started',
+      PlanFilter.past => 'Completed plans will appear here',
+      PlanFilter.all => 'Tap + New Plan to create one',
+    };
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
       decoration: BoxDecoration(
         color: AppColors.card(b),
         borderRadius: BorderRadius.circular(16),
@@ -44,20 +48,11 @@ class EmptyPlanSlot extends StatelessWidget {
               color: AppColors.textSecondary(b),
             ),
           ),
-          if (filter == PlanFilter.all || filter == PlanFilter.upcoming) ...[
-            const Gap(6),
-            Text(
-              'Create a plan to see it here',
-              style: TextStyle(
-                  fontSize: 12, color: AppColors.textMuted(b)),
-            ),
-            const Gap(16),
-            OutlinedButton.icon(
-              onPressed: onCreateNew,
-              icon: const Icon(Icons.add_rounded, size: 16),
-              label: const Text('New plan'),
-            ),
-          ],
+          const Gap(4),
+          Text(
+            sub,
+            style: TextStyle(fontSize: 12, color: AppColors.textMuted(b)),
+          ),
         ],
       ),
     );

@@ -81,6 +81,7 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
     on<GoToStep>(_onGoToStep);
     on<ResetAll>(_onReset);
     on<MapControllerReady>(_onMapReady);
+    on<SetImportedRoute>(_onSetImportedRoute);
   }
 
   void _onMapReady(MapControllerReady e, Emitter<RouteBuilderState> emit) {
@@ -338,4 +339,15 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
       unit: state.unit,
     ),
   );
+
+  void _onSetImportedRoute(
+    SetImportedRoute e,
+    Emitter<RouteBuilderState> emit,
+  ) {
+    emit(state.copyWith(
+      route: e.route,
+      sport: e.route.sport,
+      step: AppStep.plan,
+    ));
+  }
 }

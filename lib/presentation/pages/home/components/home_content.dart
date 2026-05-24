@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../domain/entities/route_map.dart';
+import '../../../../domain/entities/route_plan.dart';
 import '../../../bloc/home/home_bloc.dart';
 import 'empty_plan_slot.dart';
 import 'plan_card.dart';
@@ -11,12 +13,15 @@ import 'section_title.dart';
 class HomeContent extends StatelessWidget {
   final HomeState state;
   final Brightness brightness;
-  final VoidCallback onCreateNew;
+  final ValueChanged<RouteMap> onRouteSelected;
+  final ValueChanged<RoutePlan> onPlanSelected;
 
-  const HomeContent({super.key, 
+  const HomeContent({
+    super.key,
     required this.state,
     required this.brightness,
-    required this.onCreateNew,
+    required this.onRouteSelected,
+    required this.onPlanSelected,
   });
 
   @override
@@ -24,7 +29,7 @@ class HomeContent extends StatelessWidget {
     final b = brightness;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       children: [
         if (state.routes.isNotEmpty) ...[
           SectionTitle(
@@ -34,15 +39,18 @@ class HomeContent extends StatelessWidget {
           ),
           const Gap(12),
           SizedBox(
-            height: 140,
+            height: 150,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: state.routes.length,
               separatorBuilder: (_, _) => const Gap(10),
-              itemBuilder: (_, i) => RouteCard(
-                route: state.routes[i],
-                brightness: b,
-                index: i,
+              itemBuilder: (_, i) => GestureDetector(
+                onTap: () => onRouteSelected(state.routes[i]),
+                child: RouteCard(
+                  route: state.routes[i],
+                  brightness: b,
+                  index: i,
+                ),
               ),
             ),
           ),
@@ -60,31 +68,21 @@ class HomeContent extends StatelessWidget {
           EmptyPlanSlot(
             filter: state.planFilter,
             brightness: b,
-            onCreateNew: onCreateNew,
           )
         else
           ...state.activePlans.asMap().entries.map(
                 (e) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: PlanCard(
-                    plan: e.value,
-                    brightness: b,
-                    index: e.key,
+                  child: GestureDetector(
+                    onTap: () => onPlanSelected(e.value),
+                    child: PlanCard(
+                      plan: e.value,
+                      brightness: b,
+                      index: e.key,
+                    ),
                   ),
                 ),
               ),
-
-        const Gap(16),
-        Center(
-          child: ElevatedButton.icon(
-            onPressed: onCreateNew,
-            icon: const Icon(Icons.add_rounded, size: 18),
-            label: const Text('Create New Plan'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-            ),
-          ),
-        ),
       ],
     );
   }

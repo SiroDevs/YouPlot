@@ -13,6 +13,9 @@ class StepHeader extends StatelessWidget {
   final bool showThemeToggle;
   final VoidCallback? onBack;
   final VoidCallback? onNew;
+  /// If non-null, shows a step number badge (e.g. "2 of 5") beside the back button.
+  final int? stepNumber;
+  final int? totalSteps;
 
   const StepHeader({
     super.key,
@@ -21,6 +24,8 @@ class StepHeader extends StatelessWidget {
     this.showThemeToggle = false,
     this.onBack,
     this.onNew,
+    this.stepNumber,
+    this.totalSteps,
   });
 
   @override
@@ -89,6 +94,29 @@ class StepHeader extends StatelessWidget {
                   ],
                 ),
               ),
+
+            // Step number badge
+            if (stepNumber != null) ...[
+              const Gap(10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryDim,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  totalSteps != null
+                      ? 'Step $stepNumber of $totalSteps'
+                      : 'Step $stepNumber',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+
             const Spacer(),
             if (showNew)
               GlassBtn(

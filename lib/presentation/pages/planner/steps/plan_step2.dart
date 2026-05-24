@@ -32,6 +32,8 @@ class PlanStep2 extends StatelessWidget {
                   onBack: () => bloc.add(GoToStep(AppStep.setup)),
                   showNew: true,
                   onNew: () => bloc.add(ResetAll()),
+                  stepNumber: 2,
+                  totalSteps: 5,
                 ),
                 const Spacer(),
                 Container(

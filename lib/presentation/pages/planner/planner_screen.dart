@@ -4,13 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/state_widgets.dart';
-import 'steps/plan_step3.dart';
-import 'steps/plan_step4.dart';
-import 'steps/plan_step5.dart';
-import 'steps/plan_step6.dart';
 import 'steps/plan_step1.dart';
-import 'steps/plan_step7.dart';
 import 'steps/plan_step2.dart';
+import 'steps/plan_step4.dart';   // combined step 3+4
+import 'steps/plan_step5.dart';
+import 'steps/plan_step6.dart';   // combined step 6+7
 
 class PlannerScreen extends StatelessWidget {
   const PlannerScreen({super.key});
@@ -33,7 +31,7 @@ class PlannerScreen extends StatelessWidget {
                   child: _pageForStep(state),
                 ),
               ),
-              if (state.loading)
+              if (state.loading && state.step != AppStep.generating)
                 LoadingOverlay(message: _loadingMessage(state.step)),
             ],
           ),
@@ -49,15 +47,13 @@ class PlannerScreen extends StatelessWidget {
       case AppStep.waypoints:
         return const PlanStep2();
       case AppStep.generating:
-        return const PlanStep3();
       case AppStep.map:
-        return const PlanStep4();
+        return const PlanStep4(); // handles both generating + map
       case AppStep.plan:
         return const PlanStep5();
       case AppStep.review:
-        return const PlanStep6();
       case AppStep.export:
-        return const PlanStep7();
+        return const PlanStep6(); // combined review + export
     }
   }
 
