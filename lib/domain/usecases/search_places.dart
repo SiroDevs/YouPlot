@@ -18,6 +18,7 @@ class SearchPlaces extends UseCase<List<Location>, SearchPlacesParams> {
 class SearchPlacesParams extends Equatable {
   final String query;
   const SearchPlacesParams(this.query);
+  
   @override
   List<Object?> get props => [query];
 }

@@ -62,7 +62,7 @@ class RoutePanel extends StatelessWidget {
               Expanded(
                 child: StatCard(
                   label: 'Distance',
-                  value: Fmt.distance(route.totalDistanceKm, unit),
+                  value: Fmt.distance(route.totalDistance, unit),
                   icon: Icons.straighten_rounded,
                   color: AppColors.sport(sport),
                 ),
@@ -71,7 +71,7 @@ class RoutePanel extends StatelessWidget {
               Expanded(
                 child: StatCard(
                   label: 'Ascent',
-                  value: '+${Fmt.elevation(route.totalAscentM, unit)}',
+                  value: '+${Fmt.elevation(route.totalAscent, unit)}',
                   icon: Icons.trending_up_rounded,
                   color: AppColors.warning,
                 ),
@@ -80,7 +80,7 @@ class RoutePanel extends StatelessWidget {
               Expanded(
                 child: StatCard(
                   label: 'Descent',
-                  value: '-${Fmt.elevation(route.totalDescentM, unit)}',
+                  value: '-${Fmt.elevation(route.totalDescent, unit)}',
                   icon: Icons.trending_down_rounded,
                   color: AppColors.accent,
                 ),

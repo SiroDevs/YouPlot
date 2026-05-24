@@ -51,9 +51,9 @@ class RouteRepositoryImpl implements RouteRepository {
         waypoints: waypoints,
         geometry: dir.geometry,
         elevation: elev,
-        totalDistanceKm: dir.distanceKm,
-        totalAscentM: stats.$1,
-        totalDescentM: stats.$2,
+        totalDistance: dir.distanceKm,
+        totalAscent: stats.$1,
+        totalDescent: stats.$2,
         sport: sport,
         unit: unit,
       ));

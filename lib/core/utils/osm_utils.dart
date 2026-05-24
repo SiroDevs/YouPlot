@@ -1,5 +1,6 @@
-
 import 'dart:math';
+
+import '../../domain/entities/location.dart';
 
 class DirectionsResult {
   final List<List<double>> geometry;
@@ -26,4 +27,45 @@ class OsmFmt {
     double lat2,
     double lon2,
   ) => haversineDist(lat1, lon1, lat2, lon2);
+}
+
+Location locationDto(
+  Map<String, dynamic> f, {
+  double? forcedLat,
+  double? forcedLng,
+}) {
+  final lat = forcedLat ?? double.parse(f['lat'].toString());
+  final lng = forcedLng ?? double.parse(f['lon'].toString());
+
+  final addr = f['address'] as Map<String, dynamic>?;
+  final name =
+      f['name'] as String? ??
+      f['namedetails']?['name'] as String? ??
+      addr?['amenity'] as String? ??
+      addr?['road'] as String? ??
+      addr?['suburb'] as String? ??
+      addr?['city'] as String? ??
+      addr?['town'] as String? ??
+      addr?['village'] as String? ??
+      '';
+
+  final city =
+      addr?['city'] as String? ??
+      addr?['town'] as String? ??
+      addr?['village'] as String?;
+  final road = addr?['road'] as String?;
+  final country = addr?['country'] as String?;
+
+  final addressParts = [road, city, country].whereType<String>().toList();
+
+  return Location(
+    lat: lat,
+    lng: lng,
+    name: name.isNotEmpty
+        ? name
+        : (f['display_name'] as String?)?.split(',').first.trim(),
+    address: addressParts.isNotEmpty
+        ? addressParts.join(', ')
+        : f['display_name'] as String?,
+  );
 }

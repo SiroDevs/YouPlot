@@ -26,16 +26,16 @@ class LocalRepositoryImpl implements LocalRepository {
     try {
       final entity = RouteEntity(
         id: route.id,
-        originName: route.origin.name ?? '${route.origin.lat},${route.origin.lng}',
+        origin: route.origin.name ?? '${route.origin.lat},${route.origin.lng}',
         originLat: route.origin.lat,
         originLng: route.origin.lng,
-        destinationName:
+        destination:
             route.destination.name ?? '${route.destination.lat},${route.destination.lng}',
         destinationLat: route.destination.lat,
         destinationLng: route.destination.lng,
-        totalDistanceKm: route.totalDistanceKm,
-        totalAscentM: route.totalAscentM,
-        totalDescentM: route.totalDescentM,
+        totalDistance: route.totalDistance,
+        totalAscent: route.totalAscent,
+        totalDescent: route.totalDescent,
         sport: route.sport.name,
         unit: route.unit.name,
         routeJson: _routeToJson(route),
@@ -74,15 +74,15 @@ class LocalRepositoryImpl implements LocalRepository {
       final entity = PlanEntity(
         id: plan.id,
         routeId: plan.route.id,
-        originName:
+        origin:
             plan.route.origin.name ?? '${plan.route.origin.lat},${plan.route.origin.lng}',
-        destinationName: plan.route.destination.name ??
+        destination: plan.route.destination.name ??
             '${plan.route.destination.lat},${plan.route.destination.lng}',
-        totalDistanceKm: plan.route.totalDistanceKm,
+        totalDistance: plan.route.totalDistance,
         sport: plan.route.sport.name,
         totalDays: plan.totalDays,
-        speedKmh: plan.speedKmh,
-        startTimeMs: plan.startTime.millisecondsSinceEpoch,
+        speed: plan.speed,
+        startTime: plan.startTime.millisecondsSinceEpoch,
         planJson: _planToJson(plan),
         createdAt: DateTime.now().millisecondsSinceEpoch,
       );
@@ -151,9 +151,9 @@ class LocalRepositoryImpl implements LocalRepository {
         'elevation': r.elevation
             .map((e) => {'distanceKm': e.distanceKm, 'elevationM': e.elevationM})
             .toList(),
-        'totalDistanceKm': r.totalDistanceKm,
-        'totalAscentM': r.totalAscentM,
-        'totalDescentM': r.totalDescentM,
+        'totalDistance': r.totalDistance,
+        'totalAscent': r.totalAscent,
+        'totalDescent': r.totalDescent,
         'sport': r.sport.name,
         'unit': r.unit.name,
       });
@@ -166,7 +166,7 @@ class LocalRepositoryImpl implements LocalRepository {
   RouteMap _mapToRoute(Map<String, dynamic> m) {
     final sport = SportType.values.firstWhere(
       (s) => s.name == (m['sport'] as String),
-      orElse: () => SportType.hiking,
+      orElse: () => SportType.cycling,
     );
     final unit = DistanceUnit.values.firstWhere(
       (u) => u.name == (m['unit'] as String),
@@ -193,9 +193,9 @@ class LocalRepositoryImpl implements LocalRepository {
                 elevationM: (e['elevationM'] as num).toDouble(),
               ))
           .toList(),
-      totalDistanceKm: (m['totalDistanceKm'] as num).toDouble(),
-      totalAscentM: (m['totalAscentM'] as num).toDouble(),
-      totalDescentM: (m['totalDescentM'] as num).toDouble(),
+      totalDistance: (m['totalDistance'] as num).toDouble(),
+      totalAscent: (m['totalAscent'] as num).toDouble(),
+      totalDescent: (m['totalDescent'] as num).toDouble(),
       sport: sport,
       unit: unit,
     );
@@ -205,7 +205,7 @@ class LocalRepositoryImpl implements LocalRepository {
         'id': p.id,
         'route': jsonDecode(_routeToJson(p.route)),
         'totalDays': p.totalDays,
-        'speedKmh': p.speedKmh,
+        'speed': p.speed,
         'startTime': p.startTime.toIso8601String(),
         'estimatedTotalSeconds': p.estimatedTotal.inSeconds,
         'breaks': p.breaks
@@ -265,7 +265,7 @@ class LocalRepositoryImpl implements LocalRepository {
       id: m['id'] as String,
       route: route,
       totalDays: m['totalDays'] as int,
-      speedKmh: (m['speedKmh'] as num).toDouble(),
+      speed: (m['speed'] as num).toDouble(),
       startTime: DateTime.parse(m['startTime'] as String),
       estimatedTotal: Duration(seconds: m['estimatedTotalSeconds'] as int),
       breaks:

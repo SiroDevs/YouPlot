@@ -7,14 +7,14 @@ import '../../pages/settings/settings_screen.dart';
 import '../../theme/app_colors.dart';
 import 'buttons.dart';
 
-class AppHeader extends StatelessWidget {
+class StepHeader extends StatelessWidget {
   final bool showBack;
   final bool showNew;
   final bool showThemeToggle;
   final VoidCallback? onBack;
   final VoidCallback? onNew;
 
-  const AppHeader({
+  const StepHeader({
     super.key,
     this.showBack = false,
     this.showNew = false,

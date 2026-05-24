@@ -5,26 +5,26 @@ class PlanEntity {
   @PrimaryKey()
   final String id;
   final String routeId;
-  final String originName;
-  final String destinationName;
-  final double totalDistanceKm;
+  final String origin;
+  final String destination;
+  final double totalDistance;
   final String sport;
   final int totalDays;
-  final double speedKmh;
-  final int startTimeMs;
+  final double speed;
+  final int startTime;
   final String planJson;
   final int createdAt;
 
   const PlanEntity({
     required this.id,
     required this.routeId,
-    required this.originName,
-    required this.destinationName,
-    required this.totalDistanceKm,
+    required this.origin,
+    required this.destination,
+    required this.totalDistance,
     required this.sport,
     required this.totalDays,
-    required this.speedKmh,
-    required this.startTimeMs,
+    required this.speed,
+    required this.startTime,
     required this.planJson,
     required this.createdAt,
   });

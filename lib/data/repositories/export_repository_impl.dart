@@ -22,7 +22,7 @@ class ExportRepositoryImpl implements ExportRepository {
         ..writeln('<gpx version="1.1" creator="$kAppName" xmlns="http://www.topografix.com/GPX/1/1">')
         ..writeln('  <metadata>')
         ..writeln('    <name>${_e(r.origin.name)} to ${_e(r.destination.name)}</name>')
-        ..writeln('    <desc>${r.sport.label} · ${r.totalDistanceKm.toStringAsFixed(1)} km · +${r.totalAscentM.toStringAsFixed(0)} m</desc>')
+        ..writeln('    <desc>${r.sport.label} · ${r.totalDistance.toStringAsFixed(1)} km · +${r.totalAscent.toStringAsFixed(0)} m</desc>')
         ..writeln('    <time>${plan.startTime.toUtc().toIso8601String()}</time>')
         ..writeln('  </metadata>');
 
@@ -95,9 +95,9 @@ class ExportRepositoryImpl implements ExportRepository {
           ),
           pw.SizedBox(height: 20),
           pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly, children: [
-            _stat('Distance', Fmt.distance(r.totalDistanceKm, u)),
-            _stat('Ascent', '+${Fmt.elevation(r.totalAscentM, u)}'),
-            _stat('Descent', '-${Fmt.elevation(r.totalDescentM, u)}'),
+            _stat('Distance', Fmt.distance(r.totalDistance, u)),
+            _stat('Ascent', '+${Fmt.elevation(r.totalAscent, u)}'),
+            _stat('Descent', '-${Fmt.elevation(r.totalDescent, u)}'),
             _stat('Days', '${plan.totalDays}'),
             _stat('Total time', Fmt.duration(plan.estimatedTotal)),
           ]),
@@ -162,8 +162,8 @@ class ExportRepositoryImpl implements ExportRepository {
             pw.SizedBox(height: 20),
             pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly, children: [
               _statLight('Sport', '${r.sport.emoji} ${r.sport.label}'),
-              _statLight('Distance', Fmt.distance(r.totalDistanceKm, r.unit)),
-              _statLight('Ascent', '+${Fmt.elevation(r.totalAscentM, r.unit)}'),
+              _statLight('Distance', Fmt.distance(r.totalDistance, r.unit)),
+              _statLight('Ascent', '+${Fmt.elevation(r.totalAscent, r.unit)}'),
               _statLight('Days', '${plan.totalDays}'),
             ]),
             pw.SizedBox(height: 16),

@@ -7,11 +7,11 @@ import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/elevation_chart.dart';
 import '../../../widgets/state_widgets.dart';
-import '../../../widgets/steps/app_header.dart';
+import '../../../widgets/steps/step_header.dart';
 import '../../../widgets/steps/day_card.dart';
 
-class ReviewStep extends StatelessWidget {
-  const ReviewStep({super.key});
+class PlanStep6 extends StatelessWidget {
+  const PlanStep6({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class ReviewStep extends StatelessWidget {
           backgroundColor: AppColors.bg(b),
           body: Column(
             children: [
-              AppHeader(
+              StepHeader(
                 showBack: true,
                 onBack: () => bloc.add(GoToStep(AppStep.plan)),
               ),
@@ -40,7 +40,7 @@ class ReviewStep extends StatelessWidget {
                         Expanded(
                           child: StatCard(
                             label: 'Total distance',
-                            value: Fmt.distance(route.totalDistanceKm, unit),
+                            value: Fmt.distance(route.totalDistance, unit),
                           ),
                         ),
                         const Gap(8),
@@ -55,7 +55,7 @@ class ReviewStep extends StatelessWidget {
                           child: StatCard(
                             label: 'Avg/day',
                             value: Fmt.distance(
-                              route.totalDistanceKm / plan.totalDays,
+                              route.totalDistance / plan.totalDays,
                               unit,
                             ),
                           ),

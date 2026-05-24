@@ -7,13 +7,13 @@ import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../widgets/maps/map_background.dart';
 import '../../../widgets/maps/map_search_field.dart';
 import '../../../widgets/state_widgets.dart';
-import '../../../widgets/steps/app_header.dart';
+import '../../../widgets/steps/step_header.dart';
 import '../../../widgets/steps/badges.dart';
 import '../../../widgets/steps/general.dart';
 import '../../../widgets/steps/sport_dropdown.dart';
 
-class SetupStep extends StatelessWidget {
-  const SetupStep({super.key});
+class PlanStep1 extends StatelessWidget {
+  const PlanStep1({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class SetupStep extends StatelessWidget {
             MapBackground(),
             Column(
               children: [
-                const AppHeader(showBack: true, showThemeToggle: true),
+                const StepHeader(showBack: true, showThemeToggle: true),
                 const Spacer(),
                 Container(
                   margin: const EdgeInsets.all(20),

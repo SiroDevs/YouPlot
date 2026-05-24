@@ -11,12 +11,12 @@ abstract class PlanDao {
   Future<List<PlanEntity>> getRecent(int limit);
 
   @Query(
-    'SELECT * FROM plans WHERE startTimeMs > :nowMs ORDER BY startTimeMs ASC',
+    'SELECT * FROM plans WHERE startTime > :nowMs ORDER BY startTime ASC',
   )
   Future<List<PlanEntity>> getUpcoming(int nowMs);
 
   @Query(
-    'SELECT * FROM plans WHERE startTimeMs <= :nowMs ORDER BY startTimeMs DESC',
+    'SELECT * FROM plans WHERE startTime <= :nowMs ORDER BY startTime DESC',
   )
   Future<List<PlanEntity>> getPast(int nowMs);
 

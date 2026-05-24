@@ -9,7 +9,7 @@ abstract class PlanRepository {
   Future<Either<Failure, RoutePlan>> buildPlan({
     required RouteMap route,
     required int days,
-    required double speedKmh,
+    required double speed,
     required DateTime startTime,
     required List<BreakType> breaks,
   });

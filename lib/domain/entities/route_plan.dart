@@ -8,7 +8,7 @@ class RoutePlan extends Equatable {
   final String id;
   final RouteMap route;
   final int totalDays;
-  final double speedKmh;
+  final double speed;
   final DateTime startTime;
   final List<RouteBreak> breaks;
   final List<DailySegment> segments;
@@ -18,7 +18,7 @@ class RoutePlan extends Equatable {
     required this.id,
     required this.route,
     required this.totalDays,
-    required this.speedKmh,
+    required this.speed,
     required this.startTime,
     required this.breaks,
     required this.segments,

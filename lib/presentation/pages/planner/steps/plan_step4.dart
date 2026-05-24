@@ -5,8 +5,8 @@ import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../widgets/maps/map_convas.dart';
 import '../components/route_panel.dart';
 
-class MapStep extends StatelessWidget {
-  const MapStep({super.key});
+class PlanStep4 extends StatelessWidget {
+  const PlanStep4({super.key});
 
   @override
   Widget build(BuildContext context) {

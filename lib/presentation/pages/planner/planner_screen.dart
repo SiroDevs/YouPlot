@@ -4,13 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/state_widgets.dart';
-import 'steps/generating_step.dart';
-import 'steps/map_step.dart';
-import 'steps/plan_step.dart';
-import 'steps/review_step.dart';
-import 'steps/setup_step.dart';
-import 'steps/export_step.dart';
-import 'steps/waypoint_step.dart';
+import 'steps/plan_step3.dart';
+import 'steps/plan_step4.dart';
+import 'steps/plan_step5.dart';
+import 'steps/plan_step6.dart';
+import 'steps/plan_step1.dart';
+import 'steps/plan_step7.dart';
+import 'steps/plan_step2.dart';
 
 class PlannerScreen extends StatelessWidget {
   const PlannerScreen({super.key});
@@ -45,19 +45,19 @@ class PlannerScreen extends StatelessWidget {
   Widget _pageForStep(RouteBuilderState state) {
     switch (state.step) {
       case AppStep.setup:
-        return const SetupStep();
+        return const PlanStep1();
       case AppStep.waypoints:
-        return const WaypointsStep();
+        return const PlanStep2();
       case AppStep.generating:
-        return const GeneratingStep();
+        return const PlanStep3();
       case AppStep.map:
-        return const MapStep();
+        return const PlanStep4();
       case AppStep.plan:
-        return const PlanStep();
+        return const PlanStep5();
       case AppStep.review:
-        return const ReviewStep();
+        return const PlanStep6();
       case AppStep.export:
-        return const ExportStep();
+        return const PlanStep7();
     }
   }
 

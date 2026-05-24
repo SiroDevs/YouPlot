@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../domain/entities/route_map.dart';
-import '../steps/app_header.dart';
+import '../steps/step_header.dart';
 import '../steps/badges.dart';
 import 'map_background.dart';
 
@@ -30,7 +30,7 @@ class MapCanvas extends StatelessWidget {
 
         Positioned(
           top: 0, left: 0, right: 0,
-          child: AppHeader(
+          child: StepHeader(
             showBack: true,
             onBack: onBack,
             showNew: true,

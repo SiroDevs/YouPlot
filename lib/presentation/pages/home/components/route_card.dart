@@ -21,7 +21,7 @@ class RouteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final b = brightness;
     final distText = Fmt.distance(
-      route.totalDistanceKm,
+      route.totalDistance,
       route.unit,
     );
 
@@ -100,7 +100,7 @@ class RouteCard extends StatelessWidget {
                   size: 12, color: AppColors.textMuted(b)),
               const Gap(3),
               Text(
-                '+${route.totalAscentM.round()}m',
+                '+${route.totalAscent.round()}m',
                 style: TextStyle(
                   fontSize: 11,
                   color: AppColors.textMuted(b),

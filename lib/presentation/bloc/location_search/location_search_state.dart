@@ -5,7 +5,7 @@ class LocationSearchState extends Equatable {
   final List<Location> results;
   final List<Location> history;
   final Location? currentLocation;
-  final Location? reversedLocation; // result of ReverseGeocode
+  final Location? reversedLocation;
   final bool loading;
   final bool locating;
   final String? error;

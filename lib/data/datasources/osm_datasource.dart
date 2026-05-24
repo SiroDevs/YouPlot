@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
@@ -10,6 +9,7 @@ import '../../core/errors/failures.dart';
 import '../../core/utils/osm_utils.dart';
 import '../../domain/entities/elevation_point.dart';
 import '../../domain/entities/location.dart';
+import 'elevation_isolate.dart';
 
 class OsmDatasource {
   final Dio _dio;
@@ -17,7 +17,7 @@ class OsmDatasource {
 
   Map<String, String> get _nominatimHeaders => {
     'User-Agent': dotenv.env['OSM_USER_AGENT']!,
-    'Accept-Language': 'en',
+    'Accept': '*/*',
   };
 
   Future<List<Location>> searchPlaces(
@@ -54,8 +54,9 @@ class OsmDatasource {
       );
 
       final features = resp.data as List;
+
       return features
-          .map((f) => _locationFromNominatim(f as Map<String, dynamic>))
+          .map((f) => locationDto(f as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
       throw NetworkException(e.message ?? 'Geocoding request failed');
@@ -76,7 +77,7 @@ class OsmDatasource {
       );
 
       if (resp.data is! Map) return Location(lat: lat, lng: lng);
-      return _locationFromNominatim(
+      return locationDto(
         resp.data as Map<String, dynamic>,
         forcedLat: lat,
         forcedLng: lng,
@@ -133,47 +134,7 @@ class OsmDatasource {
     int samples,
   ) async {
     final sampled = _sampleGeometry(geometry, samples);
-    return compute(_fetchElevationIsolate, sampled);
-  }
-
-  Location _locationFromNominatim(
-    Map<String, dynamic> f, {
-    double? forcedLat,
-    double? forcedLng,
-  }) {
-    final lat = forcedLat ?? double.parse(f['lat'].toString());
-    final lng = forcedLng ?? double.parse(f['lon'].toString());
-
-    final addr = f['address'] as Map<String, dynamic>?;
-    final name =
-        f['name'] as String? ??
-        f['namedetails']?['name'] as String? ??
-        addr?['amenity'] as String? ??
-        addr?['road'] as String? ??
-        addr?['suburb'] as String? ??
-        addr?['city'] as String? ??
-        addr?['town'] as String? ??
-        addr?['village'] as String? ??
-        '';
-
-    final city =
-        addr?['city'] as String? ??
-        addr?['town'] as String? ??
-        addr?['village'] as String?;
-    final road = addr?['road'] as String?;
-    final country = addr?['country'] as String?;
-    final addressParts = <String>[road!, city!, country!];
-
-    return Location(
-      lat: lat,
-      lng: lng,
-      name: name.isNotEmpty
-          ? name
-          : (f['display_name'] as String?)?.split(',').first.trim(),
-      address: addressParts.isNotEmpty
-          ? addressParts.join(', ')
-          : f['display_name'] as String?,
-    );
+    return compute(fetchElevationIsolate, sampled);
   }
 
   List<List<double>> _sampleGeometry(List<List<double>> geom, int n) {
@@ -186,61 +147,3 @@ class OsmDatasource {
   }
 }
 
-Future<List<ElevationPoint>> _fetchElevationIsolate(
-  List<List<double>> sampled,
-) async {
-  final result = <ElevationPoint>[];
-  double cumDist = 0;
-
-  try {
-    final body = {
-      'locations': sampled
-          .map((c) => {'latitude': c[1], 'longitude': c[0]})
-          .toList(),
-    };
-
-    final client = Dio(
-      BaseOptions(
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 30),
-      ),
-    );
-
-    final resp = await client.post(
-      kElevationLookup,
-      data: jsonEncode(body),
-      options: Options(headers: {'Content-Type': 'application/json'}),
-    );
-
-    final results = resp.data['results'] as List;
-    for (int i = 0; i < results.length; i++) {
-      if (i > 0) {
-        cumDist += haversineDist(
-          sampled[i - 1][1],
-          sampled[i - 1][0],
-          sampled[i][1],
-          sampled[i][0],
-        );
-      }
-      result.add(
-        ElevationPoint(
-          distanceKm: cumDist,
-          elevationM: (results[i]['elevation'] as num).toDouble(),
-        ),
-      );
-    }
-  } catch (_) {
-    for (int i = 0; i < sampled.length; i++) {
-      if (i > 0) {
-        cumDist += haversineDist(
-          sampled[i - 1][1],
-          sampled[i - 1][0],
-          sampled[i][1],
-          sampled[i][0],
-        );
-      }
-      result.add(ElevationPoint(distanceKm: cumDist, elevationM: 0));
-    }
-  }
-  return result;
-}

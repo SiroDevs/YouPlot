@@ -12,9 +12,9 @@ class RouteMap extends Equatable {
   final List<Waypoint> waypoints;
   final List<List<double>> geometry;
   final List<ElevationPoint> elevation;
-  final double totalDistanceKm;
-  final double totalAscentM;
-  final double totalDescentM;
+  final double totalDistance;
+  final double totalAscent;
+  final double totalDescent;
   final SportType sport;
   final DistanceUnit unit;
 
@@ -25,9 +25,9 @@ class RouteMap extends Equatable {
     required this.waypoints,
     required this.geometry,
     required this.elevation,
-    required this.totalDistanceKm,
-    required this.totalAscentM,
-    required this.totalDescentM,
+    required this.totalDistance,
+    required this.totalAscent,
+    required this.totalDescent,
     required this.sport,
     required this.unit,
   });

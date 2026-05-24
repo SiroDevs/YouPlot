@@ -72,7 +72,6 @@ class GoToStep extends RouteBuilderEvent {
 
 class ResetAll extends RouteBuilderEvent {}
 
-/// Fired by LiveMap once the flutter_map MapController is initialised.
 class MapControllerReady extends RouteBuilderEvent {
   final MapController controller;
   MapControllerReady(this.controller);

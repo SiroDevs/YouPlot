@@ -24,7 +24,7 @@ class RouteBuilderState extends Equatable {
   final RouteMap? route;
 
   final int days;
-  final double speedKmh;
+  final double speed;
   final DateTime startTime;
   final Set<BreakType> selectedBreaks;
 
@@ -34,9 +34,6 @@ class RouteBuilderState extends Equatable {
   final String? error;
   final String? exportedPath;
 
-  /// The flutter_map MapController — non-null once the map widget reports ready.
-  /// Not included in props so state changes here don't trigger unnecessary
-  /// widget rebuilds.
   final MapController? mapController;
 
   const RouteBuilderState({
@@ -50,7 +47,7 @@ class RouteBuilderState extends Equatable {
     this.usingSuggestions = false,
     this.route,
     this.days = 1,
-    this.speedKmh = 4.0,
+    this.speed = 4.0,
     required this.startTime,
     this.selectedBreaks = const {},
     this.plan,
@@ -63,7 +60,7 @@ class RouteBuilderState extends Equatable {
   bool get canProceed => origin != null && destination != null;
 
   double get displaySpeed =>
-      unit == DistanceUnit.miles ? speedKmh * 0.621371 : speedKmh;
+      unit == DistanceUnit.miles ? speed * 0.621371 : speed;
 
   RouteBuilderState copyWith({
     AppStep? step,
@@ -76,7 +73,7 @@ class RouteBuilderState extends Equatable {
     bool? usingSuggestions,
     RouteMap? route,
     int? days,
-    double? speedKmh,
+    double? speed,
     DateTime? startTime,
     Set<BreakType>? selectedBreaks,
     RoutePlan? plan,
@@ -100,7 +97,7 @@ class RouteBuilderState extends Equatable {
       usingSuggestions: usingSuggestions ?? this.usingSuggestions,
       route: route ?? this.route,
       days: days ?? this.days,
-      speedKmh: speedKmh ?? this.speedKmh,
+      speed: speed ?? this.speed,
       startTime: startTime ?? this.startTime,
       selectedBreaks: selectedBreaks ?? this.selectedBreaks,
       plan: plan ?? this.plan,
@@ -115,9 +112,7 @@ class RouteBuilderState extends Equatable {
   List<Object?> get props => [
         step, sport, unit, origin, destination,
         viaPoints, suggestions, usingSuggestions,
-        route, days, speedKmh, startTime, selectedBreaks,
+        route, days, speed, startTime, selectedBreaks,
         plan, loading, error, exportedPath,
-        // mapController intentionally excluded — it's a mutable object and
-        // including it would cause rebuild loops.
       ];
 }

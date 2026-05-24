@@ -22,12 +22,12 @@ class PlanRepositoryImpl implements PlanRepository {
   Future<Either<Failure, RoutePlan>> buildPlan({
     required RouteMap route,
     required int days,
-    required double speedKmh,
+    required double speed,
     required DateTime startTime,
     required List<BreakType> breaks,
   }) async {
     try {
-      final distPerDay = route.totalDistanceKm / days;
+      final distPerDay = route.totalDistance / days;
       final allBreaks = <RouteBreak>[];
       final segments = <DailySegment>[];
 
@@ -44,7 +44,7 @@ class PlanRepositoryImpl implements PlanRepository {
           final triggerKm = _breakTriggerKm(bt, dayStartKm, distPerDay);
           if (triggerKm > dayEndKm) continue;
 
-          final travelSoFar = (triggerKm - dayStartKm) / speedKmh;
+          final travelSoFar = (triggerKm - dayStartKm) / speed;
           final breakTime = dayStart.add(Duration(seconds: (travelSoFar * 3600).round()));
           final br = RouteBreak(
             id: _uuid.v4(),
@@ -57,7 +57,7 @@ class PlanRepositoryImpl implements PlanRepository {
           allBreaks.add(br);
         }
 
-        final movingSec = (distPerDay / speedKmh * 3600).round();
+        final movingSec = (distPerDay / speed * 3600).round();
         final breakSec = dayBreaks.fold(0, (s, b) => s + b.duration.inSeconds);
         final arrivalTime = dayStart.add(Duration(seconds: movingSec + breakSec));
 
@@ -71,7 +71,7 @@ class PlanRepositoryImpl implements PlanRepository {
         ));
       }
 
-      final movingH = route.totalDistanceKm / speedKmh;
+      final movingH = route.totalDistance / speed;
       final breakSec = allBreaks.fold(0, (s, b) => s + b.duration.inSeconds);
       final total = Duration(seconds: (movingH * 3600).round() + breakSec);
 
@@ -79,7 +79,7 @@ class PlanRepositoryImpl implements PlanRepository {
         id: _uuid.v4(),
         route: route,
         totalDays: days,
-        speedKmh: speedKmh,
+        speed: speed,
         startTime: startTime,
         breaks: allBreaks,
         segments: segments,
@@ -99,7 +99,7 @@ class PlanRepositoryImpl implements PlanRepository {
         'origin': plan.route.origin.name ?? plan.route.origin.toString(),
         'destination': plan.route.destination.name ?? plan.route.destination.toString(),
         'days': plan.totalDays,
-        'distanceKm': plan.route.totalDistanceKm,
+        'distanceKm': plan.route.totalDistance,
         'sport': plan.route.sport.name,
         'savedAt': DateTime.now().toIso8601String(),
       };

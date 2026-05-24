@@ -7,10 +7,10 @@ import '../../../../../../core/constants/app_constants.dart';
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/state_widgets.dart';
-import '../../../widgets/steps/app_header.dart';
+import '../../../widgets/steps/step_header.dart';
 
-class ExportStep extends StatelessWidget {
-  const ExportStep({super.key});
+class PlanStep7 extends StatelessWidget {
+  const PlanStep7({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class ExportStep extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppColors.bg(b),
           body: Column(children: [
-            AppHeader(
+            StepHeader(
               showBack: true,
               onBack: () => bloc.add(GoToStep(AppStep.review)),
             ),

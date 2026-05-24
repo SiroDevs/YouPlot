@@ -5,37 +5,33 @@ class RouteEntity {
   @PrimaryKey()
   final String id;
 
-  final String originName;
+  final String origin;
   final double originLat;
   final double originLng;
 
-  final String destinationName;
+  final String destination;
   final double destinationLat;
   final double destinationLng;
 
-  final double totalDistanceKm;
-  final double totalAscentM;
-  final double totalDescentM;
-  final String sport;  // SportType.name
-  final String unit;   // DistanceUnit.name
-
-  /// Full serialised RouteMap JSON (geometry, waypoints, elevation)
+  final double totalDistance;
+  final double totalAscent;
+  final double totalDescent;
+  final String sport;
+  final String unit;
   final String routeJson;
-
-  /// Epoch milliseconds
   final int createdAt;
 
   const RouteEntity({
     required this.id,
-    required this.originName,
+    required this.origin,
     required this.originLat,
     required this.originLng,
-    required this.destinationName,
+    required this.destination,
     required this.destinationLat,
     required this.destinationLng,
-    required this.totalDistanceKm,
-    required this.totalAscentM,
-    required this.totalDescentM,
+    required this.totalDistance,
+    required this.totalAscent,
+    required this.totalDescent,
     required this.sport,
     required this.unit,
     required this.routeJson,

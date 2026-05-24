@@ -12,11 +12,21 @@ class PersistentMap extends StatelessWidget {
     return LiveMap(key: liveMapKey);
   }
 }
-class MapBackground extends StatelessWidget {
+
+class MapBackground extends StatefulWidget {
   const MapBackground({super.key});
 
   @override
+  State<MapBackground> createState() => _MapBackgroundState();
+}
+
+class _MapBackgroundState extends State<MapBackground> {
+  final _mapKey = GlobalKey<LiveMapState>();
+
+  @override
   Widget build(BuildContext context) {
-    return const Positioned.fill(child: PersistentMap());
+    return Positioned.fill(
+      child: LiveMap(key: _mapKey),
+    );
   }
 }

@@ -35,52 +35,32 @@ class SearchHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
         child: Row(
           children: [
-            _BackButton(brightness: brightness, onTap: onBack),
-            const Gap(10),
-            Expanded(
-              child: _SearchTextField(
-                controller: controller,
-                focusNode: focusNode,
-                hint: hint,
-                brightness: brightness,
-                onClear: onClear,
+            GestureDetector(
+              onTap: onBack,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.surface(brightness),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 20,
+                  color: AppColors.textPrimary(brightness),
+                ),
               ),
             ),
-            if (showGps) ...[
-              const Gap(10),
-              const GpsButton(),
-            ],
+            const Gap(10),
+            _SearchTextField(
+              controller: controller,
+              focusNode: focusNode,
+              hint: hint,
+              brightness: brightness,
+              onClear: onClear,
+            ),
+            if (showGps) ...[const Gap(10), const GpsButton()],
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BackButton extends StatelessWidget {
-  final Brightness brightness;
-  final VoidCallback onTap;
-
-  const _BackButton({
-    required this.brightness,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: AppColors.surface(brightness),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          Icons.arrow_back_rounded,
-          size: 20,
-          color: AppColors.textPrimary(brightness),
         ),
       ),
     );
@@ -104,41 +84,43 @@ class _SearchTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      focusNode: focusNode,
-      style: TextStyle(
-        fontSize: 15,
-        color: AppColors.textPrimary(brightness),
-      ),
-      textInputAction: TextInputAction.search,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(
-          color: AppColors.textMuted(brightness),
+    return Expanded(
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        style: TextStyle(
           fontSize: 15,
+          color: AppColors.textPrimary(brightness),
         ),
-        prefixIcon: Icon(
-          Icons.search_rounded,
-          size: 20,
-          color: AppColors.textMuted(brightness),
-        ),
-        suffixIcon: controller.text.isNotEmpty
-            ? IconButton(
-                icon: Icon(
-                  Icons.close_rounded,
-                  size: 18,
-                  color: AppColors.textMuted(brightness),
-                ),
-                onPressed: onClear,
-              )
-            : null,
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(
+            color: AppColors.textMuted(brightness),
+            fontSize: 15,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            size: 20,
+            color: AppColors.textMuted(brightness),
+          ),
+          suffixIcon: controller.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 18,
+                    color: AppColors.textMuted(brightness),
+                  ),
+                  onPressed: onClear,
+                )
+              : null,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
         ),
       ),
     );

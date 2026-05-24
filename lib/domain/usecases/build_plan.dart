@@ -16,7 +16,7 @@ class BuildPlan extends UseCase<RoutePlan, BuildPlanParams> {
   Future<Either<Failure, RoutePlan>> call(BuildPlanParams p) => _repo.buildPlan(
         route: p.route,
         days: p.days,
-        speedKmh: p.speedKmh,
+        speed: p.speed,
         startTime: p.startTime,
         breaks: p.breaks,
       );
@@ -25,18 +25,18 @@ class BuildPlan extends UseCase<RoutePlan, BuildPlanParams> {
 class BuildPlanParams extends Equatable {
   final RouteMap route;
   final int days;
-  final double speedKmh;
+  final double speed;
   final DateTime startTime;
   final List<BreakType> breaks;
 
   const BuildPlanParams({
     required this.route,
     required this.days,
-    required this.speedKmh,
+    required this.speed,
     required this.startTime,
     required this.breaks,
   });
 
   @override
-  List<Object?> get props => [route, days, speedKmh, startTime];
+  List<Object?> get props => [route, days, speed, startTime];
 }
