@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../theme/app_colors.dart';
 import 'gps_button.dart';
@@ -84,45 +85,40 @@ class _SearchTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        style: TextStyle(
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      style: TextStyle(fontSize: 15, color: AppColors.textPrimary(brightness)),
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(
+          color: AppColors.textMuted(brightness),
           fontSize: 15,
-          color: AppColors.textPrimary(brightness),
         ),
-        textInputAction: TextInputAction.search,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-            color: AppColors.textMuted(brightness),
-            fontSize: 15,
-          ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            size: 20,
-            color: AppColors.textMuted(brightness),
-          ),
-          suffixIcon: controller.text.isNotEmpty
-              ? IconButton(
-                  icon: Icon(
-                    Icons.close_rounded,
-                    size: 18,
-                    color: AppColors.textMuted(brightness),
-                  ),
-                  onPressed: onClear,
-                )
-              : null,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
+        prefixIcon: Icon(
+          Icons.search_rounded,
+          size: 20,
+          color: AppColors.textMuted(brightness),
+        ),
+        suffixIcon: controller.text.isNotEmpty
+            ? IconButton(
+                icon: Icon(
+                  Icons.close_rounded,
+                  size: 18,
+                  color: AppColors.textMuted(brightness),
+                ),
+                onPressed: onClear,
+              )
+            : null,
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
         ),
       ),
-    );
+    ).expanded();
   }
 }

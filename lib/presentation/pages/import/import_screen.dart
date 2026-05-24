@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/location.dart';
@@ -9,8 +10,8 @@ import '../../../domain/entities/route_map.dart';
 import '../../../domain/repositories/local_repository.dart';
 import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/steps/step_bottom_button.dart';
-import '../planner/planner_screen.dart';
+import '../../widgets/steps/icon_text_button.dart';
+import '../plan_maker/plan_maker_screen.dart';
 import 'components/done_view.dart';
 import 'components/parsing_view.dart';
 import 'components/stat_chip.dart';
@@ -131,7 +132,7 @@ class _ImportScreenState extends State<ImportScreen> {
     routeBloc.add(SetImportedRoute(route));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const PlannerScreen()),
+      MaterialPageRoute(builder: (_) => const PlanMakerScreen()),
     );
   }
 
@@ -158,9 +159,9 @@ class _ImportScreenState extends State<ImportScreen> {
       ),
       body: Column(
         children: [
-          Expanded(child: _buildBody(b)),
+          _buildBody(b).expanded(),
           if (_phase == ImportPhase.done)
-            StepBottomButton(
+            IconTextButton(
               label: 'Create Plan with this Route',
               icon: Icons.arrow_forward_rounded,
               brightness: b,

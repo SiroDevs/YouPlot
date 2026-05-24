@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../theme/app_colors.dart';
 
@@ -7,7 +8,11 @@ class NewPlanDialog extends StatelessWidget {
   final VoidCallback onScratch;
   final VoidCallback onImport;
 
-  const NewPlanDialog({super.key, required this.onScratch, required this.onImport});
+  const NewPlanDialog({
+    super.key,
+    required this.onScratch,
+    required this.onImport,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +37,7 @@ class NewPlanDialog extends StatelessWidget {
             const Gap(6),
             Text(
               'How would you like to start?',
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary(b),
-              ),
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary(b)),
             ),
             const Gap(20),
             DialogOption(
@@ -71,7 +73,8 @@ class DialogOption extends StatelessWidget {
   final VoidCallback onTap;
   final Brightness brightness;
 
-  const DialogOption({super.key, 
+  const DialogOption({
+    super.key,
     required this.icon,
     required this.color,
     required this.title,
@@ -105,31 +108,32 @@ class DialogOption extends StatelessWidget {
               child: Icon(icon, size: 22, color: color),
             ),
             const Gap(14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary(b),
-                    ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary(b),
                   ),
-                  const Gap(2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary(b),
-                    ),
+                ),
+                const Gap(2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary(b),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ).expanded(),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
+              color: AppColors.textMuted(b),
             ),
-            Icon(Icons.chevron_right_rounded,
-                size: 18, color: AppColors.textMuted(b)),
           ],
         ),
       ),

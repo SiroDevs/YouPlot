@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../domain/entities/location.dart';
 import '../../../domain/entities/waypoint.dart';
@@ -11,7 +12,8 @@ class ViaRow extends StatelessWidget {
   final VoidCallback onRemove;
   final Brightness brightness;
 
-  const ViaRow({super.key, 
+  const ViaRow({
+    super.key,
     required this.index,
     required this.location,
     required this.onRemove,
@@ -49,12 +51,10 @@ class ViaRow extends StatelessWidget {
             ),
           ),
           const Gap(10),
-          Expanded(
-            child: Text(
-              location.name ?? location.toString(),
-              style: TextStyle(fontSize: 13, color: AppColors.textPrimary(b)),
-            ),
-          ),
+          Text(
+            location.name ?? location.toString(),
+            style: TextStyle(fontSize: 13, color: AppColors.textPrimary(b)),
+          ).expanded(),
           GestureDetector(
             onTap: onRemove,
             child: Icon(
@@ -72,7 +72,11 @@ class ViaRow extends StatelessWidget {
 class WaypointRow extends StatelessWidget {
   final Waypoint waypoint;
   final Brightness brightness;
-  const WaypointRow({super.key, required this.waypoint, required this.brightness});
+  const WaypointRow({
+    super.key,
+    required this.waypoint,
+    required this.brightness,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -90,12 +94,10 @@ class WaypointRow extends StatelessWidget {
           children: [
             const Icon(Icons.place_rounded, size: 15, color: AppColors.primary),
             const Gap(10),
-            Expanded(
-              child: Text(
+            Text(
                 waypoint.label,
                 style: TextStyle(fontSize: 13, color: AppColors.textPrimary(b)),
-              ),
-            ),
+              ).expanded(),
             if (waypoint.distanceFromStartKm != null)
               Text(
                 '${waypoint.distanceFromStartKm!.toStringAsFixed(0)} km',

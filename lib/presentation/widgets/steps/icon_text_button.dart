@@ -3,8 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../theme/app_colors.dart';
 
-/// Common bottom action button used at the bottom of every planning step.
-class StepBottomButton extends StatelessWidget {
+class IconTextButton extends StatelessWidget {
   final String label;
   final IconData? icon;
   final VoidCallback? onPressed;
@@ -12,7 +11,7 @@ class StepBottomButton extends StatelessWidget {
   final Brightness brightness;
   final Color? color;
 
-  const StepBottomButton({
+  const IconTextButton({
     super.key,
     required this.label,
     required this.brightness,

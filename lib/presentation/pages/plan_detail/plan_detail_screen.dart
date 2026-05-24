@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../domain/entities/route_plan.dart';
 import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/steps/step_bottom_button.dart';
-import '../planner/planner_screen.dart';
+import '../../widgets/steps/icon_text_button.dart';
+import '../plan_maker/plan_maker_screen.dart';
 import 'widgets/plan_header_stats.dart';
 import 'widgets/plan_widgets.dart';
 
@@ -24,18 +25,16 @@ class PlanDetailScreen extends StatelessWidget {
       appBar: _buildAppBar(context, b),
       body: Column(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PlanHeaderStats(plan: plan, brightness: b),
-                  PlanDailySchedule(plan: plan, brightness: b),
-                ],
-              ),
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PlanHeaderStats(plan: plan, brightness: b),
+                PlanDailySchedule(plan: plan, brightness: b),
+              ],
             ),
-          ),
-          StepBottomButton(
+          ).expanded(),
+          IconTextButton(
             label: 'Edit Plan',
             icon: Icons.edit_rounded,
             brightness: b,
@@ -68,9 +67,13 @@ class PlanDetailScreen extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          icon: Icon(Icons.delete_outline_rounded,
-              color: AppColors.danger, size: 22),
-          onPressed: () => PlanDeleteDialog.show(context, plan: plan, brightness: b),
+          icon: Icon(
+            Icons.delete_outline_rounded,
+            color: AppColors.danger,
+            size: 22,
+          ),
+          onPressed: () =>
+              PlanDeleteDialog.show(context, plan: plan, brightness: b),
         ),
         const Gap(4),
       ],
@@ -83,7 +86,7 @@ class PlanDetailScreen extends StatelessWidget {
     bloc.add(SetImportedRoute(plan.route));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const PlannerScreen()),
+      MaterialPageRoute(builder: (_) => const PlanMakerScreen()),
     );
   }
 }

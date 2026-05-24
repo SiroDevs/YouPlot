@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/state_widgets.dart';
+import '../../../widgets/steps/icon_text_button.dart';
 import '../../../widgets/steps/step_header.dart';
 import '../../../widgets/steps/general.dart';
 import '../../../widgets/steps/section_header.dart';
@@ -64,7 +65,7 @@ class PlanStep2 extends StatelessWidget {
                         const Gap(20),
 
                         OptionCard(
-                            key: const ValueKey('app_suggestions'),
+                          key: const ValueKey('app_suggestions'),
                           brightness: b,
                           emoji: '🤖',
                           title: 'App suggestions',
@@ -73,7 +74,7 @@ class PlanStep2 extends StatelessWidget {
                         ),
                         const Gap(10),
                         OptionCard(
-                            key: const ValueKey('my_own_stops'),
+                          key: const ValueKey('my_own_stops'),
                           brightness: b,
                           emoji: '✏️',
                           title: 'My own stops',
@@ -83,7 +84,7 @@ class PlanStep2 extends StatelessWidget {
                         ),
                         const Gap(10),
                         OptionCard(
-                            key: const ValueKey('direct_route'),
+                          key: const ValueKey('direct_route'),
                           brightness: b,
                           emoji: '⚡',
                           title: 'Direct route',
@@ -113,13 +114,11 @@ class PlanStep2 extends StatelessWidget {
                             ),
                           ),
                           const Gap(12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () => bloc.add(GenerateRoute()),
-                              icon: const Icon(Icons.map_rounded, size: 16),
-                              label: const Text('Generate Route'),
-                            ),
+                          IconTextButton(
+                            label: 'Generate Route',
+                            icon: Icons.map_rounded,
+                            brightness: b,
+                            onPressed: () => bloc.add(GenerateRoute()),
                           ),
                         ],
 
@@ -136,15 +135,12 @@ class PlanStep2 extends StatelessWidget {
                             (w) => WaypointRow(waypoint: w, brightness: b),
                           ),
                           const Gap(12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () => bloc.add(GenerateRoute()),
-                              icon: const Icon(Icons.map_rounded, size: 16),
-                              label: const Text(
-                                'Generate Route with These Stops',
-                              ),
-                            ),
+
+                          IconTextButton(
+                            label: 'Generate Route with These Stops',
+                            icon: Icons.map_rounded,
+                            brightness: b,
+                            onPressed: () => bloc.add(GenerateRoute()),
                           ),
                         ],
 

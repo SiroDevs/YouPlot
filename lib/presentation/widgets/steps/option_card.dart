@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../theme/app_colors.dart';
 
@@ -35,29 +36,27 @@ class OptionCard extends StatelessWidget {
           children: [
             Text(emoji, style: const TextStyle(fontSize: 26)),
             const Gap(14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary(b),
-                    ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary(b),
                   ),
-                  const Gap(2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary(b),
-                    ),
+                ),
+                const Gap(2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary(b),
                   ),
-                ],
-              ),
-            ),
+                ),
+              ],
+            ).expanded(),
             Icon(
               Icons.chevron_right_rounded,
               size: 18,

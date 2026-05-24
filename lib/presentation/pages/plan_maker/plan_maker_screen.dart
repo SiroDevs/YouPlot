@@ -6,12 +6,12 @@ import '../../theme/app_colors.dart';
 import '../../widgets/state_widgets.dart';
 import 'steps/plan_step1.dart';
 import 'steps/plan_step2.dart';
-import 'steps/plan_step4.dart';   // combined step 3+4
+import 'steps/plan_step3.dart';
+import 'steps/plan_step4.dart';
 import 'steps/plan_step5.dart';
-import 'steps/plan_step6.dart';   // combined step 6+7
 
-class PlannerScreen extends StatelessWidget {
-  const PlannerScreen({super.key});
+class PlanMakerScreen extends StatelessWidget {
+  const PlanMakerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +48,12 @@ class PlannerScreen extends StatelessWidget {
         return const PlanStep2();
       case AppStep.generating:
       case AppStep.map:
-        return const PlanStep4(); // handles both generating + map
+        return const PlanStep3();
       case AppStep.plan:
-        return const PlanStep5();
+        return const PlanStep4();
       case AppStep.review:
       case AppStep.export:
-        return const PlanStep6(); // combined review + export
+        return const PlanStep5();
     }
   }
 

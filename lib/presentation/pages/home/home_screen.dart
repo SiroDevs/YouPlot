@@ -9,7 +9,7 @@ import '../../bloc/home/home_bloc.dart';
 import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
 import '../import/import_screen.dart';
-import '../planner/planner_screen.dart';
+import '../plan_maker/plan_maker_screen.dart';
 import '../plan_detail/plan_detail_screen.dart';
 import '../route_detail/route_detail_screen.dart';
 import '../settings/settings_screen.dart';
@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<RouteBuilderBloc>().add(ResetAll());
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const PlannerScreen()),
+      MaterialPageRoute(builder: (_) => const PlanMakerScreen()),
     ).then((_) {
       if (mounted) context.read<HomeBloc>().add(LoadHome());
     });

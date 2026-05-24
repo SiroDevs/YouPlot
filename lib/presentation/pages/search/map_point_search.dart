@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../bloc/location_search/location_search_bloc.dart';
 import '../../theme/app_colors.dart';
@@ -92,39 +93,37 @@ class _MapPointSearchState extends State<MapPointSearch> {
           ),
           PickOnMapTile(brightness: widget.brightness, onSelected: _select),
           Divider(height: 0, color: AppColors.border(widget.brightness)),
-          Expanded(
-            child: BlocConsumer<LocationSearchBloc, LocationSearchState>(
-              listenWhen: (p, c) =>
-                  p.currentLocation != c.currentLocation &&
-                  c.currentLocation != null,
-              listener: (_, s) {
-                if (s.currentLocation != null) {
-                  _select(s.currentLocation!);
-                }
-              },
-              builder: (_, state) {
-                if (state.loading) {
-                  return const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  );
-                }
-
-                if (_ctrl.text.length < 2) {
-                  return IdleSearchView(
-                    brightness: widget.brightness,
-                    onQueryFill: _onQueryFill,
-                  );
-                }
-
-                return SearchResultsList(
-                  results: state.results,
-                  query: _ctrl.text,
-                  brightness: widget.brightness,
-                  onSelect: _select,
+          BlocConsumer<LocationSearchBloc, LocationSearchState>(
+            listenWhen: (p, c) =>
+                p.currentLocation != c.currentLocation &&
+                c.currentLocation != null,
+            listener: (_, s) {
+              if (s.currentLocation != null) {
+                _select(s.currentLocation!);
+              }
+            },
+            builder: (_, state) {
+              if (state.loading) {
+                return const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 );
-              },
-            ),
-          ),
+              }
+
+              if (_ctrl.text.length < 2) {
+                return IdleSearchView(
+                  brightness: widget.brightness,
+                  onQueryFill: _onQueryFill,
+                );
+              }
+
+              return SearchResultsList(
+                results: state.results,
+                query: _ctrl.text,
+                brightness: widget.brightness,
+                onSelect: _select,
+              );
+            },
+          ).expanded(),
         ],
       ),
     );

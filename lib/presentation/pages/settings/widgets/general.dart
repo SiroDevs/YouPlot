@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../theme/app_colors.dart';
 
 class SectionHeader extends StatelessWidget {
   final String label;
   final Brightness brightness;
-  const SectionHeader({super.key, required this.label, required this.brightness});
+  const SectionHeader({
+    super.key,
+    required this.label,
+    required this.brightness,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +30,11 @@ class SectionHeader extends StatelessWidget {
 class SettingsCard extends StatelessWidget {
   final List<Widget> children;
   final Brightness brightness;
-  const SettingsCard({super.key, required this.children, required this.brightness});
+  const SettingsCard({
+    super.key,
+    required this.children,
+    required this.brightness,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +48,10 @@ class SettingsCard extends StatelessWidget {
         children: List.generate(children.length * 2 - 1, (i) {
           if (i.isOdd) {
             return Divider(
-                height: 0, thickness: 0.5, color: AppColors.border(brightness));
+              height: 0,
+              thickness: 0.5,
+              color: AppColors.border(brightness),
+            );
           }
           return children[i ~/ 2];
         }),
@@ -55,7 +67,8 @@ class ModeBtn extends StatelessWidget {
   final Brightness brightness;
   final VoidCallback onTap;
 
-  const ModeBtn({super.key, 
+  const ModeBtn({
+    super.key,
     required this.icon,
     required this.label,
     required this.active,
@@ -74,18 +87,29 @@ class ModeBtn extends StatelessWidget {
           color: active ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(7),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
               size: 14,
-              color: active ? Colors.white : AppColors.textSecondary(brightness)),
-          const Gap(4),
-          Text(label,
+              color: active
+                  ? Colors.white
+                  : AppColors.textSecondary(brightness),
+            ),
+            const Gap(4),
+            Text(
+              label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: active ? Colors.white : AppColors.textSecondary(brightness),
-              )),
-        ]),
+                color: active
+                    ? Colors.white
+                    : AppColors.textSecondary(brightness),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -100,7 +124,8 @@ class DropdownTile<T> extends StatelessWidget {
   final String Function(T) itemLabel;
   final ValueChanged<T?> onChanged;
 
-  const DropdownTile({super.key, 
+  const DropdownTile({
+    super.key,
     required this.brightness,
     required this.icon,
     required this.label,
@@ -114,36 +139,51 @@ class DropdownTile<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(children: [
-        Icon(icon, size: 20, color: AppColors.primary),
-        const Gap(14),
-        Expanded(
-          child: Text(label,
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary(brightness))),
-        ),
-        const Gap(8),
-        DropdownButton<T>(
-          value: value,
-          underline: const SizedBox.shrink(),
-          dropdownColor: AppColors.card(brightness),
-          style: TextStyle(
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.primary),
+          const Gap(14),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary(brightness),
+            ),
+          ).expanded(),
+          const Gap(8),
+          DropdownButton<T>(
+            value: value,
+            underline: const SizedBox.shrink(),
+            dropdownColor: AppColors.card(brightness),
+            style: TextStyle(
               fontSize: 13,
               color: AppColors.textPrimary(brightness),
-              fontWeight: FontWeight.w500),
-          icon: Icon(Icons.expand_more_rounded,
-              size: 18, color: AppColors.textSecondary(brightness)),
-          items: items.map((t) => DropdownMenuItem<T>(
-            value: t,
-            child: Text(itemLabel(t),
-                style: TextStyle(
-                    fontSize: 13, color: AppColors.textPrimary(brightness))),
-          )).toList(),
-          onChanged: onChanged,
-        ),
-      ]),
+              fontWeight: FontWeight.w500,
+            ),
+            icon: Icon(
+              Icons.expand_more_rounded,
+              size: 18,
+              color: AppColors.textSecondary(brightness),
+            ),
+            items: items
+                .map(
+                  (t) => DropdownMenuItem<T>(
+                    value: t,
+                    child: Text(
+                      itemLabel(t),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textPrimary(brightness),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: onChanged,
+          ),
+        ],
+      ),
     );
   }
 }

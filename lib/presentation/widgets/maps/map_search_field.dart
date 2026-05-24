@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../domain/entities/location.dart';
 import '../../theme/app_colors.dart';
@@ -33,7 +34,7 @@ class MapSearchField extends StatelessWidget {
           PageRouteBuilder(
             pageBuilder: (_, _, _) =>
                 MapPointSearch(hint: hint, showGps: showGps, brightness: b),
-            transitionsBuilder: (_, anim, __, child) => FadeTransition(
+            transitionsBuilder: (_, anim, _, child) => FadeTransition(
               opacity: anim,
               child: SlideTransition(
                 position: Tween(
@@ -66,19 +67,17 @@ class MapSearchField extends StatelessWidget {
           children: [
             Icon(Icons.search_rounded, size: 17, color: AppColors.textMuted(b)),
             const Gap(10),
-            Expanded(
-              child: Text(
-                value?.name ?? hint,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: value != null
-                      ? AppColors.textPrimary(b)
-                      : AppColors.textMuted(b),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            Text(
+              value?.name ?? hint,
+              style: TextStyle(
+                fontSize: 14,
+                color: value != null
+                    ? AppColors.textPrimary(b)
+                    : AppColors.textMuted(b),
               ),
-            ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ).expanded(),
             if (value != null)
               Icon(
                 Icons.check_circle_rounded,

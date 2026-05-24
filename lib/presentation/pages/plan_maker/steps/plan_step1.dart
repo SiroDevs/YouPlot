@@ -7,6 +7,7 @@ import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../widgets/maps/map_background.dart';
 import '../../../widgets/maps/map_search_field.dart';
 import '../../../widgets/state_widgets.dart';
+import '../../../widgets/steps/icon_text_button.dart';
 import '../../../widgets/steps/step_header.dart';
 import '../../../widgets/steps/badges.dart';
 import '../../../widgets/steps/general.dart';
@@ -27,7 +28,12 @@ class PlanStep1 extends StatelessWidget {
             MapBackground(),
             Column(
               children: [
-                const StepHeader(showBack: true, showThemeToggle: true, stepNumber: 1, totalSteps: 5),
+                const StepHeader(
+                  showBack: true,
+                  showThemeToggle: true,
+                  stepNumber: 1,
+                  totalSteps: 5,
+                ),
                 const Spacer(),
                 Container(
                   margin: const EdgeInsets.all(20),
@@ -113,21 +119,13 @@ class PlanStep1 extends StatelessWidget {
                           const Gap(12),
                         ],
 
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: state.canProceed
-                                ? () => bloc.add(GoToStep(AppStep.waypoints))
-                                : null,
-                            icon: const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 17,
-                            ),
-                            label: const Text('Continue'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.all(15),
-                            ),
-                          ),
+                        IconTextButton(
+                          label: 'Continue',
+                          icon: Icons.arrow_forward_rounded,
+                          brightness: b,
+                          onPressed: state.canProceed
+                              ? () => bloc.add(GoToStep(AppStep.waypoints))
+                              : null,
                         ).animate().fadeIn(delay: 240.ms),
                         const Gap(8),
                       ],

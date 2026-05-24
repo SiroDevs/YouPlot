@@ -4,16 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../domain/entities/location.dart';
 import '../../../bloc/location_search/location_search_bloc.dart';
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
-import '../../planner/widgets/confirm_panel.dart';
-import '../../planner/widgets/cross_hair.dart';
-import '../../planner/widgets/glass_circle.dart';
-import '../../planner/widgets/instruction_chip.dart';
+import '../../plan_maker/widgets/confirm_panel.dart';
+import '../../plan_maker/widgets/cross_hair.dart';
+import '../../plan_maker/widgets/glass_circle.dart';
+import '../../plan_maker/widgets/instruction_chip.dart';
 
 class MapPointPicker extends StatefulWidget {
   final Brightness brightness;
@@ -42,11 +43,13 @@ class _MapPointPickerState extends State<MapPointPicker> {
     final rbState = context.read<RouteBuilderBloc>().state;
     final lsState = context.read<LocationSearchBloc>().state;
 
-    final anchor = rbState.origin ??
+    final anchor =
+        rbState.origin ??
         (lsState.currentLocation != null
             ? Location(
                 lat: lsState.currentLocation!.lat,
-                lng: lsState.currentLocation!.lng)
+                lng: lsState.currentLocation!.lng,
+              )
             : null);
 
     if (anchor != null) {
@@ -60,9 +63,7 @@ class _MapPointPickerState extends State<MapPointPicker> {
     final b = widget.brightness;
     final isDark = b == Brightness.dark;
 
-    final markers = <Marker>[
-      if (_tapMarker != null) _tapMarker!,
-    ];
+    final markers = <Marker>[if (_tapMarker != null) _tapMarker!];
 
     return Scaffold(
       body: Stack(
@@ -117,47 +118,52 @@ class _MapPointPickerState extends State<MapPointPicker> {
                     ),
                   ),
                   const Gap(10),
-                  Expanded(
-                    child: InstructionChip(
-                      isDark: isDark,
-                      hasPinned: _pinnedPoint != null,
-                      resolving: _resolving,
-                    ),
-                  ),
+                  InstructionChip(
+                    isDark: isDark,
+                    hasPinned: _pinnedPoint != null,
+                    resolving: _resolving,
+                  ).expanded(),
                   const Gap(10),
                   GlassCircle(
-                    child: BlocConsumer<LocationSearchBloc, LocationSearchState>(
-                      listenWhen: (p, c) =>
-                          p.currentLocation != c.currentLocation &&
-                          c.currentLocation != null,
-                      listener: (_, s) {
-                        if (s.currentLocation != null) {
-                          _mapController.move(
-                            LatLng(s.currentLocation!.lat,
-                                s.currentLocation!.lng),
-                            14,
-                          );
-                        }
-                      },
-                      buildWhen: (p, c) => p.locating != c.locating,
-                      builder: (_, s) => IconButton(
-                        icon: s.locating
-                            ? SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.primary),
-                              )
-                            : Icon(Icons.my_location_rounded,
-                                color: AppColors.primary, size: 20),
-                        onPressed: s.locating
-                            ? null
-                            : () => context
-                                .read<LocationSearchBloc>()
-                                .add(LocateMe()),
-                      ),
-                    ),
+                    child:
+                        BlocConsumer<LocationSearchBloc, LocationSearchState>(
+                          listenWhen: (p, c) =>
+                              p.currentLocation != c.currentLocation &&
+                              c.currentLocation != null,
+                          listener: (_, s) {
+                            if (s.currentLocation != null) {
+                              _mapController.move(
+                                LatLng(
+                                  s.currentLocation!.lat,
+                                  s.currentLocation!.lng,
+                                ),
+                                14,
+                              );
+                            }
+                          },
+                          buildWhen: (p, c) => p.locating != c.locating,
+                          builder: (_, s) => IconButton(
+                            icon: s.locating
+                                ? SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.my_location_rounded,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
+                            onPressed: s.locating
+                                ? null
+                                : () => context.read<LocationSearchBloc>().add(
+                                    LocateMe(),
+                                  ),
+                          ),
+                        ),
                   ),
                 ],
               ),
@@ -170,17 +176,17 @@ class _MapPointPickerState extends State<MapPointPicker> {
               left: 0,
               right: 0,
               child: BlocBuilder<LocationSearchBloc, LocationSearchState>(
-                buildWhen: (p, c) =>
-                    p.reversedLocation != c.reversedLocation,
+                buildWhen: (p, c) => p.reversedLocation != c.reversedLocation,
                 builder: (_, s) {
-                  final resolved = s.reversedLocation ??
+                  final resolved =
+                      s.reversedLocation ??
                       Location(
                         lat: _pinnedPoint!.latitude,
                         lng: _pinnedPoint!.longitude,
                         name: _resolving
                             ? 'Resolving…'
                             : '${_pinnedPoint!.latitude.toStringAsFixed(4)}, '
-                                '${_pinnedPoint!.longitude.toStringAsFixed(4)}',
+                                  '${_pinnedPoint!.longitude.toStringAsFixed(4)}',
                       );
                   return ConfirmPanel(
                     location: resolved,
@@ -216,9 +222,9 @@ class _MapPointPickerState extends State<MapPointPicker> {
 
     _mapController.move(latLng, _mapController.camera.zoom);
 
-    context
-        .read<LocationSearchBloc>()
-        .add(ReverseGeocode(latLng.latitude, latLng.longitude));
+    context.read<LocationSearchBloc>().add(
+      ReverseGeocode(latLng.latitude, latLng.longitude),
+    );
 
     _waitForReverseGeocode();
   }
@@ -261,14 +267,13 @@ class _MapPointPickerState extends State<MapPointPicker> {
                 ),
               ],
             ),
-            child: const Icon(Icons.push_pin_rounded,
-                color: Colors.white, size: 22),
+            child: const Icon(
+              Icons.push_pin_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
-          Container(
-            width: 2,
-            height: 10,
-            color: AppColors.primary,
-          ),
+          Container(width: 2, height: 10, color: AppColors.primary),
         ],
       ),
     );

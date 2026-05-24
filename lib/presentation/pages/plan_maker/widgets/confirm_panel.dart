@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../../domain/entities/location.dart';
 import '../../../bloc/location_search/location_search_bloc.dart';
@@ -13,7 +14,8 @@ class ConfirmPanel extends StatelessWidget {
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
 
-  const ConfirmPanel({super.key, 
+  const ConfirmPanel({
+    super.key,
     required this.location,
     required this.brightness,
     required this.resolving,
@@ -64,38 +66,39 @@ class ConfirmPanel extends StatelessWidget {
                         color: AppColors.primaryDim,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.place_rounded,
-                          size: 18, color: AppColors.primary),
-                    ),
-                    const Gap(12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            display.name ?? 'Selected point',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary(b),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            display.address ??
-                                '${display.lat.toStringAsFixed(5)}, '
-                                    '${display.lng.toStringAsFixed(5)}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary(b),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                      child: const Icon(
+                        Icons.place_rounded,
+                        size: 18,
+                        color: AppColors.primary,
                       ),
                     ),
+                    const Gap(12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          display.name ?? 'Selected point',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary(b),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          display.address ??
+                              '${display.lat.toStringAsFixed(5)}, '
+                                  '${display.lng.toStringAsFixed(5)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary(b),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ).expanded(),
                     if (resolving && s.reversedLocation == null)
                       SizedBox(
                         width: 16,
@@ -110,12 +113,10 @@ class ConfirmPanel extends StatelessWidget {
                 const Gap(14),
                 Row(
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: onCancel,
-                        child: const Text('Cancel'),
-                      ),
-                    ),
+                    OutlinedButton(
+                      onPressed: onCancel,
+                      child: const Text('Cancel'),
+                    ).expanded(),
                     const Gap(10),
                     Expanded(
                       flex: 2,

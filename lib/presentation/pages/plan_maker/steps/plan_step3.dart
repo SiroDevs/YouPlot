@@ -8,10 +8,8 @@ import '../../../widgets/maps/map_convas.dart';
 import '../../../widgets/steps/step_header.dart';
 import '../widgets/route_panel.dart';
 
-/// Combined step 3+4: shows a loading overlay while the route is being generated,
-/// then reveals the map + route panel once ready.
-class PlanStep4 extends StatelessWidget {
-  const PlanStep4({super.key});
+class PlanStep3 extends StatelessWidget {
+  const PlanStep3({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +19,10 @@ class PlanStep4 extends StatelessWidget {
         final b = Theme.of(ctx).brightness;
         final isDark = b == Brightness.dark;
 
-        // Loading / generating state (replaces old Step3)
         if (state.step == AppStep.generating || state.route == null) {
           return _GeneratingView(brightness: b, isDark: isDark);
         }
 
-        // Route ready
         final route = state.route!;
         return Scaffold(
           backgroundColor:

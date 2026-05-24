@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../../core/constants/app_constants.dart';
-import '../../../../../core/utils/formatters.dart';
-import '../../../domain/entities/daily_segment.dart';
-import '../../theme/app_colors.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/formatters.dart';
+import '../../domain/entities/daily_segment.dart';
+import '../theme/app_colors.dart';
 
 class DayCard extends StatelessWidget {
   final DailySegment segment;

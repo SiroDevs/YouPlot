@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../../core/utils/formatters.dart';
 import '../../../../domain/entities/route_map.dart';
@@ -58,37 +59,32 @@ class RoutePanel extends StatelessWidget {
           // Stats row
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(children: [
-              Expanded(
-                child: StatCard(
+            child: Row(
+              children: [
+                StatCard(
                   label: 'Distance',
                   value: Fmt.distance(route.totalDistance, unit),
                   icon: Icons.straighten_rounded,
                   color: AppColors.sport(sport),
-                ),
-              ),
-              const Gap(8),
-              Expanded(
-                child: StatCard(
+                ).expanded(),
+                const Gap(8),
+                StatCard(
                   label: 'Ascent',
                   value: '+${Fmt.elevation(route.totalAscent, unit)}',
                   icon: Icons.trending_up_rounded,
                   color: AppColors.warning,
-                ),
-              ),
-              const Gap(8),
-              Expanded(
-                child: StatCard(
+                ).expanded(),
+                const Gap(8),
+                StatCard(
                   label: 'Descent',
                   value: '-${Fmt.elevation(route.totalDescent, unit)}',
                   icon: Icons.trending_down_rounded,
                   color: AppColors.accent,
-                ),
-              ),
-            ]),
+                ).expanded(),
+              ],
+            ),
           ),
 
-          // Elevation chart
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Column(
@@ -112,7 +108,6 @@ class RoutePanel extends StatelessWidget {
             ),
           ),
 
-          // Waypoint pills
           if (route.waypoints.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -151,7 +146,6 @@ class RoutePanel extends StatelessWidget {
 
           const Gap(16),
 
-          // CTA button
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
             child: SizedBox(
@@ -167,10 +161,7 @@ class RoutePanel extends StatelessWidget {
             ),
           ),
 
-          SafeArea(
-            top: false,
-            child: const SizedBox(height: 12),
-          ),
+          SafeArea(top: false, child: const SizedBox(height: 12)),
         ],
       ),
     );

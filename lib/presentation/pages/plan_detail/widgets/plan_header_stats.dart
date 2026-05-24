@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../../../../core/utils/formatters.dart';
 import '../../../../domain/entities/route_plan.dart';
@@ -34,38 +35,25 @@ class PlanHeaderStats extends StatelessWidget {
           const Gap(14),
           Row(
             children: [
-              Expanded(
-                child: StatCard(
-                  label: 'Distance',
-                  value: Fmt.distance(route.totalDistance, unit),
-                ),
-              ),
+              StatCard(
+                label: 'Distance',
+                value: Fmt.distance(route.totalDistance, unit),
+              ).expanded(),
               const Gap(8),
-              Expanded(
-                child: StatCard(
-                  label: 'Total time',
-                  value: Fmt.duration(plan.estimatedTotal),
-                ),
-              ),
+              StatCard(
+                label: 'Total time',
+                value: Fmt.duration(plan.estimatedTotal),
+              ).expanded(),
               const Gap(8),
-              Expanded(
-                child: StatCard(
-                  label: '${plan.totalDays} days',
-                  value: Fmt.distance(
-                    route.totalDistance / plan.totalDays,
-                    unit,
-                  ),
-                ),
-              ),
+              StatCard(
+                label: '${plan.totalDays} days',
+                value: Fmt.distance(route.totalDistance / plan.totalDays, unit),
+              ).expanded(),
             ],
           ),
           if (route.elevation.isNotEmpty) ...[
             const Gap(12),
-            ElevationChart(
-              points: route.elevation,
-              unit: unit,
-              height: 80,
-            ),
+            ElevationChart(points: route.elevation, unit: unit, height: 80),
           ],
         ],
       ),
@@ -93,39 +81,41 @@ class _PlanTitleRow extends StatelessWidget {
       children: [
         Text(route.sport.emoji, style: const TextStyle(fontSize: 22)),
         const Gap(10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${route.origin.name ?? 'Origin'} → ${route.destination.name ?? 'Destination'}',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary(b),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${route.origin.name ?? 'Origin'} → ${route.destination.name ?? 'Destination'}',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary(b),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const Gap(3),
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_rounded,
+                  size: 11,
+                  color: AppColors.textMuted(b),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Gap(3),
-              Row(
-                children: [
-                  Icon(Icons.calendar_today_rounded,
-                      size: 11, color: AppColors.textMuted(b)),
-                  const Gap(4),
-                  Text(
-                    DateFormat('EEE, MMM d, yyyy – h:mm a')
-                        .format(plan.startTime),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary(b),
-                    ),
+                const Gap(4),
+                Text(
+                  DateFormat(
+                    'EEE, MMM d, yyyy – h:mm a',
+                  ).format(plan.startTime),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary(b),
                   ),
-                ],
-              ),
-            ],
-          ),
-        ),
+                ),
+              ],
+            ),
+          ],
+        ).expanded(),
         _StatusBadge(isUpcoming: isUpcoming, brightness: b),
       ],
     );
