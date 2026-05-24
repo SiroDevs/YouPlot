@@ -1,20 +1,22 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/errors/failures.dart';
 import '../../core/utils/formatters.dart';
+import '../../domain/entities/elevation_point.dart';
 import '../../domain/entities/location.dart';
 import '../../domain/entities/route_map.dart';
 import '../../domain/entities/waypoint.dart';
 import '../../domain/repositories/route_repository.dart';
-import '../datasources/mapbox_datasource.dart' hide Fmt;
+import '../datasources/osm_datasource.dart';
 
 class RouteRepositoryImpl implements RouteRepository {
-  final MapboxDatasource _mapbox;
+  final OsmDatasource _osm;
   final _uuid = const Uuid();
 
-  RouteRepositoryImpl(this._mapbox);
+  RouteRepositoryImpl(this._osm);
 
   @override
   Future<Either<Failure, RouteMap>> buildRoute({
@@ -25,26 +27,22 @@ class RouteRepositoryImpl implements RouteRepository {
     required DistanceUnit unit,
   }) async {
     try {
-      final dir = await _mapbox.getDirections(
+      final dir = await _osm.getDirections(
         origin: origin,
         destination: destination,
         via: viaPoints,
-        profile: sport.mapboxProfile,
+        profile: sport.osmrProfile,
       );
 
-      // Elevation (100 samples along geometry)
-      final elev = await _mapbox.getElevationProfile(dir.geometry, 100);
+      final results = await Future.wait([
+        _osm.getElevationProfile(dir.geometry, 100),
+        _reverseGeocodeWaypoints(viaPoints),
+      ]);
 
-      // Ascent / descent
-      double asc = 0, desc = 0;
-      for (int i = 1; i < elev.length; i++) {
-        final d = elev[i].elevationM - elev[i - 1].elevationM;
-        if (d > 0) asc += d;
-        if (d < 0) desc -= d;
-      }
+      final elev = results[0] as List<ElevationPoint>;
+      final waypoints = results[1] as List<Waypoint>;
 
-      // Intermediate town labels from reverse geocoding
-      final waypoints = await _reverseGeocodeWaypoints(dir.geometry, viaPoints);
+      final stats = await compute(_calcElevStats, elev);
 
       return Right(RouteMap(
         id: _uuid.v4(),
@@ -54,8 +52,8 @@ class RouteRepositoryImpl implements RouteRepository {
         geometry: dir.geometry,
         elevation: elev,
         totalDistanceKm: dir.distanceKm,
-        totalAscentM: asc,
-        totalDescentM: desc,
+        totalAscentM: stats.$1,
+        totalDescentM: stats.$2,
         sport: sport,
         unit: unit,
       ));
@@ -83,24 +81,26 @@ class RouteRepositoryImpl implements RouteRepository {
         );
       });
 
-      final waypoints = <Waypoint>[];
-      for (final pt in pts) {
+      final resolved = await Future.wait(pts.map((pt) async {
         try {
-          final loc = await _mapbox.reverseGeocode(pt.lat, pt.lng);
-          waypoints.add(Waypoint(
-            id: _uuid.v4(),
-            location: loc,
-            label: loc.name ?? loc.address ?? '${pt.lat.toStringAsFixed(3)}, ${pt.lng.toStringAsFixed(3)}',
-            distanceFromStartKm: Fmt.haversineKm(origin.lat, origin.lng, pt.lat, pt.lng),
-          ));
+          return await _osm.reverseGeocode(pt.lat, pt.lng);
         } catch (_) {
-          waypoints.add(Waypoint(
-            id: _uuid.v4(),
-            location: pt,
-            label: '${pt.lat.toStringAsFixed(3)}, ${pt.lng.toStringAsFixed(3)}',
-            distanceFromStartKm: Fmt.haversineKm(origin.lat, origin.lng, pt.lat, pt.lng),
-          ));
+          return pt;
         }
+      }));
+
+      final waypoints = <Waypoint>[];
+      for (int i = 0; i < resolved.length; i++) {
+        final loc = resolved[i];
+        waypoints.add(Waypoint(
+          id: _uuid.v4(),
+          location: loc,
+          label: loc.name ??
+              loc.address ??
+              '${loc.lat.toStringAsFixed(3)}, ${loc.lng.toStringAsFixed(3)}',
+          distanceFromStartKm:
+              Fmt.haversineKm(origin.lat, origin.lng, loc.lat, loc.lng),
+        ));
       }
       return Right(waypoints);
     } catch (e) {
@@ -109,11 +109,8 @@ class RouteRepositoryImpl implements RouteRepository {
   }
 
   Future<List<Waypoint>> _reverseGeocodeWaypoints(
-    List<List<double>> geometry,
-    List<Location> userVia,
-  ) async {
+      List<Location> userVia) async {
     final result = <Waypoint>[];
-
     for (final loc in userVia) {
       result.add(Waypoint(
         id: _uuid.v4(),
@@ -122,7 +119,16 @@ class RouteRepositoryImpl implements RouteRepository {
         distanceFromStartKm: null,
       ));
     }
-
     return result;
   }
+}
+
+(double, double) _calcElevStats(List<ElevationPoint> elev) {
+  double asc = 0, desc = 0;
+  for (int i = 1; i < elev.length; i++) {
+    final d = elev[i].elevationM - elev[i - 1].elevationM;
+    if (d > 0) asc += d;
+    if (d < 0) desc -= d;
+  }
+  return (asc, desc);
 }

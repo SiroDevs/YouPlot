@@ -34,10 +34,10 @@ class RouteBuilderState extends Equatable {
   final String? error;
   final String? exportedPath;
 
-  /// The live Mapbox controller — non-null once the map widget reports ready.
+  /// The flutter_map MapController — non-null once the map widget reports ready.
   /// Not included in props so state changes here don't trigger unnecessary
   /// widget rebuilds.
-  final MapboxMap? mapController;
+  final MapController? mapController;
 
   const RouteBuilderState({
     this.step = AppStep.setup,
@@ -87,7 +87,7 @@ class RouteBuilderState extends Equatable {
     bool clearExport = false,
     bool clearOrigin = false,
     bool clearDestination = false,
-    MapboxMap? mapController,
+    MapController? mapController,
   }) {
     return RouteBuilderState(
       step: step ?? this.step,

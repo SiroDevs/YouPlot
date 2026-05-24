@@ -72,9 +72,8 @@ class GoToStep extends RouteBuilderEvent {
 
 class ResetAll extends RouteBuilderEvent {}
 
-/// Fired when the map controller is ready — stores it so the bloc can
-/// animate the camera whenever origin / destination / route change.
+/// Fired by LiveMap once the flutter_map MapController is initialised.
 class MapControllerReady extends RouteBuilderEvent {
-  final MapboxMap controller;
+  final MapController controller;
   MapControllerReady(this.controller);
 }

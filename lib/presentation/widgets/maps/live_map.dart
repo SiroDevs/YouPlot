@@ -1,7 +1,8 @@
 // ignore_for_file: unused_field
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/location.dart';
@@ -15,153 +16,232 @@ class LiveMap extends StatefulWidget {
   State<LiveMap> createState() => LiveMapState();
 }
 
-class LiveMapState extends State<LiveMap> {
-  MapboxMap? _ctrl;
-  PointAnnotationManager? _pointAnnotationManager;   // ← concrete type
-  PolylineAnnotationManager? _polylineManager;       // ← concrete type
+class LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
+  final MapController _mapController = MapController();
 
-  String? _drawnOriginId;
-  String? _drawnDestId;
-  String? _drawnRouteId;
+  // Track last-drawn state to avoid redundant layer rebuilds.
   Location? _lastOrigin;
   Location? _lastDest;
   String? _lastRouteId;
+  bool _tilesFaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<RouteBuilderBloc>().add(
+          MapControllerReady(_mapController),
+        );
+        _flyToCurrentLocation();
+      }
+    });
+  }
+
+  Future<void> _flyToCurrentLocation() async {
+    final locState = context.read<RouteBuilderBloc>().state;
+    final origin = locState.origin;
+    if (origin != null) {
+      _mapController.move(LatLng(origin.lat, origin.lng), 13);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final style = isDark ? kMapboxStyleDark : kMapboxStyleOutdoors;
+    final tileUrl = isDark ? kOsmTileTemplateDark : kOsmTileTemplate;
 
-    return BlocListener<RouteBuilderBloc, RouteBuilderState>(
+    return BlocConsumer<RouteBuilderBloc, RouteBuilderState>(
       listenWhen: (prev, curr) =>
           prev.origin != curr.origin ||
           prev.destination != curr.destination ||
-          prev.route != curr.route,
-      listener: (ctx, state) => _syncAnnotations(state),
-      child: MapWidget(
-        styleUri: style,
-        cameraOptions: CameraOptions(
-          center: Point(coordinates: Position(36.8219, -1.2921)), // Nairobi
-          zoom: 4,
+          prev.route?.id != curr.route?.id,
+      listener: (ctx, state) => _onStateChange(state),
+      buildWhen: (prev, curr) =>
+          prev.origin != curr.origin ||
+          prev.destination != curr.destination ||
+          prev.route?.id != curr.route?.id ||
+          prev.viaPoints.length != curr.viaPoints.length,
+      builder: (ctx, state) {
+        final markers = _buildMarkers(state);
+        final polylines = _buildPolylines(state);
+
+        return FlutterMap(
+          mapController: _mapController,
+          options: MapOptions(
+            initialCenter: const LatLng(-1.2921, 36.8219),
+            initialZoom: 5,
+            minZoom: 3,
+            maxZoom: 18,
+            interactionOptions: const InteractionOptions(
+              flags: InteractiveFlag.all,
+            ),
+            onMapReady: _onMapReady,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: tileUrl,
+              subdomains: isDark
+                  ? const ['a', 'b', 'c', 'd']
+                  : const ['a', 'b', 'c'],
+              userAgentPackageName: 'com.youplot.app',
+              tileProvider: NetworkTileProvider(),
+              tileBuilder: _fadeTileBuilder,
+              errorTileCallback: (tile, err, _) {},
+            ),
+
+            if (polylines.isNotEmpty)
+              PolylineLayer(polylines: polylines),
+            MarkerLayer(markers: markers),
+            RichAttributionWidget(
+              attributions: [TextSourceAttribution(kAppCredits2, onTap: () {})],
+              alignment: AttributionAlignment.bottomRight,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _fadeTileBuilder(BuildContext ctx, Widget tile, TileImage tileImage) {
+    return AnimatedOpacity(
+      opacity: tileImage.loadFinishedAt != null ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeIn,
+      child: tile,
+    );
+  }
+
+  List<Marker> _buildMarkers(RouteBuilderState state) {
+    final markers = <Marker>[];
+
+    if (state.origin != null) {
+      markers.add(
+        _pinMarker(
+          state.origin!,
+          color: AppColors.primary,
+          icon: Icons.trip_origin_rounded,
+          label: state.origin!.name,
         ),
-        onMapCreated: _onMapCreated,
-        onStyleLoadedListener: (_) => _onStyleLoaded(),
+      );
+    }
+
+    if (state.destination != null) {
+      markers.add(
+        _pinMarker(
+          state.destination!,
+          color: Colors.redAccent,
+          icon: Icons.location_on_rounded,
+          label: state.destination!.name,
+        ),
+      );
+    }
+
+    for (final via in state.viaPoints) {
+      markers.add(
+        _pinMarker(
+          via,
+          color: Colors.amber.shade700,
+          icon: Icons.radio_button_checked_rounded,
+          small: true,
+        ),
+      );
+    }
+
+    return markers;
+  }
+
+  Marker _pinMarker(
+    Location loc, {
+    required Color color,
+    required IconData icon,
+    String? label,
+    bool small = false,
+  }) {
+    final size = small ? 28.0 : 38.0;
+    return Marker(
+      point: LatLng(loc.lat, loc.lng),
+      width: size + (label != null ? 100 : 0),
+      height: size + (label != null ? 22 : 0),
+      alignment: Alignment.bottomCenter,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (label != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          if (label != null) const SizedBox(height: 2),
+          Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: Colors.white, size: size * 0.52),
+          ),
+        ],
       ),
     );
   }
 
-  // ── Lifecycle ──────────────────────────────────────────────────────────────
+  List<Polyline> _buildPolylines(RouteBuilderState state) {
+    if (state.route == null || state.route!.geometry.isEmpty) return [];
 
-  Future<void> _onMapCreated(MapboxMap ctrl) async {
-    _ctrl = ctrl;
+    final points = state.route!.geometry
+        .map((c) => LatLng(c[1], c[0]))
+        .toList();
 
-    await ctrl.location.updateSettings(LocationComponentSettings(
-      enabled: true,
-      pulsingEnabled: true,
-      pulsingColor: AppColors.primary.value,
-    ));
-
-    if (mounted) {
-      context.read<RouteBuilderBloc>().add(MapControllerReady(ctrl));
-    }
+    return [
+      Polyline(
+        points: points,
+        color: Colors.black.withValues(alpha: 0.18),
+        strokeWidth: 7,
+        strokeJoin: StrokeJoin.round,
+        strokeCap: StrokeCap.round,
+      ),
+      Polyline(
+        points: points,
+        color: AppColors.primary,
+        strokeWidth: 4.5,
+        strokeJoin: StrokeJoin.round,
+        strokeCap: StrokeCap.round,
+        gradientColors: [
+          AppColors.primary,
+          AppColors.primary.withValues(alpha: 0.75),
+        ],
+      ),
+    ];
+  }
+  void _onMapReady() {
+    _flyToCurrentLocation();
   }
 
-  Future<void> _onStyleLoaded() async {
-    final ctrl = _ctrl;
-    if (ctrl == null) return;
-
-    // Concrete types — no cast needed
-    _pointAnnotationManager ??=
-        await ctrl.annotations.createPointAnnotationManager();
-    _polylineManager ??=
-        await ctrl.annotations.createPolylineAnnotationManager();
-
-    await _flyToUserOrWorld(ctrl);
-
-    if (mounted) {
-      final state = context.read<RouteBuilderBloc>().state;
-      await _syncAnnotations(state);
-    }
-  }
-
-  // ── Camera init ────────────────────────────────────────────────────────────
-
-  Future<void> _flyToUserOrWorld(MapboxMap ctrl) async {
-    try {
-      await ctrl.location.updateSettings(LocationComponentSettings(
-        enabled: true,
-        pulsingEnabled: true,
-        pulsingColor: AppColors.primary.value,
-        locationPuck: LocationPuck(
-          locationPuck2D: DefaultLocationPuck2D(),
-        ),
-      ));
-    } catch (_) {}
-  }
-
-  // ── Annotations ────────────────────────────────────────────────────────────
-
-  Future<void> _syncAnnotations(RouteBuilderState state) async {
-    final mgr  = _pointAnnotationManager;  // already PointAnnotationManager?
-    final poly = _polylineManager;         // already PolylineAnnotationManager?
-    if (mgr == null || poly == null) return;
-
-    // Origin pin
-    if (state.origin != _lastOrigin) {
-      if (_drawnOriginId != null) {
-        await mgr.deleteAll();
-        _drawnOriginId = null;
-        _drawnDestId = null;
-      }
-      _lastOrigin = state.origin;
-      if (state.origin != null) {
-        final ann = await mgr.create(PointAnnotationOptions(
-          geometry: Point(
-              coordinates: Position(state.origin!.lng, state.origin!.lat)),
-          iconSize: 1.4,
-          textField: '🟢',
-          textSize: 22,
-          textOffset: [0, -1.2],
-        ));
-        _drawnOriginId = ann.id;
-      }
-    }
-
-    // Destination pin
-    if (state.destination != _lastDest) {
-      _lastDest = state.destination;
-      if (state.destination != null) {
-        final ann = await mgr.create(PointAnnotationOptions(
-          geometry: Point(
-              coordinates:
-                  Position(state.destination!.lng, state.destination!.lat)),
-          textField: '🔴',
-          textSize: 22,
-          textOffset: [0, -1.2],
-        ));
-        _drawnDestId = ann.id;
-      }
-    }
-
-    // Route polyline
-    if (state.route?.id != _lastRouteId) {
-      _lastRouteId = state.route?.id;
-      await poly.deleteAll();
-      _drawnRouteId = null;
-
-      if (state.route != null && state.route!.geometry.isNotEmpty) {
-        final positions =
-            state.route!.geometry.map((c) => Position(c[0], c[1])).toList();
-
-        final ann = await poly.create(PolylineAnnotationOptions(
-          geometry: LineString(coordinates: positions),
-          lineColor: AppColors.primary.value,
-          lineWidth: 4.5,
-          lineOpacity: 0.9,
-          lineJoin: LineJoin.ROUND,
-        ));
-        _drawnRouteId = ann.id;
-      }
-    }
+  void _onStateChange(RouteBuilderState state) {
+    _lastOrigin = state.origin;
+    _lastDest = state.destination;
+    _lastRouteId = state.route?.id;
   }
 }

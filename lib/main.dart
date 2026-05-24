@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import 'core/di/injection.dart' as di;
 import 'presentation/bloc/dashboard/dashboard_bloc.dart';
@@ -14,8 +13,6 @@ import 'presentation/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  final mapboxToken = dotenv.env['MAPBOX_TOKEN'];
-  MapboxOptions.setAccessToken(mapboxToken!);
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

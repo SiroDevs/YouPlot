@@ -4,7 +4,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/datasources/location_datasource.dart';
-import '../../data/datasources/mapbox_datasource.dart';
+import '../../data/datasources/osm_datasource.dart';
 import '../../data/local/app_database.dart';
 import '../../data/repositories/export_repository_impl.dart';
 import '../../data/repositories/local_repository_impl.dart';
@@ -39,11 +39,11 @@ Future<void> init() async {
 
   sl.registerSingleton<Dio>(
     Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 30),
-        ),
-      )
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 20),
+        receiveTimeout: const Duration(seconds: 40),
+      ),
+    )
       ..interceptors.add(
         PrettyDioLogger(
           requestHeader: false,
@@ -53,17 +53,19 @@ Future<void> init() async {
       ),
   );
 
-  sl.registerLazySingleton(() => MapboxDatasource(sl<Dio>()));
+  // ── Datasources ────────────────────────────────────────────────────────────
+  sl.registerLazySingleton(() => OsmDatasource(sl<Dio>()));
   sl.registerLazySingleton(() => LocationDatasource());
 
+  // ── Repositories ───────────────────────────────────────────────────────────
   sl.registerLazySingleton<LocationRepository>(
     () => LocationRepositoryImpl(
       sl<LocationDatasource>(),
-      sl<MapboxDatasource>(),
+      sl<OsmDatasource>(),
     ),
   );
   sl.registerLazySingleton<RouteRepository>(
-    () => RouteRepositoryImpl(sl<MapboxDatasource>()),
+    () => RouteRepositoryImpl(sl<OsmDatasource>()),
   );
   sl.registerLazySingleton<PlanRepository>(
     () => PlanRepositoryImpl(sl<SharedPreferences>()),
@@ -73,6 +75,7 @@ Future<void> init() async {
     () => LocalRepositoryImpl(sl<AppDatabase>()),
   );
 
+  // ── Usecases ───────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetCurrentLocation(sl<LocationRepository>()));
   sl.registerLazySingleton(() => SearchPlaces(sl<LocationRepository>()));
   sl.registerLazySingleton(() => BuildRoute(sl<RouteRepository>()));
@@ -80,6 +83,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => BuildPlan(sl<PlanRepository>()));
   sl.registerLazySingleton(() => ExportPlan(sl<ExportRepository>()));
 
+  // ── Blocs ──────────────────────────────────────────────────────────────────
   sl.registerFactory(
     () => RouteBuilderBloc(
       buildRoute: sl<BuildRoute>(),

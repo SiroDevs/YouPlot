@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_constants.dart';
@@ -44,8 +46,8 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
         _local = local,
         _prefs = prefs,
         super(RouteBuilderState(
-          startTime: DateTime.now().copyWith(hour: 7, minute: 0, second: 0, millisecond: 0),
-          // Restore persisted sport & unit preferences on launch
+          startTime: DateTime.now().copyWith(
+              hour: 7, minute: 0, second: 0, millisecond: 0),
           sport: SportType.values.firstWhere(
             (s) => s.name == prefs.getString(_kSportKey),
             orElse: () => SportType.hiking,
@@ -79,18 +81,16 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
     emit(state.copyWith(mapController: e.controller));
   }
 
-  Future<void> _fitCamera(List<Location> locations) async {
+  // ── Camera helpers ─────────────────────────────────────────────────────────
+
+  LatLng _toLatLng(Location l) => LatLng(l.lat, l.lng);
+
+  void _fitCamera(List<Location> locations) {
     final ctrl = state.mapController;
     if (ctrl == null || locations.isEmpty) return;
 
     if (locations.length == 1) {
-      await ctrl.flyTo(
-        CameraOptions(
-          center: Point(coordinates: Position(locations[0].lng, locations[0].lat)),
-          zoom: 11,
-        ),
-        MapAnimationOptions(duration: 900),
-      );
+      ctrl.move(_toLatLng(locations[0]), 13.5);
       return;
     }
 
@@ -103,49 +103,38 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
       maxLng = max(maxLng, l.lng);
     }
 
-    await ctrl.cameraForCoordinatesPadding(
-      [
-        Point(coordinates: Position(minLng, minLat)),
-        Point(coordinates: Position(maxLng, maxLat)),
-      ],
-      CameraOptions(),
-      MbxEdgeInsets(top: 100, left: 60, bottom: 340, right: 60),
-      null,
-      null,
-    ).then((cam) async {
-      final zoom = (cam.zoom ?? 10).clamp(3.0, 13.0);
-      await ctrl.flyTo(
-        CameraOptions(center: cam.center, zoom: zoom, padding: cam.padding),
-        MapAnimationOptions(duration: 1100),
-      );
-    }).catchError((_) async {
-      final midLat = (minLat + maxLat) / 2;
-      final midLng = (minLng + maxLng) / 2;
-      await ctrl.flyTo(
-        CameraOptions(
-          center: Point(coordinates: Position(midLng, midLat)),
-          zoom: 7,
+    ctrl.fitCamera(
+      CameraFit.bounds(
+        bounds: LatLngBounds(
+          LatLng(minLat, minLng),
+          LatLng(maxLat, maxLng),
         ),
-        MapAnimationOptions(duration: 900),
-      );
-    });
+        padding: const EdgeInsets.only(
+            left: 60, right: 60, top: 110, bottom: 360),
+        maxZoom: 14,
+      ),
+    );
   }
 
-  Future<void> _onSetOrigin(SetOrigin e, Emitter<RouteBuilderState> emit) async {
+  // ── Event handlers ─────────────────────────────────────────────────────────
+
+  Future<void> _onSetOrigin(
+      SetOrigin e, Emitter<RouteBuilderState> emit) async {
     emit(state.copyWith(origin: e.location, clearError: true));
-    await _fitCamera([
+    _fitCamera([
       e.location,
       if (state.destination != null) state.destination!,
     ]);
   }
 
-  Future<void> _onSetDestination(SetDestination e, Emitter<RouteBuilderState> emit) async {
+  Future<void> _onSetDestination(
+      SetDestination e, Emitter<RouteBuilderState> emit) async {
     emit(state.copyWith(
       destination: e.location,
       clearError: true,
       step: state.origin != null ? AppStep.waypoints : state.step,
     ));
-    await _fitCamera([
+    _fitCamera([
       if (state.origin != null) state.origin!,
       e.location,
     ]);
@@ -161,10 +150,11 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
     _prefs.setString(_kUnitKey, e.unit.name);
   }
 
-  Future<void> _onAddVia(AddViaPoint e, Emitter<RouteBuilderState> emit) async {
+  Future<void> _onAddVia(
+      AddViaPoint e, Emitter<RouteBuilderState> emit) async {
     final updated = [...state.viaPoints, e.location];
     emit(state.copyWith(viaPoints: updated));
-    await _fitCamera([
+    _fitCamera([
       if (state.origin != null) state.origin!,
       ...updated,
       if (state.destination != null) state.destination!,
@@ -200,7 +190,8 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
     );
   }
 
-  void _onAcceptSuggestions(AcceptSuggestions e, Emitter<RouteBuilderState> emit) =>
+  void _onAcceptSuggestions(
+          AcceptSuggestions e, Emitter<RouteBuilderState> emit) =>
       emit(state.copyWith(usingSuggestions: true));
 
   Future<void> _onGenerateRoute(
@@ -208,7 +199,8 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
     Emitter<RouteBuilderState> emit,
   ) async {
     if (state.origin == null || state.destination == null) return;
-    emit(state.copyWith(loading: true, step: AppStep.generating, clearError: true));
+    emit(state.copyWith(
+        loading: true, step: AppStep.generating, clearError: true));
 
     final via = state.usingSuggestions
         ? state.suggestions.map((w) => w.location).toList()
@@ -230,13 +222,12 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
       )),
       (route) async {
         await _local.saveRoute(route);
-
         emit(state.copyWith(
           loading: false,
           route: route,
           step: AppStep.map,
         ));
-        await _fitCamera([route.origin, route.destination]);
+        _fitCamera([route.origin, route.destination]);
       },
     );
   }
@@ -279,7 +270,6 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
       (f) => emit(state.copyWith(loading: false, error: f.message)),
       (plan) async {
         await _local.savePlanToDb(plan);
-
         emit(state.copyWith(
           loading: false,
           plan: plan,
@@ -289,7 +279,8 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
     );
   }
 
-  Future<void> _onExport(ExportEvent e, Emitter<RouteBuilderState> emit) async {
+  Future<void> _onExport(
+      ExportEvent e, Emitter<RouteBuilderState> emit) async {
     if (state.plan == null) return;
     emit(state.copyWith(loading: true, clearError: true, clearExport: true));
 
@@ -313,7 +304,8 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
 
   void _onReset(ResetAll e, Emitter<RouteBuilderState> emit) => emit(
         RouteBuilderState(
-          startTime: DateTime.now().copyWith(hour: 7, minute: 0, second: 0, millisecond: 0),
+          startTime: DateTime.now().copyWith(
+              hour: 7, minute: 0, second: 0, millisecond: 0),
           mapController: state.mapController,
           sport: state.sport,
           unit: state.unit,

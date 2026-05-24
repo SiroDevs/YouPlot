@@ -1,6 +1,6 @@
 import 'package:froom/froom.dart';
 
-@Entity(tableName: 'saved_routes')
+@Entity(tableName: 'routes')
 class RouteEntity {
   @PrimaryKey()
   final String id;
