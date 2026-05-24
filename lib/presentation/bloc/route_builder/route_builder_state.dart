@@ -3,11 +3,9 @@ part of 'route_builder_bloc.dart';
 enum AppStep {
   setup,       // sport, units, origin, destination
   waypoints,   // suggest vs custom
-  generating,  // loading spinner while API runs
-  map,         // map + elevation
+  map,         // loading spinner, map + elevation
   plan,        // days, speed, breaks
-  review,      // daily segments
-  export,      // export options
+  review,      // daily segments and export options
 }
 
 class RouteBuilderState extends Equatable {

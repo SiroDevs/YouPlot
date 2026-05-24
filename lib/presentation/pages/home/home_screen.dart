@@ -13,8 +13,8 @@ import '../plan_maker/plan_maker_screen.dart';
 import '../plan_detail/plan_detail_screen.dart';
 import '../route_detail/route_detail_screen.dart';
 import '../settings/settings_screen.dart';
-import 'widgets/home_content.dart';
 import 'widgets/empty_state.dart';
+import 'widgets/home_content.dart';
 import 'widgets/home_dialog.dart';
 
 class HomeScreen extends StatefulWidget {

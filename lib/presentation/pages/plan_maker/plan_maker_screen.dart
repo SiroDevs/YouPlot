@@ -31,7 +31,7 @@ class PlanMakerScreen extends StatelessWidget {
                   child: _pageForStep(state),
                 ),
               ),
-              if (state.loading && state.step != AppStep.generating)
+              if (state.loading && state.step != AppStep.map)
                 LoadingOverlay(message: _loadingMessage(state.step)),
             ],
           ),
@@ -46,26 +46,24 @@ class PlanMakerScreen extends StatelessWidget {
         return const PlanStep1();
       case AppStep.waypoints:
         return const PlanStep2();
-      case AppStep.generating:
       case AppStep.map:
         return const PlanStep3();
       case AppStep.plan:
         return const PlanStep4();
       case AppStep.review:
-      case AppStep.export:
         return const PlanStep5();
     }
   }
 
   String _loadingMessage(AppStep step) {
     switch (step) {
-      case AppStep.generating:
+      case AppStep.map:
         return 'Building route…';
       case AppStep.waypoints:
         return 'Finding waypoints…';
       case AppStep.plan:
         return 'Scheduling plan…';
-      case AppStep.export:
+      case AppStep.review:
         return 'Exporting file…';
       default:
         return 'Please wait…';

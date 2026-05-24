@@ -77,7 +77,6 @@ class MapControllerReady extends RouteBuilderEvent {
   MapControllerReady(this.controller);
 }
 
-/// Load an imported route directly into the builder (skips steps 1–3).
 class SetImportedRoute extends RouteBuilderEvent {
   final RouteMap route;
   SetImportedRoute(this.route);

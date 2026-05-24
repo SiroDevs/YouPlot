@@ -206,10 +206,10 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
     Emitter<RouteBuilderState> emit,
   ) async {
     if (state.origin == null || state.destination == null) return;
-    if (state.step == AppStep.generating) return;
+    if (state.step == AppStep.map) return;
 
     emit(
-      state.copyWith(loading: true, step: AppStep.generating, clearError: true),
+      state.copyWith(loading: true, step: AppStep.map, clearError: true),
     );
 
     final via = state.usingSuggestions
@@ -226,7 +226,6 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
       ),
     );
 
-    // ✅ No async closure — await happens directly in the handler
     if (result.isLeft()) {
       final failure = result.fold(
         (f) => f,
@@ -319,7 +318,7 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
 
     final path = result.getOrElse(() => throw StateError('unreachable'));
     emit(
-      state.copyWith(loading: false, exportedPath: path, step: AppStep.export),
+      state.copyWith(loading: false, exportedPath: path, step: AppStep.review),
     );
   }
 

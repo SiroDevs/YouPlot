@@ -19,7 +19,7 @@ class PlanStep3 extends StatelessWidget {
         final b = Theme.of(ctx).brightness;
         final isDark = b == Brightness.dark;
 
-        if (state.step == AppStep.generating || state.route == null) {
+        if (state.step == AppStep.map || state.route == null) {
           return _GeneratingView(brightness: b, isDark: isDark);
         }
 
