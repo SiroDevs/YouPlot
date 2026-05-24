@@ -33,8 +33,6 @@ class AppColors {
       case SportType.walking:  return const Color(0xFF60A5FA);
       case SportType.running:  return const Color(0xFFF87171);
       case SportType.cycling:  return const Color(0xFF34D399);
-      case SportType.skating:  return const Color(0xFFA78BFA);
-      case SportType.hiking:   return const Color(0xFFFBBF24);
     }
   }
 

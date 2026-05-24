@@ -16,9 +16,7 @@ const String kAppPackage   = 'com.sirodevs.youplot';
 enum SportType {
   walking('Walking',  '🚶', 'foot',    5.0),
   running('Running',  '🏃', 'foot',   10.0),
-  cycling('Cycling',  '🚴', 'bike',   20.0),
-  skating('Skating',  '⛸️', 'bike',   15.0),
-  hiking ('Hiking',   '🥾', 'foot',    4.0);
+  cycling('Cycling',  '🚴', 'bike',   20.0);
 
   const SportType(
     this.label,

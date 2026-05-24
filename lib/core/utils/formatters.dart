@@ -61,9 +61,7 @@ class Fmt {
         return 4.0;
       case SportType.cycling:
         return 8.0;
-      case SportType.skating:
-        return 5.0;
-      default:
+      case SportType.walking:
         return 2.0;
     }
   }
@@ -74,9 +72,7 @@ class Fmt {
         return 22.0;
       case SportType.cycling:
         return 50.0;
-      case SportType.skating:
-        return 30.0;
-      default:
+      case SportType.walking:
         return 8.0;
     }
   }

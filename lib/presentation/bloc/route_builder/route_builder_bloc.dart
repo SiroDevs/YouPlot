@@ -55,7 +55,7 @@ class RouteBuilderBloc extends Bloc<RouteBuilderEvent, RouteBuilderState> {
            ),
            sport: SportType.values.firstWhere(
              (s) => s.name == prefs.getString(_kSportKey),
-             orElse: () => SportType.hiking,
+             orElse: () => SportType.cycling,
            ),
            unit: DistanceUnit.values.firstWhere(
              (u) => u.name == prefs.getString(_kUnitKey),

@@ -38,7 +38,7 @@ class RouteBuilderState extends Equatable {
 
   const RouteBuilderState({
     this.step = AppStep.setup,
-    this.sport = SportType.hiking,
+    this.sport = SportType.cycling,
     this.unit = DistanceUnit.kilometers,
     this.origin,
     this.destination,
