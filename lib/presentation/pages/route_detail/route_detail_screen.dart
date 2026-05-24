@@ -11,8 +11,6 @@ import '../../widgets/state_widgets.dart';
 import '../../widgets/steps/step_bottom_button.dart';
 import '../planner/planner_screen.dart';
 
-/// Shows a saved route on a map with stats + elevation data.
-/// User can tap "Create Plan" to jump into planning from this route.
 class RouteDetailScreen extends StatelessWidget {
   final RouteMap route;
 
@@ -50,7 +48,6 @@ class RouteDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Map placeholder (replace with actual flutter_map widget)
                   Container(
                     height: 280,
                     color: b == Brightness.dark
@@ -77,7 +74,6 @@ class RouteDetailScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Sport badge
                         Row(
                           children: [
                             Text(route.sport.emoji,
@@ -95,7 +91,6 @@ class RouteDetailScreen extends StatelessWidget {
                         ),
                         const Gap(16),
 
-                        // Stats row
                         Row(
                           children: [
                             Expanded(

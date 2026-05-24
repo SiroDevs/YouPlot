@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/location_search/location_search_bloc.dart';
 import '../../theme/app_colors.dart';
-import 'components/idle_search_view.dart';
-import 'components/pick_on_map_tile.dart';
-import 'components/search_header.dart';
-import 'components/search_results_list.dart';
+import 'widgets/idle_search_view.dart';
+import 'widgets/pick_on_map_tile.dart';
+import 'widgets/search_header.dart';
+import 'widgets/search_results_list.dart';
 
 class MapPointSearch extends StatefulWidget {
   final String hint;

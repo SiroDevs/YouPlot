@@ -5,8 +5,8 @@ import 'package:gap/gap.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
-import 'components/general.dart';
-import 'components/theme_tile.dart';
+import 'widgets/general.dart';
+import 'widgets/theme_tile.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

@@ -9,7 +9,7 @@ import '../../../widgets/state_widgets.dart';
 import '../../../widgets/steps/step_bottom_button.dart';
 import '../../../widgets/steps/step_header.dart';
 import '../../../widgets/steps/section_header.dart';
-import '../components/step5_components.dart';
+import '../widgets/step5_components.dart';
 
 class PlanStep5 extends StatelessWidget {
   const PlanStep5({super.key});

@@ -6,7 +6,7 @@ import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/maps/map_convas.dart';
 import '../../../widgets/steps/step_header.dart';
-import '../components/route_panel.dart';
+import '../widgets/route_panel.dart';
 
 /// Combined step 3+4: shows a loading overlay while the route is being generated,
 /// then reveals the map + route panel once ready.

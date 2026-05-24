@@ -74,7 +74,6 @@ class _ImportScreenState extends State<ImportScreen> {
   }
 
   Future<void> _parseFile(PlatformFile file) async {
-    // Simulate parsing stages
     final stages = [
       (0.2, 'Reading file…'),
       (0.45, 'Parsing waypoints…'),
@@ -89,7 +88,6 @@ class _ImportScreenState extends State<ImportScreen> {
       setState(() => _progress = progress);
     }
 
-    // Try to parse the file (GPX / KML stub — real impl would use xml package)
     try {
       final route = await _parseRouteFile(file);
       if (!mounted) return;
@@ -98,7 +96,6 @@ class _ImportScreenState extends State<ImportScreen> {
         _importedRoute = route;
       });
 
-      // Save to local repository
       final local = context.read<LocalRepository>();
       await local.saveRoute(route);
     } catch (e) {
@@ -110,10 +107,7 @@ class _ImportScreenState extends State<ImportScreen> {
     }
   }
 
-  /// Stub parser — replace with real GPX/KML parsing via xml package.
   Future<RouteMap> _parseRouteFile(PlatformFile file) async {
-    // In a real implementation: parse XML, extract trackpoints, compute stats.
-    // Here we return a placeholder to allow UI testing.
     return RouteMap(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       origin: const Location(lat: 0, lng: 0, name: 'Start'),
