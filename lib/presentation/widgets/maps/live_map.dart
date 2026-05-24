@@ -49,7 +49,8 @@ class LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tileUrl = isDark ? kOsmTileTemplateDark : kOsmTileTemplate;
+    // final tileUrl = isDark ? kOsmTileTemplateDark : kOsmTileTemplate;
+    final tileUrl = kOsmTileTemplate;
 
     return BlocConsumer<RouteBuilderBloc, RouteBuilderState>(
       listenWhen: (prev, curr) =>
@@ -70,7 +71,7 @@ class LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
           mapController: _mapController,
           options: MapOptions(
             initialCenter: const LatLng(-1.2921, 36.8219),
-            initialZoom: 5,
+            initialZoom: 10,
             minZoom: 3,
             maxZoom: 18,
             interactionOptions: const InteractionOptions(
@@ -84,7 +85,7 @@ class LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
               subdomains: isDark
                   ? const ['a', 'b', 'c', 'd']
                   : const ['a', 'b', 'c'],
-              userAgentPackageName: 'com.youplot.app',
+              userAgentPackageName: kAppPackage,
               tileProvider: NetworkTileProvider(),
               tileBuilder: _fadeTileBuilder,
               errorTileCallback: (tile, err, _) {},

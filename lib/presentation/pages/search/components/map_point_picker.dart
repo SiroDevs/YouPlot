@@ -10,10 +10,10 @@ import '../../../../domain/entities/location.dart';
 import '../../../bloc/location_search/location_search_bloc.dart';
 import '../../../bloc/route_builder/route_builder_bloc.dart';
 import '../../../theme/app_colors.dart';
-import 'confirm_panel.dart';
-import 'cross_hair.dart';
-import 'glass_circle.dart';
-import 'instruction_chip.dart';
+import '../../planner/components/confirm_panel.dart';
+import '../../planner/components/cross_hair.dart';
+import '../../planner/components/glass_circle.dart';
+import '../../planner/components/instruction_chip.dart';
 
 class MapPointPicker extends StatefulWidget {
   final Brightness brightness;
@@ -60,10 +60,6 @@ class _MapPointPickerState extends State<MapPointPicker> {
     final b = widget.brightness;
     final isDark = b == Brightness.dark;
 
-    final tileUrl = isDark
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-        : kOsmTileTemplate;
-
     final markers = <Marker>[
       if (_tapMarker != null) _tapMarker!,
     ];
@@ -85,7 +81,7 @@ class _MapPointPickerState extends State<MapPointPicker> {
             ),
             children: [
               TileLayer(
-                urlTemplate: tileUrl,
+                urlTemplate: kOsmTileTemplate,
                 subdomains: isDark
                     ? const ['a', 'b', 'c', 'd']
                     : const ['a', 'b', 'c'],

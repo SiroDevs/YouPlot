@@ -23,7 +23,7 @@ class WaypointsStep extends StatelessWidget {
         final b = Theme.of(ctx).brightness;
         final isDark = b == Brightness.dark;
         return Stack(children: [
-          MapBackground(brightness: b),
+          MapBackground(),
           Column(children: [
             AppHeader(
               showBack: true,
@@ -39,12 +39,6 @@ class WaypointsStep extends StatelessWidget {
                     ? Colors.black.withValues(alpha: 0.88)
                     : Colors.white.withValues(alpha: 0.96),
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 4)),
-                ],
               ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),

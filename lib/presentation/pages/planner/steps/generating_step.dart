@@ -11,7 +11,7 @@ class GeneratingStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final b = Theme.of(context).brightness;
     return Stack(children: [
-      MapBackground(brightness: b),
+      MapBackground(),
       Center(
         child: Container(
           padding: const EdgeInsets.all(28),

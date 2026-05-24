@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../bloc/dashboard/dashboard_bloc.dart';
+import '../../../bloc/home/home_bloc.dart';
 import 'empty_plan_slot.dart';
 import 'plan_card.dart';
 import 'plan_filter_chips.dart';
 import 'route_card.dart';
 import 'section_title.dart';
 
-class DashboardContent extends StatelessWidget {
-  final DashboardState state;
+class HomeContent extends StatelessWidget {
+  final HomeState state;
   final Brightness brightness;
   final VoidCallback onCreateNew;
 
-  const DashboardContent({super.key, 
+  const HomeContent({super.key, 
     required this.state,
     required this.brightness,
     required this.onCreateNew,

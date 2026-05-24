@@ -5,20 +5,20 @@ import '../../../domain/entities/route_map.dart';
 import '../../../domain/entities/route_plan.dart';
 import '../../../domain/repositories/local_repository.dart';
 
-part 'dashboard_event.dart';
-part 'dashboard_state.dart';
+part 'home_event.dart';
+part 'home_state.dart';
 
-class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
+class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final LocalRepository _local;
 
-  DashboardBloc(this._local) : super(const DashboardState()) {
-    on<LoadDashboard>(_onLoad);
+  HomeBloc(this._local) : super(const HomeState()) {
+    on<LoadHome>(_onLoad);
     on<DeleteRoute>(_onDeleteRoute);
     on<DeletePlan>(_onDeletePlan);
     on<SetPlanFilter>(_onSetFilter);
   }
 
-  Future<void> _onLoad(LoadDashboard e, Emitter<DashboardState> emit) async {
+  Future<void> _onLoad(LoadHome e, Emitter<HomeState> emit) async {
     emit(state.copyWith(loading: true));
 
     final routesResult = await _local.loadRoutes(limit: 10);
@@ -40,17 +40,17 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     ));
   }
 
-  Future<void> _onDeleteRoute(DeleteRoute e, Emitter<DashboardState> emit) async {
+  Future<void> _onDeleteRoute(DeleteRoute e, Emitter<HomeState> emit) async {
     await _local.deleteRoute(e.id);
-    add(LoadDashboard());
+    add(LoadHome());
   }
 
-  Future<void> _onDeletePlan(DeletePlan e, Emitter<DashboardState> emit) async {
+  Future<void> _onDeletePlan(DeletePlan e, Emitter<HomeState> emit) async {
     await _local.deletePlanFromDb(e.id);
-    add(LoadDashboard());
+    add(LoadHome());
   }
 
-  void _onSetFilter(SetPlanFilter e, Emitter<DashboardState> emit) {
+  void _onSetFilter(SetPlanFilter e, Emitter<HomeState> emit) {
     emit(state.copyWith(planFilter: e.filter));
   }
 }

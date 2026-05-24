@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-import 'persistent_map.dart';
 
-/// Replaces the old grid-painted placeholder with the real Mapbox map.
-/// Used as the full-screen background in Setup, Waypoints, and Generating steps.
+import 'live_map.dart';
+
+final liveMapKey = GlobalKey<LiveMapState>();
+
+class PersistentMap extends StatelessWidget {
+  const PersistentMap({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LiveMap(key: liveMapKey);
+  }
+}
 class MapBackground extends StatelessWidget {
-  // brightness kept for API compatibility but the map handles styling itself
-  final Brightness brightness;
-  const MapBackground({super.key, required this.brightness});
+  const MapBackground({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -11,6 +11,7 @@ const String kAppName      = 'YouPlot';
 const String kSavedPlansKey = 'saved_plans_v1';
 const String kAppCredits   = '© Siro Devs';
 const String kAppCredits2   = '© OpenStreetMap contributors';
+const String kAppPackage   = 'com.sirodevs.youplot';
 
 enum SportType {
   walking('Walking',  '🚶', 'foot',    5.0),

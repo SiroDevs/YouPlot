@@ -1,78 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
 
+import '../../../core/constants/app_constants.dart';
+import '../../bloc/home/home_bloc.dart';
 import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/state_widgets.dart';
-import 'steps/generating_step.dart';
-import 'steps/map_step.dart';
-import 'steps/plan_step.dart';
-import 'steps/review_step.dart';
-import 'steps/setup_step.dart';
-import 'steps/export_step.dart';
-import 'steps/waypoint_step.dart';
+import '../planner/planner_screen.dart';
+import '../settings/settings_screen.dart';
+import 'components/home_content.dart';
+import 'components/empty_state.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<HomeBloc>().add(LoadHome());
+  }
+
+  void _goToPlanner() {
+    context.read<RouteBuilderBloc>().add(ResetAll());
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const PlannerScreen()),
+    ).then((_) {
+      if (mounted) context.read<HomeBloc>().add(LoadHome());
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RouteBuilderBloc, RouteBuilderState>(
-      builder: (ctx, state) {
-        final b = Theme.of(ctx).brightness;
-        return Scaffold(
-          backgroundColor: AppColors.bg(b),
-          body: Stack(
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 280),
-                transitionBuilder: (child, anim) =>
-                    FadeTransition(opacity: anim, child: child),
-                child: KeyedSubtree(
-                  key: ValueKey(state.step),
-                  child: _pageForStep(state),
-                ),
+    final b = Theme.of(context).brightness;
+
+    return Scaffold(
+      backgroundColor: AppColors.bg(b),
+      appBar: _buildAppBar(context, b),
+      body: BlocBuilder<HomeBloc, HomeState>(
+        builder: (ctx, state) {
+          if (state.loading) {
+            return const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primary,
               ),
-              if (state.loading)
-                LoadingOverlay(message: _loadingMessage(state.step)),
-            ],
-          ),
-        );
-      },
+            );
+          }
+
+          if (state.isEmpty) {
+            return EmptyState(onCreateNew: _goToPlanner, brightness: b);
+          }
+
+          return HomeContent(
+            state: state,
+            brightness: b,
+            onCreateNew: _goToPlanner,
+          );
+        },
+      ),
     );
   }
 
-  Widget _pageForStep(RouteBuilderState state) {
-    switch (state.step) {
-      case AppStep.setup:
-        return const SetupStep();
-      case AppStep.waypoints:
-        return const WaypointsStep();
-      case AppStep.generating:
-        return const GeneratingStep();
-      case AppStep.map:
-        return const MapStep();
-      case AppStep.plan:
-        return const PlanStep();
-      case AppStep.review:
-        return const ReviewStep();
-      case AppStep.export:
-        return const ExportStep();
-    }
-  }
-
-  String _loadingMessage(AppStep step) {
-    switch (step) {
-      case AppStep.generating:
-        return 'Building route…';
-      case AppStep.waypoints:
-        return 'Finding waypoints…';
-      case AppStep.plan:
-        return 'Scheduling plan…';
-      case AppStep.export:
-        return 'Exporting file…';
-      default:
-        return 'Please wait…';
-    }
+  AppBar _buildAppBar(BuildContext context, Brightness b) {
+    return AppBar(
+      backgroundColor: AppColors.bg(b),
+      elevation: 0,
+      titleSpacing: 16,
+      title: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: const Icon(Icons.route_rounded, size: 16, color: Colors.white),
+          ),
+          const Gap(10),
+          Text(
+            kAppName,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.settings_outlined,
+              size: 22, color: AppColors.textSecondary(b)),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SettingsScreen()),
+          ),
+        ),
+        const Gap(4),
+      ],
+    );
   }
 }

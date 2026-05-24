@@ -5,9 +5,6 @@ import 'package:gap/gap.dart';
 import '../../../bloc/location_search/location_search_bloc.dart';
 import '../../../theme/app_colors.dart';
 
-/// Shown when the search field has fewer than 2 characters.
-/// Displays the user's real search history (from SharedPreferences).
-/// On first use, shows nothing — no fake hardcoded suggestions.
 class IdleSearchView extends StatefulWidget {
   final Brightness brightness;
   final ValueChanged<String> onQueryFill; // fills the text field

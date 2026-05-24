@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../domain/entities/location.dart';
 import '../../theme/app_colors.dart';
-import '../../pages/home/components/full_page_search.dart';
+import '../../pages/search/map_point_search.dart';
 
 class MapSearchField extends StatelessWidget {
   final String hint;
@@ -32,7 +32,7 @@ class MapSearchField extends StatelessWidget {
           context,
           PageRouteBuilder(
             pageBuilder: (_, _, _) =>
-                FullPageSearch(hint: hint, showGps: showGps, brightness: b),
+                MapPointSearch(hint: hint, showGps: showGps, brightness: b),
             transitionsBuilder: (_, anim, __, child) => FadeTransition(
               opacity: anim,
               child: SlideTransition(

@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
 import '../../../bloc/route_builder/route_builder_bloc.dart';
-import '../../../theme/app_colors.dart';
 import '../../../widgets/maps/map_background.dart';
 import '../../../widgets/maps/map_search_field.dart';
 import '../../../widgets/state_widgets.dart';
@@ -25,28 +24,18 @@ class SetupStep extends StatelessWidget {
         final isDark = b == Brightness.dark;
         return Stack(
           children: [
-            MapBackground(brightness: b),
-
+            MapBackground(),
             Column(
               children: [
-                const AppHeader(showThemeToggle: true),
-
+                const AppHeader(showBack: true, showThemeToggle: true),
                 const Spacer(),
-
                 Container(
-                  margin: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.black.withValues(alpha: 0.88)
                         : Colors.white.withValues(alpha: 0.96),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
@@ -54,22 +43,10 @@ class SetupStep extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Plan your route',
+                          'Plot your route',
                           style: Theme.of(ctx).textTheme.displayMedium,
                         ).animate().fadeIn(delay: 50.ms),
-                        const Gap(4),
-                        Text(
-                          'Choose your sport, then pick start and end.',
-                          style: TextStyle(
-                            color: AppColors.textSecondary(b),
-                            fontSize: 13,
-                          ),
-                        ).animate().fadeIn(delay: 80.ms),
-                        const Gap(20),
-
-                        // Sport dropdown
-                        FieldLabel(label: 'Sport', brightness: b),
-                        const Gap(8),
+                        const Gap(10),
                         SportDropdown(
                           brightness: b,
                           value: state.sport,
@@ -77,9 +54,8 @@ class SetupStep extends StatelessWidget {
                             if (s != null) bloc.add(SetSport(s));
                           },
                         ).animate().fadeIn(delay: 120.ms),
-                        const Gap(20),
+                        const Gap(10),
 
-                        // Origin
                         FieldLabel(
                           label: 'Starting point',
                           icon: Icons.trip_origin_rounded,

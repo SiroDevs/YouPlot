@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/di/injection.dart' as di;
-import 'presentation/bloc/dashboard/dashboard_bloc.dart';
+import 'presentation/bloc/home/home_bloc.dart';
 import 'presentation/bloc/location_search/location_search_bloc.dart';
 import 'presentation/bloc/route_builder/route_builder_bloc.dart';
 import 'presentation/pages/splash/splash_screen.dart';
@@ -52,14 +52,14 @@ class MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<DashboardBloc>(
-          create: (_) => di.sl<DashboardBloc>(),
-        ),
-        BlocProvider<RouteBuilderBloc>(
-          create: (_) => di.sl<RouteBuilderBloc>(),
+        BlocProvider<HomeBloc>(
+          create: (_) => di.sl<HomeBloc>(),
         ),
         BlocProvider<LocationSearchBloc>(
           create: (_) => di.sl<LocationSearchBloc>(),
+        ),
+        BlocProvider<RouteBuilderBloc>(
+          create: (_) => di.sl<RouteBuilderBloc>(),
         ),
       ],
       child: MaterialApp(

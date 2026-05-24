@@ -16,7 +16,7 @@ import '../../domain/repositories/local_repository.dart';
 import '../../domain/repositories/location_repository.dart';
 import '../../domain/repositories/plan_repository.dart';
 import '../../domain/repositories/route_repository.dart';
-import '../../presentation/bloc/dashboard/dashboard_bloc.dart';
+import '../../presentation/bloc/home/home_bloc.dart';
 import '../../presentation/bloc/location_search/location_search_bloc.dart';
 import '../../presentation/bloc/route_builder/route_builder_bloc.dart';
 import '../../domain/usecases/suggest_waypoints.dart';
@@ -102,5 +102,5 @@ Future<void> init() async {
       prefs: sl<SharedPreferences>(),
     ),
   );
-  sl.registerFactory(() => DashboardBloc(sl<LocalRepository>()));
+  sl.registerFactory(() => HomeBloc(sl<LocalRepository>()));
 }

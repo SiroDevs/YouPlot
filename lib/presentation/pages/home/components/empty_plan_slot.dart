@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../bloc/dashboard/dashboard_bloc.dart';
+import '../../../bloc/home/home_bloc.dart';
 import '../../../theme/app_colors.dart';
 
 class EmptyPlanSlot extends StatelessWidget {

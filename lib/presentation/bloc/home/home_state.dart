@@ -1,6 +1,6 @@
-part of 'dashboard_bloc.dart';
+part of 'home_bloc.dart';
 
-class DashboardState extends Equatable {
+class HomeState extends Equatable {
   final bool loading;
   final List<RouteMap> routes;
   final List<RoutePlan> allPlans;
@@ -8,7 +8,7 @@ class DashboardState extends Equatable {
   final List<RoutePlan> pastPlans;
   final PlanFilter planFilter;
 
-  const DashboardState({
+  const HomeState({
     this.loading = false,
     this.routes = const [],
     this.allPlans = const [],
@@ -30,7 +30,7 @@ class DashboardState extends Equatable {
 
   bool get isEmpty => routes.isEmpty && allPlans.isEmpty;
 
-  DashboardState copyWith({
+  HomeState copyWith({
     bool? loading,
     List<RouteMap>? routes,
     List<RoutePlan>? allPlans,
@@ -38,7 +38,7 @@ class DashboardState extends Equatable {
     List<RoutePlan>? pastPlans,
     PlanFilter? planFilter,
   }) {
-    return DashboardState(
+    return HomeState(
       loading: loading ?? this.loading,
       routes: routes ?? this.routes,
       allPlans: allPlans ?? this.allPlans,

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../bloc/dashboard/dashboard_bloc.dart';
+import '../../../bloc/home/home_bloc.dart';
 import '../../../theme/app_colors.dart';
 
 class PlanFilterChips extends StatelessWidget {
-  final DashboardState state;
+  final HomeState state;
   const PlanFilterChips({super.key, required this.state});
 
   @override
@@ -18,7 +18,7 @@ class PlanFilterChips extends StatelessWidget {
           padding: const EdgeInsets.only(left: 6),
           child: GestureDetector(
             onTap: () =>
-                context.read<DashboardBloc>().add(SetPlanFilter(f)),
+                context.read<HomeBloc>().add(SetPlanFilter(f)),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 160),
               padding:

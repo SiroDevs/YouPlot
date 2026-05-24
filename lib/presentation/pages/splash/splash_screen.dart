@@ -4,7 +4,7 @@ import 'package:styled_widget/styled_widget.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../theme/app_colors.dart';
-import '../dashboard/dashboard_screen.dart';
+import '../home/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -25,7 +25,7 @@ class SplashScreenState extends State<SplashScreen> {
     if (!context.mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => const DashboardScreen()),
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
       (route) => false,
     );
   }

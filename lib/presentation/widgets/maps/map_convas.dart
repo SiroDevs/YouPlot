@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../domain/entities/route_map.dart';
 import '../steps/app_header.dart';
 import '../steps/badges.dart';
-import 'persistent_map.dart';
+import 'map_background.dart';
 
 class MapCanvas extends StatelessWidget {
   final RouteMap route;
