@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
-import '../../../bloc/route_builder/route_builder_bloc.dart';
+import '../../../bloc/route_builder/route_session_cubit.dart';
+import '../../../bloc/waypoints/waypoints_cubit.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/state_widgets.dart';
 import '../../../widgets/steps/icon_text_button.dart';
@@ -18,11 +19,17 @@ class PlanStep2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<RouteBuilderBloc>();
-    return BlocBuilder<RouteBuilderBloc, RouteBuilderState>(
+    final cubit = context.read<WaypointsCubit>();
+
+    // Read origin/destination names from session (they never change here)
+    final session = context.read<RouteSessionCubit>();
+
+    return BlocBuilder<WaypointsCubit, WaypointsState>(
       builder: (ctx, state) {
         final b = Theme.of(ctx).brightness;
         final isDark = b == Brightness.dark;
+        final sessionState = session.state;
+
         return Stack(
           children: [
             MapBackground(),
@@ -30,9 +37,9 @@ class PlanStep2 extends StatelessWidget {
               children: [
                 StepHeader(
                   showBack: true,
-                  onBack: () => bloc.add(GoToStep(AppStep.setup)),
+                  onBack: cubit.goBack,
                   showNew: true,
-                  onNew: () => bloc.add(ResetAll()),
+                  onNew: () => session.reset(),
                   stepNumber: 2,
                   totalSteps: 5,
                 ),
@@ -56,7 +63,7 @@ class PlanStep2 extends StatelessWidget {
                         ),
                         const Gap(4),
                         Text(
-                          '${state.origin?.name ?? "Start"} → ${state.destination?.name ?? "End"}',
+                          '${sessionState.origin?.name ?? "Start"} → ${sessionState.destination?.name ?? "End"}',
                           style: TextStyle(
                             color: AppColors.textSecondary(b),
                             fontSize: 13,
@@ -70,7 +77,7 @@ class PlanStep2 extends StatelessWidget {
                           emoji: '🤖',
                           title: 'App suggestions',
                           subtitle: 'Auto-pick major towns along the way',
-                          onTap: () => bloc.add(RequestSuggestions()),
+                          onTap: cubit.requestSuggestions,
                         ),
                         const Gap(10),
                         OptionCard(
@@ -80,7 +87,7 @@ class PlanStep2 extends StatelessWidget {
                           title: 'My own stops',
                           subtitle:
                               'Add specific places you want to pass through',
-                          onTap: () => _showCustomSheet(ctx, bloc),
+                          onTap: () => _showCustomSheet(ctx, cubit),
                         ),
                         const Gap(10),
                         OptionCard(
@@ -90,7 +97,7 @@ class PlanStep2 extends StatelessWidget {
                           title: 'Direct route',
                           subtitle:
                               'No intermediate stops — straight from A to B',
-                          onTap: () => bloc.add(GenerateRoute()),
+                          onTap: cubit.generateRoute,
                         ),
 
                         if (state.viaPoints.isNotEmpty) ...[
@@ -108,7 +115,7 @@ class PlanStep2 extends StatelessWidget {
                               child: ViaRow(
                                 index: e.key,
                                 location: e.value,
-                                onRemove: () => bloc.add(RemoveViaPoint(e.key)),
+                                onRemove: () => cubit.removeVia(e.key),
                                 brightness: b,
                               ),
                             ),
@@ -118,7 +125,7 @@ class PlanStep2 extends StatelessWidget {
                             label: 'Generate Route',
                             icon: Icons.map_rounded,
                             brightness: b,
-                            onPressed: () => bloc.add(GenerateRoute()),
+                            onPressed: cubit.generateRoute,
                           ),
                         ],
 
@@ -135,13 +142,17 @@ class PlanStep2 extends StatelessWidget {
                             (w) => WaypointRow(waypoint: w, brightness: b),
                           ),
                           const Gap(12),
-
                           IconTextButton(
                             label: 'Generate Route with These Stops',
                             icon: Icons.map_rounded,
                             brightness: b,
-                            onPressed: () => bloc.add(GenerateRoute()),
+                            onPressed: cubit.generateRoute,
                           ),
+                        ],
+
+                        if (state.loading) ...[
+                          const Gap(12),
+                          const Center(child: CircularProgressIndicator()),
                         ],
 
                         if (state.error != null) ...[
@@ -161,13 +172,13 @@ class PlanStep2 extends StatelessWidget {
     );
   }
 
-  void _showCustomSheet(BuildContext ctx, RouteBuilderBloc bloc) {
+  void _showCustomSheet(BuildContext ctx, WaypointsCubit cubit) {
     showModalBottomSheet(
       context: ctx,
       isScrollControlled: true,
       useRootNavigator: true,
       builder: (_) =>
-          BlocProvider.value(value: bloc, child: const AddViaSheet()),
+          BlocProvider.value(value: cubit, child: const AddViaSheet()),
     );
   }
 }

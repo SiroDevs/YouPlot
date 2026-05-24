@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/di/injection.dart' as di;
 import 'presentation/bloc/home/home_bloc.dart';
 import 'presentation/bloc/location_search/location_search_bloc.dart';
-import 'presentation/bloc/route_builder/route_builder_bloc.dart';
 import 'presentation/pages/splash/splash_screen.dart';
 import 'presentation/theme/app_theme.dart';
 
@@ -57,9 +56,6 @@ class MainAppState extends State<MainApp> {
         ),
         BlocProvider<LocationSearchBloc>(
           create: (_) => di.sl<LocationSearchBloc>(),
-        ),
-        BlocProvider<RouteBuilderBloc>(
-          create: (_) => di.sl<RouteBuilderBloc>(),
         ),
       ],
       child: MaterialApp(

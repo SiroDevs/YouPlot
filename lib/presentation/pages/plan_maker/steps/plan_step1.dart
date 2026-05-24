@@ -3,7 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
-import '../../../bloc/route_builder/route_builder_bloc.dart';
+import '../../../bloc/setup/setup_cubit.dart';
 import '../../../widgets/maps/map_background.dart';
 import '../../../widgets/maps/map_search_field.dart';
 import '../../../widgets/state_widgets.dart';
@@ -18,8 +18,8 @@ class PlanStep1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<RouteBuilderBloc>();
-    return BlocBuilder<RouteBuilderBloc, RouteBuilderState>(
+    final cubit = context.read<SetupCubit>();
+    return BlocBuilder<SetupCubit, SetupState>(
       builder: (ctx, state) {
         final b = Theme.of(ctx).brightness;
         final isDark = b == Brightness.dark;
@@ -57,7 +57,7 @@ class PlanStep1 extends StatelessWidget {
                           brightness: b,
                           value: state.sport,
                           onChanged: (s) {
-                            if (s != null) bloc.add(SetSport(s));
+                            if (s != null) cubit.setSport(s);
                           },
                         ).animate().fadeIn(delay: 120.ms),
                         const Gap(10),
@@ -72,14 +72,13 @@ class PlanStep1 extends StatelessWidget {
                           hint: 'Search city or address…',
                           value: state.origin,
                           showGps: true,
-                          onSelected: (loc) => bloc.add(SetOrigin(loc)),
+                          onSelected: cubit.setOrigin,
                           brightness: b,
                         ).animate().fadeIn(delay: 160.ms),
                         if (state.origin != null) ...[
                           const Gap(4),
                           SelectedBadge(
-                            label:
-                                state.origin!.address ??
+                            label: state.origin!.address ??
                                 state.origin!.name ??
                                 '',
                             brightness: b,
@@ -96,14 +95,13 @@ class PlanStep1 extends StatelessWidget {
                         MapSearchField(
                           hint: 'Search destination…',
                           value: state.destination,
-                          onSelected: (loc) => bloc.add(SetDestination(loc)),
+                          onSelected: cubit.setDestination,
                           brightness: b,
                         ).animate().fadeIn(delay: 200.ms),
                         if (state.destination != null) ...[
                           const Gap(4),
                           SelectedBadge(
-                            label:
-                                state.destination!.address ??
+                            label: state.destination!.address ??
                                 state.destination!.name ??
                                 '',
                             brightness: b,
@@ -114,7 +112,7 @@ class PlanStep1 extends StatelessWidget {
                         if (state.error != null) ...[
                           ErrorBar(
                             message: state.error!,
-                            onDismiss: () => bloc.add(ResetAll()),
+                            onDismiss: cubit.dismissError,
                           ),
                           const Gap(12),
                         ],
@@ -123,9 +121,8 @@ class PlanStep1 extends StatelessWidget {
                           label: 'Continue',
                           icon: Icons.arrow_forward_rounded,
                           brightness: b,
-                          onPressed: state.canProceed
-                              ? () => bloc.add(GoToStep(AppStep.waypoints))
-                              : null,
+                          onPressed:
+                              state.canProceed ? cubit.proceed : null,
                         ).animate().fadeIn(delay: 240.ms),
                         const Gap(8),
                       ],

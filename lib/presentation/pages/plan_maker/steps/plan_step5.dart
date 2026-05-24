@@ -6,7 +6,8 @@ import 'package:styled_widget/styled_widget.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../bloc/route_builder/route_builder_bloc.dart';
+import '../../../bloc/review/review_cubit.dart';
+import '../../../bloc/route_builder/route_session_cubit.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/elevation_chart.dart';
 import '../../../widgets/state_widgets.dart';
@@ -18,10 +19,10 @@ class PlanStep5 extends StatefulWidget {
   const PlanStep5({super.key});
 
   @override
-  State<PlanStep5> createState() => _PlanStep6State();
+  State<PlanStep5> createState() => _PlanStep5State();
 }
 
-class _PlanStep6State extends State<PlanStep5>
+class _PlanStep5State extends State<PlanStep5>
     with SingleTickerProviderStateMixin {
   late TabController _tabs;
 
@@ -39,12 +40,16 @@ class _PlanStep6State extends State<PlanStep5>
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<RouteBuilderBloc>();
-    return BlocBuilder<RouteBuilderBloc, RouteBuilderState>(
-      builder: (ctx, state) {
-        final plan = state.plan!;
+    final cubit = context.read<ReviewCubit>();
+
+    return BlocBuilder<ReviewCubit, ReviewState>(
+      builder: (ctx, reviewState) {
+        // Plan and route come from session — they are immutable at this point.
+        final session = ctx.read<RouteSessionCubit>().state;
+        final plan = session.plan!;
         final route = plan.route;
-        final unit = state.unit;
+        final unit = session.unit;
+        final sport = session.sport;
         final b = Theme.of(ctx).brightness;
 
         return Scaffold(
@@ -53,7 +58,7 @@ class _PlanStep6State extends State<PlanStep5>
             children: [
               StepHeader(
                 showBack: true,
-                onBack: () => bloc.add(GoToStep(AppStep.plan)),
+                onBack: cubit.goBack,
                 stepNumber: 4,
                 totalSteps: 5,
               ),
@@ -112,6 +117,7 @@ class _PlanStep6State extends State<PlanStep5>
               TabBarView(
                 controller: _tabs,
                 children: [
+                  // ── Tab 1: Daily plan ────────────────────────────────────
                   ListView(
                     padding: const EdgeInsets.all(16),
                     children: plan.segments
@@ -119,13 +125,14 @@ class _PlanStep6State extends State<PlanStep5>
                           (seg) => DayCard(
                             segment: seg,
                             unit: unit,
-                            sport: state.sport,
+                            sport: sport,
                             brightness: b,
                           ),
                         )
                         .toList(),
                   ),
 
+                  // ── Tab 2: Export ─────────────────────────────────────────
                   SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -144,6 +151,7 @@ class _PlanStep6State extends State<PlanStep5>
                           ),
                         ),
                         const Gap(20),
+
                         GridView.count(
                           crossAxisCount: 2,
                           shrinkWrap: true,
@@ -153,9 +161,9 @@ class _PlanStep6State extends State<PlanStep5>
                           childAspectRatio: 1.15,
                           children: ExportFormat.values.map((fmt) {
                             return GestureDetector(
-                              onTap: state.loading
+                              onTap: reviewState.loading
                                   ? null
-                                  : () => bloc.add(ExportEvent(fmt)),
+                                  : () => cubit.export(fmt),
                               child: Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
@@ -198,7 +206,12 @@ class _PlanStep6State extends State<PlanStep5>
                           }).toList(),
                         ),
 
-                        if (state.exportedPath != null) ...[
+                        if (reviewState.loading) ...[
+                          const Gap(16),
+                          const Center(child: CircularProgressIndicator()),
+                        ],
+
+                        if (reviewState.exportedPath != null) ...[
                           const Gap(20),
                           Container(
                             padding: const EdgeInsets.all(14),
@@ -206,7 +219,8 @@ class _PlanStep6State extends State<PlanStep5>
                               color: AppColors.success.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: AppColors.success.withValues(alpha: 0.3),
+                                color:
+                                    AppColors.success.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
@@ -230,7 +244,7 @@ class _PlanStep6State extends State<PlanStep5>
                                     ),
                                     const Gap(2),
                                     Text(
-                                      state.exportedPath!,
+                                      reviewState.exportedPath!,
                                       style: TextStyle(
                                         color: AppColors.textSecondary(b),
                                         fontSize: 10,
@@ -247,18 +261,18 @@ class _PlanStep6State extends State<PlanStep5>
                                     size: 18,
                                     color: AppColors.primary,
                                   ),
-                                  onPressed: () => Share.shareXFiles([
-                                    XFile(state.exportedPath!),
-                                  ]),
+                                  onPressed: () => Share.shareXFiles(
+                                    [XFile(reviewState.exportedPath!)],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                         ],
 
-                        if (state.error != null) ...[
+                        if (reviewState.error != null) ...[
                           const Gap(12),
-                          ErrorBar(message: state.error!),
+                          ErrorBar(message: reviewState.error!),
                         ],
                       ],
                     ),

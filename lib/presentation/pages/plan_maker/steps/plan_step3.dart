@@ -2,28 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
-import '../../../bloc/route_builder/route_builder_bloc.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../bloc/route_builder/route_session_cubit.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/maps/map_convas.dart';
 import '../../../widgets/steps/step_header.dart';
 import '../widgets/route_panel.dart';
 
+/// Step 3 — shows a loading spinner while the route is being built by
+/// [WaypointsCubit], then displays the map + route panel once the session
+/// has a route.  No dedicated cubit needed; reads directly from session.
 class PlanStep3 extends StatelessWidget {
   const PlanStep3({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<RouteBuilderBloc>();
-    return BlocBuilder<RouteBuilderBloc, RouteBuilderState>(
-      builder: (ctx, state) {
+    return BlocBuilder<RouteSessionCubit, RouteSessionState>(
+      builder: (ctx, session) {
         final b = Theme.of(ctx).brightness;
         final isDark = b == Brightness.dark;
 
-        if (state.step == AppStep.map || state.route == null) {
+        // While route is null we are still generating — show spinner.
+        if (session.route == null) {
           return _GeneratingView(brightness: b, isDark: isDark);
         }
 
-        final route = state.route!;
+        final route = session.route!;
         return Scaffold(
           backgroundColor:
               isDark ? const Color(0xFF0D1B2A) : const Color(0xFFE8E0D8),
@@ -36,8 +40,8 @@ class PlanStep3 extends StatelessWidget {
                   isDark: isDark,
                   stepNumber: 2,
                   totalSteps: 5,
-                  onBack: () => bloc.add(GoToStep(AppStep.waypoints)),
-                  onReset: () => bloc.add(ResetAll()),
+                  onBack: () => ctx.read<RouteSessionCubit>().goToStep(AppStep.waypoints),
+                  onReset: () => ctx.read<RouteSessionCubit>().reset(),
                 ),
               ),
               Positioned(
@@ -48,7 +52,8 @@ class PlanStep3 extends StatelessWidget {
                   route: route,
                   brightness: b,
                   isDark: isDark,
-                  onPlan: () => bloc.add(GoToStep(AppStep.plan)),
+                  onPlan: () =>
+                      ctx.read<RouteSessionCubit>().goToStep(AppStep.plan),
                 ),
               ),
             ],
@@ -70,16 +75,14 @@ class _GeneratingView extends StatelessWidget {
     final b = brightness;
     return Stack(
       children: [
-        // Blurred map bg
-        const Positioned.fill(child: _MapPlaceholder()),
-        // Header
+        Positioned.fill(
+          child: Container(
+            color: isDark ? const Color(0xFF0D1B2A) : const Color(0xFFE8E0D8),
+          ),
+        ),
         Positioned(
           top: 0, left: 0, right: 0,
-          child: StepHeader(
-            showBack: false,
-            stepNumber: 2,
-            totalSteps: 5,
-          ),
+          child: StepHeader(showBack: false, stepNumber: 2, totalSteps: 5),
         ),
         Center(
           child: Container(
@@ -137,20 +140,6 @@ class _GeneratingView extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _MapPlaceholder extends StatelessWidget {
-  const _MapPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    final b = Theme.of(context).brightness;
-    return Container(
-      color: b == Brightness.dark
-          ? const Color(0xFF0D1B2A)
-          : const Color(0xFFE8E0D8),
     );
   }
 }

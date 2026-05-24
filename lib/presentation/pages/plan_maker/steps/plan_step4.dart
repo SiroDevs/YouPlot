@@ -4,7 +4,8 @@ import 'package:gap/gap.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import '../../../../core/constants/app_constants.dart';
-import '../../../bloc/route_builder/route_builder_bloc.dart';
+import '../../../bloc/plan_config/plan_config_cubit.dart';
+import '../../../bloc/route_builder/route_session_cubit.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/state_widgets.dart';
 import '../../../widgets/steps/icon_text_button.dart';
@@ -17,18 +18,23 @@ class PlanStep4 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<RouteBuilderBloc>();
-    return BlocBuilder<RouteBuilderBloc, RouteBuilderState>(
+    final cubit = context.read<PlanConfigCubit>();
+
+    return BlocBuilder<PlanConfigCubit, PlanConfigState>(
       builder: (ctx, state) {
+        // Read unit from session for display conversion
+        final unit = ctx.read<RouteSessionCubit>().state.unit;
+        final sport = ctx.read<RouteSessionCubit>().state.sport;
         final b = Theme.of(ctx).brightness;
-        final isRunning = state.sport == SportType.running;
+        final isRunning = sport == SportType.running;
+
         return Scaffold(
           backgroundColor: AppColors.bg(b),
           body: Column(
             children: [
               StepHeader(
                 showBack: true,
-                onBack: () => bloc.add(GoToStep(AppStep.map)),
+                onBack: cubit.goBack,
                 stepNumber: 3,
                 totalSteps: 5,
               ),
@@ -61,7 +67,7 @@ class PlanStep4 extends StatelessWidget {
                     StartDateTimePicker(
                       startTime: state.startTime,
                       brightness: b,
-                      onChanged: (dt) => bloc.add(SetStartTime(dt)),
+                      onChanged: cubit.setStartTime,
                     ),
                     const Gap(28),
 
@@ -74,7 +80,7 @@ class PlanStep4 extends StatelessWidget {
                     DaysCounter(
                       days: state.days,
                       brightness: b,
-                      onChanged: (d) => bloc.add(SetDays(d)),
+                      onChanged: cubit.setDays,
                     ),
                     const Gap(28),
 
@@ -86,10 +92,10 @@ class PlanStep4 extends StatelessWidget {
                     const Gap(12),
                     SpeedSlider(
                       speed: state.speed,
-                      sport: state.sport,
-                      unit: state.unit,
+                      sport: sport,
+                      unit: unit,
                       brightness: b,
-                      onChanged: (v) => bloc.add(SetSpeed(v)),
+                      onChanged: cubit.setSpeed,
                     ),
                     const Gap(28),
 
@@ -102,7 +108,7 @@ class PlanStep4 extends StatelessWidget {
                     BreaksSection(
                       selected: state.selectedBreaks,
                       brightness: b,
-                      onToggle: (t) => bloc.add(ToggleBreak(t)),
+                      onToggle: cubit.toggleBreak,
                     ),
                     const Gap(16),
 
@@ -119,7 +125,7 @@ class PlanStep4 extends StatelessWidget {
                 icon: Icons.check_rounded,
                 brightness: b,
                 loading: state.loading,
-                onPressed: () => bloc.add(BuildPlanEvent()),
+                onPressed: cubit.buildPlan,
               ),
               const Gap(12),
             ],
