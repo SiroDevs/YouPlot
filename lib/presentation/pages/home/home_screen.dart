@@ -6,7 +6,6 @@ import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/route_map.dart';
 import '../../../domain/entities/route_plan.dart';
 import '../../bloc/home/home_bloc.dart';
-import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
 import '../import/import_screen.dart';
 import '../plan_maker/plan_maker_screen.dart';
@@ -31,8 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<HomeBloc>().add(LoadHome());
   }
 
-  void _goToPlanner() {
-    context.read<RouteBuilderBloc>().add(ResetAll());
+  void _goToPlanMaker() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const PlanMakerScreen()),
@@ -65,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) => NewPlanDialog(
         onScratch: () {
           Navigator.pop(ctx);
-          _goToPlanner();
+          _goToPlanMaker();
         },
         onImport: () {
           Navigator.pop(ctx);

@@ -11,7 +11,10 @@ import '../../../widgets/state_widgets.dart';
 import '../../../widgets/steps/icon_text_button.dart';
 import '../../../widgets/steps/step_header.dart';
 import '../../../widgets/steps/section_header.dart';
-import '../widgets/step5_components.dart';
+import '../widgets/breaks_section.dart';
+import '../widgets/days_counter.dart';
+import '../widgets/speed_slider.dart';
+import '../widgets/start_date_time_picker.dart';
 
 class PlanStep4 extends StatelessWidget {
   const PlanStep4({super.key});
@@ -22,7 +25,6 @@ class PlanStep4 extends StatelessWidget {
 
     return BlocBuilder<PlanConfigCubit, PlanConfigState>(
       builder: (ctx, state) {
-        // Read unit from session for display conversion
         final unit = ctx.read<RouteSessionCubit>().state.unit;
         final sport = ctx.read<RouteSessionCubit>().state.sport;
         final b = Theme.of(ctx).brightness;

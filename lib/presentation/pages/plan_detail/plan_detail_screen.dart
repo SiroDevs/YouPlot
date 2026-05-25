@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import '../../../domain/entities/route_plan.dart';
-import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/steps/icon_text_button.dart';
 import '../plan_maker/plan_maker_screen.dart';
@@ -81,12 +79,11 @@ class PlanDetailScreen extends StatelessWidget {
   }
 
   void _editPlan(BuildContext context) {
-    final bloc = context.read<RouteBuilderBloc>();
-    bloc.add(ResetAll());
-    bloc.add(SetImportedRoute(plan.route));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const PlanMakerScreen()),
+      MaterialPageRoute(
+        builder: (_) => PlanMakerScreen(importedRoute: plan.route),
+      ),
     );
   }
 }

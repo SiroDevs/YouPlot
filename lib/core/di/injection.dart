@@ -18,7 +18,7 @@ import '../../domain/repositories/plan_repository.dart';
 import '../../domain/repositories/route_repository.dart';
 import '../../presentation/bloc/home/home_bloc.dart';
 import '../../presentation/bloc/location_search/location_search_bloc.dart';
-import '../../presentation/bloc/route_builder/route_builder_bloc.dart';
+import '../../presentation/bloc/route_builder/route_session_cubit.dart';
 import '../../domain/usecases/suggest_waypoints.dart';
 import '../../domain/usecases/build_plan.dart';
 import '../../domain/usecases/build_route.dart';
@@ -53,11 +53,9 @@ Future<void> init() async {
       ),
   );
 
-  // ── Datasources ────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => OsmDatasource(sl<Dio>()));
   sl.registerLazySingleton(() => LocationDatasource());
 
-  // ── Repositories ───────────────────────────────────────────────────────────
   sl.registerLazySingleton<LocationRepository>(
     () => LocationRepositoryImpl(
       sl<LocationDatasource>(),
@@ -75,7 +73,6 @@ Future<void> init() async {
     () => LocalRepositoryImpl(sl<AppDatabase>()),
   );
 
-  // ── Usecases ───────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetCurrentLocation(sl<LocationRepository>()));
   sl.registerLazySingleton(() => SearchPlaces(sl<LocationRepository>()));
   sl.registerLazySingleton(() => BuildRoute(sl<RouteRepository>()));
@@ -83,17 +80,9 @@ Future<void> init() async {
   sl.registerLazySingleton(() => BuildPlan(sl<PlanRepository>()));
   sl.registerLazySingleton(() => ExportPlan(sl<ExportRepository>()));
 
-  // ── Blocs ──────────────────────────────────────────────────────────────────
-  sl.registerFactory(
-    () => RouteBuilderBloc(
-      buildRoute: sl<BuildRoute>(),
-      suggestWaypoints: sl<SuggestWaypoints>(),
-      buildPlan: sl<BuildPlan>(),
-      exportPlan: sl<ExportPlan>(),
-      local: sl<LocalRepository>(),
-      prefs: sl<SharedPreferences>(),
-    ),
-  );
+  sl.registerFactory(() => RouteSessionCubit(sl<SharedPreferences>()));
+
+
   sl.registerFactory(
     () => LocationSearchBloc(
       searchPlaces: sl<SearchPlaces>(),

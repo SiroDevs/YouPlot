@@ -13,9 +13,6 @@ part 'route_session_state.dart';
 const _kSportKey = 'sport_pref_v1';
 const _kUnitKey = 'unit_pref_v1';
 
-/// Lightweight session cubit that only holds data shared between steps:
-/// sport, unit, origin, destination, route, plan, and the map controller.
-/// Each step cubit reads from / writes back to this session.
 class RouteSessionCubit extends Cubit<RouteSessionState> {
   final SharedPreferences _prefs;
 
@@ -33,11 +30,7 @@ class RouteSessionCubit extends Cubit<RouteSessionState> {
           ),
         );
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
-
   void goToStep(AppStep step) => emit(state.copyWith(step: step));
-
-  // ── Setup data ─────────────────────────────────────────────────────────────
 
   void setSport(SportType sport) {
     emit(state.copyWith(sport: sport));
@@ -53,20 +46,14 @@ class RouteSessionCubit extends Cubit<RouteSessionState> {
 
   void setDestination(Location loc) => emit(state.copyWith(destination: loc));
 
-  // ── Route & plan (written by step cubits) ──────────────────────────────────
-
   void setRoute(RouteMap route) =>
       emit(state.copyWith(route: route, step: AppStep.map));
 
   void setPlan(RoutePlan plan) =>
       emit(state.copyWith(plan: plan, step: AppStep.review));
 
-  // ── Map controller ─────────────────────────────────────────────────────────
-
   void setMapController(MapController ctrl) =>
       emit(state.copyWith(mapController: ctrl));
-
-  // ── Import shortcut ────────────────────────────────────────────────────────
 
   void setImportedRoute(RouteMap route) {
     emit(state.copyWith(
@@ -75,8 +62,6 @@ class RouteSessionCubit extends Cubit<RouteSessionState> {
       step: AppStep.plan,
     ));
   }
-
-  // ── Reset ──────────────────────────────────────────────────────────────────
 
   void reset() => emit(RouteSessionState(
         mapController: state.mapController,

@@ -7,7 +7,6 @@ import '../route_builder/route_session_cubit.dart';
 
 part 'review_state.dart';
 
-/// Cubit for Step 5: view daily plan, export in various formats.
 class ReviewCubit extends Cubit<ReviewState> {
   final ExportPlan _exportPlan;
   final RouteSessionCubit _session;
@@ -19,11 +18,7 @@ class ReviewCubit extends Cubit<ReviewState> {
         _session = session,
         super(const ReviewState());
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
-
   void goBack() => _session.goToStep(AppStep.plan);
-
-  // ── Export ─────────────────────────────────────────────────────────────────
 
   Future<void> export(ExportFormat format) async {
     final plan = _session.state.plan;

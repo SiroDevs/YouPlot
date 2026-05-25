@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
-import '../../bloc/route_builder/route_builder_bloc.dart';
+import '../../bloc/waypoints/waypoints_cubit.dart';
 import '../../theme/app_colors.dart';
 import '../maps/map_search_field.dart';
 
@@ -77,12 +77,15 @@ class RoutePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+/// Bottom sheet for adding a custom via-point in Step 2.
+/// Expects [WaypointsCubit] to be available in the widget tree
+/// (passed via BlocProvider.value from PlanStep2).
 class AddViaSheet extends StatelessWidget {
   const AddViaSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<RouteBuilderBloc>();
+    final cubit = context.read<WaypointsCubit>();
     final b = Theme.of(context).brightness;
     return Padding(
       padding: EdgeInsets.only(
@@ -95,21 +98,25 @@ class AddViaSheet extends StatelessWidget {
         Container(
           width: 36, height: 4,
           decoration: BoxDecoration(
-              color: AppColors.border(b),
-              borderRadius: BorderRadius.circular(2)),
+            color: AppColors.border(b),
+            borderRadius: BorderRadius.circular(2),
+          ),
         ),
         const Gap(16),
-        Text('Add a stop',
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary(b))),
+        Text(
+          'Add a stop',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary(b),
+          ),
+        ),
         const Gap(16),
         MapSearchField(
           hint: 'Search town or landmark…',
           brightness: b,
           onSelected: (loc) {
-            bloc.add(AddViaPoint(loc));
+            cubit.addVia(loc);
             Navigator.pop(context);
           },
         ),

@@ -31,8 +31,6 @@ class CacheFailure extends Failure {
   const CacheFailure([super.message = 'Local storage error.']);
 }
 
-// lib/core/errors/exceptions.dart
-
 class NetworkException implements Exception {
   final String message;
   const NetworkException([this.message = 'Network error']);

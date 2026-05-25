@@ -47,8 +47,12 @@ class RouteSessionState extends Equatable {
 
   @override
   List<Object?> get props => [
-        step, sport, unit, origin, destination, route, plan,
-        // mapController intentionally excluded — it's a mutable object
-        // and we don't want UI rebuilds just because the controller moved.
-      ];
+    step,
+    sport,
+    unit,
+    origin,
+    destination,
+    route,
+    plan,
+  ];
 }

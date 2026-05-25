@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/route_map.dart';
-import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/elevation_chart.dart';
 import '../../widgets/state_widgets.dart';
@@ -57,16 +55,9 @@ class RouteDetailScreen extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.map_rounded,
-                          size: 48,
-                          color: AppColors.textMuted(b),
-                        ),
+                        Icon(Icons.map_rounded, size: 48, color: AppColors.textMuted(b)),
                         const Gap(8),
-                        Text(
-                          'Route map',
-                          style: TextStyle(color: AppColors.textMuted(b)),
-                        ),
+                        Text('Route map', style: TextStyle(color: AppColors.textMuted(b))),
                       ],
                     ),
                   ),
@@ -79,10 +70,7 @@ class RouteDetailScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            route.sport.emoji,
-                            style: const TextStyle(fontSize: 20),
-                          ),
+                          Text(route.sport.emoji, style: const TextStyle(fontSize: 20)),
                           const Gap(8),
                           Text(
                             route.sport.label,
@@ -110,8 +98,7 @@ class RouteDetailScreen extends StatelessWidget {
                           const Gap(8),
                           StatCard(
                             label: 'Descent',
-                            value:
-                                '-${Fmt.elevation(route.totalDescent, unit)}',
+                            value: '-${Fmt.elevation(route.totalDescent, unit)}',
                           ).expanded(),
                         ],
                       ),
@@ -127,11 +114,7 @@ class RouteDetailScreen extends StatelessWidget {
                           ),
                         ),
                         const Gap(8),
-                        ElevationChart(
-                          points: route.elevation,
-                          unit: unit,
-                          height: 110,
-                        ),
+                        ElevationChart(points: route.elevation, unit: unit, height: 110),
                       ],
                     ],
                   ),
@@ -139,17 +122,19 @@ class RouteDetailScreen extends StatelessWidget {
               ],
             ),
           ).expanded(),
+
           IconTextButton(
             label: 'Create Plan with this Route',
             icon: Icons.calendar_today_rounded,
             brightness: b,
             onPressed: () {
-              final bloc = context.read<RouteBuilderBloc>();
-              bloc.add(ResetAll());
-              bloc.add(SetImportedRoute(route));
+              // Pass the route to PlanMakerScreen; it seeds the session with
+              // setImportedRoute so the user lands on Step 4 (plan config).
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const PlanMakerScreen()),
+                MaterialPageRoute(
+                  builder: (_) => PlanMakerScreen(importedRoute: route),
+                ),
               );
             },
           ),

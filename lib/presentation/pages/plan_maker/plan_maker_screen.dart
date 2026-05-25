@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/di/injection.dart';
+import '../../../domain/entities/route_map.dart';
 import '../../bloc/route_builder/route_session_cubit.dart';
 import '../../bloc/setup/setup_cubit.dart';
 import '../../bloc/waypoints/waypoints_cubit.dart';
 import '../../bloc/plan_config/plan_config_cubit.dart';
 import '../../bloc/review/review_cubit.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/state_widgets.dart';
 import 'steps/plan_step1.dart';
 import 'steps/plan_step2.dart';
 import 'steps/plan_step3.dart';
@@ -17,16 +18,26 @@ import 'steps/plan_step5.dart';
 
 /// Provides [RouteSessionCubit] and all step-level cubits, then delegates
 /// rendering to the correct step widget based on [RouteSessionState.step].
+///
+/// Pass [importedRoute] when opening from RouteDetailScreen or PlanDetailScreen
+/// to skip setup/waypoints and land directly on the plan-config step.
 class PlanMakerScreen extends StatelessWidget {
-  const PlanMakerScreen({super.key});
+  final RouteMap? importedRoute;
+
+  const PlanMakerScreen({super.key, this.importedRoute});
 
   @override
   Widget build(BuildContext context) {
-    // RouteSessionCubit is the single source of truth for cross-step data.
-    // Each step cubit is created once and kept alive for the session lifetime
-    // so state is not lost when stepping back and forth.
     return BlocProvider<RouteSessionCubit>(
-      create: (_) => sl<RouteSessionCubit>(),
+      create: (_) {
+        final session = sl<RouteSessionCubit>();
+        // Seed from an imported route if provided — this transitions the
+        // session straight to AppStep.plan so the user skips steps 1-3.
+        if (importedRoute != null) {
+          session.setImportedRoute(importedRoute!);
+        }
+        return session;
+      },
       child: Builder(builder: (ctx) {
         final session = ctx.read<RouteSessionCubit>();
         return MultiBlocProvider(
@@ -40,7 +51,7 @@ class PlanMakerScreen extends StatelessWidget {
                 session: session,
               ),
             ),
-            // MapRoute step has no cubit — it reads from session directly.
+            // Step 3 (map) has no cubit — reads session directly.
             BlocProvider(
               create: (_) => PlanConfigCubit(
                 buildPlan: sl(),
@@ -65,28 +76,19 @@ class _PlanMakerBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RouteSessionCubit, RouteSessionState>(
-      // Only rebuild when the step changes — avoids spurious rebuilds from
-      // origin/destination updates deep inside step widgets.
       buildWhen: (prev, next) => prev.step != next.step,
       builder: (ctx, session) {
         final b = Theme.of(ctx).brightness;
         return Scaffold(
           backgroundColor: AppColors.bg(b),
-          body: Stack(
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 280),
-                transitionBuilder: (child, anim) =>
-                    FadeTransition(opacity: anim, child: child),
-                child: KeyedSubtree(
-                  key: ValueKey(session.step),
-                  child: _pageForStep(session.step),
-                ),
-              ),
-              // Global loading overlay for steps that do async work and
-              // want to block the whole screen (waypoints suggestion fetch).
-              // Steps manage their own in-widget loaders otherwise.
-            ],
+          body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 280),
+            transitionBuilder: (child, anim) =>
+                FadeTransition(opacity: anim, child: child),
+            child: KeyedSubtree(
+              key: ValueKey(session.step),
+              child: _pageForStep(session.step),
+            ),
           ),
         );
       },

@@ -9,9 +9,6 @@ import '../../../widgets/maps/map_convas.dart';
 import '../../../widgets/steps/step_header.dart';
 import '../widgets/route_panel.dart';
 
-/// Step 3 — shows a loading spinner while the route is being built by
-/// [WaypointsCubit], then displays the map + route panel once the session
-/// has a route.  No dedicated cubit needed; reads directly from session.
 class PlanStep3 extends StatelessWidget {
   const PlanStep3({super.key});
 
@@ -22,7 +19,6 @@ class PlanStep3 extends StatelessWidget {
         final b = Theme.of(ctx).brightness;
         final isDark = b == Brightness.dark;
 
-        // While route is null we are still generating — show spinner.
         if (session.route == null) {
           return _GeneratingView(brightness: b, isDark: isDark);
         }

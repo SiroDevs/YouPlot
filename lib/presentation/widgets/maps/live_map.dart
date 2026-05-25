@@ -6,9 +6,14 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/location.dart';
-import '../../bloc/route_builder/route_builder_bloc.dart';
+import '../../bloc/route_builder/route_session_cubit.dart';
+import '../../bloc/waypoints/waypoints_cubit.dart';
 import '../../theme/app_colors.dart';
 
+/// Live map shown in the background of Steps 1 & 2.
+/// Reads origin/destination/route from [RouteSessionCubit] and via-points
+/// from [WaypointsCubit]. Both cubits are available anywhere inside
+/// PlanMakerScreen.
 class LiveMap extends StatefulWidget {
   const LiveMap({super.key});
 
@@ -19,28 +24,25 @@ class LiveMap extends StatefulWidget {
 class LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
   final MapController _mapController = MapController();
 
-  // Track last-drawn state to avoid redundant layer rebuilds.
   Location? _lastOrigin;
   Location? _lastDest;
   String? _lastRouteId;
-  bool _tilesFaded = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.read<RouteBuilderBloc>().add(
-          MapControllerReady(_mapController),
-        );
-        _flyToCurrentLocation();
+        // Register the map controller with the session so step cubits can
+        // call fitCamera without needing a direct reference.
+        context.read<RouteSessionCubit>().setMapController(_mapController);
+        _flyToOrigin();
       }
     });
   }
 
-  Future<void> _flyToCurrentLocation() async {
-    final locState = context.read<RouteBuilderBloc>().state;
-    final origin = locState.origin;
+  void _flyToOrigin() {
+    final origin = context.read<RouteSessionCubit>().state.origin;
     if (origin != null) {
       _mapController.move(LatLng(origin.lat, origin.lng), 13);
     }
@@ -49,56 +51,65 @@ class LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // final tileUrl = isDark ? kOsmTileTemplateDark : kOsmTileTemplate;
     final tileUrl = kOsmTileTemplate;
 
-    return BlocConsumer<RouteBuilderBloc, RouteBuilderState>(
+    // Listen to session for origin/destination/route changes.
+    // Listen to waypoints cubit for via-point changes.
+    return BlocConsumer<RouteSessionCubit, RouteSessionState>(
       listenWhen: (prev, curr) =>
           prev.origin != curr.origin ||
           prev.destination != curr.destination ||
           prev.route?.id != curr.route?.id,
-      listener: (ctx, state) => _onStateChange(state),
+      listener: (ctx, state) {
+        _lastOrigin = state.origin;
+        _lastDest = state.destination;
+        _lastRouteId = state.route?.id;
+      },
       buildWhen: (prev, curr) =>
           prev.origin != curr.origin ||
           prev.destination != curr.destination ||
-          prev.route?.id != curr.route?.id ||
-          prev.viaPoints.length != curr.viaPoints.length,
-      builder: (ctx, state) {
-        final markers = _buildMarkers(state);
-        final polylines = _buildPolylines(state);
+          prev.route?.id != curr.route?.id,
+      builder: (ctx, session) {
+        return BlocBuilder<WaypointsCubit, WaypointsState>(
+          buildWhen: (prev, curr) =>
+              prev.viaPoints.length != curr.viaPoints.length,
+          builder: (ctx, waypointState) {
+            final markers = _buildMarkers(session, waypointState.viaPoints);
+            final polylines = _buildPolylines(session);
 
-        return FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            initialCenter: const LatLng(-1.2921, 36.8219),
-            initialZoom: 10,
-            minZoom: 3,
-            maxZoom: 18,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.all,
-            ),
-            onMapReady: _onMapReady,
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: tileUrl,
-              subdomains: isDark
-                  ? const ['a', 'b', 'c', 'd']
-                  : const ['a', 'b', 'c'],
-              userAgentPackageName: kAppPackage,
-              tileProvider: NetworkTileProvider(),
-              tileBuilder: _fadeTileBuilder,
-              errorTileCallback: (tile, err, _) {},
-            ),
-
-            if (polylines.isNotEmpty)
-              PolylineLayer(polylines: polylines),
-            MarkerLayer(markers: markers),
-            RichAttributionWidget(
-              attributions: [TextSourceAttribution(kAppCredits2, onTap: () {})],
-              alignment: AttributionAlignment.bottomRight,
-            ),
-          ],
+            return FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: const LatLng(-1.2921, 36.8219),
+                initialZoom: 10,
+                minZoom: 3,
+                maxZoom: 18,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.all,
+                ),
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: tileUrl,
+                  subdomains: isDark
+                      ? const ['a', 'b', 'c', 'd']
+                      : const ['a', 'b', 'c'],
+                  userAgentPackageName: kAppPackage,
+                  tileProvider: NetworkTileProvider(),
+                  tileBuilder: _fadeTileBuilder,
+                  errorTileCallback: (tile, err, _) {},
+                ),
+                if (polylines.isNotEmpty) PolylineLayer(polylines: polylines),
+                MarkerLayer(markers: markers),
+                RichAttributionWidget(
+                  attributions: [
+                    TextSourceAttribution(kAppCredits2, onTap: () {}),
+                  ],
+                  alignment: AttributionAlignment.bottomRight,
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -113,40 +124,37 @@ class LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
     );
   }
 
-  List<Marker> _buildMarkers(RouteBuilderState state) {
+  List<Marker> _buildMarkers(
+    RouteSessionState session,
+    List<Location> viaPoints,
+  ) {
     final markers = <Marker>[];
 
-    if (state.origin != null) {
-      markers.add(
-        _pinMarker(
-          state.origin!,
-          color: AppColors.primary,
-          icon: Icons.trip_origin_rounded,
-          label: state.origin!.name,
-        ),
-      );
+    if (session.origin != null) {
+      markers.add(_pinMarker(
+        session.origin!,
+        color: AppColors.primary,
+        icon: Icons.trip_origin_rounded,
+        label: session.origin!.name,
+      ));
     }
 
-    if (state.destination != null) {
-      markers.add(
-        _pinMarker(
-          state.destination!,
-          color: Colors.redAccent,
-          icon: Icons.location_on_rounded,
-          label: state.destination!.name,
-        ),
-      );
+    if (session.destination != null) {
+      markers.add(_pinMarker(
+        session.destination!,
+        color: Colors.redAccent,
+        icon: Icons.location_on_rounded,
+        label: session.destination!.name,
+      ));
     }
 
-    for (final via in state.viaPoints) {
-      markers.add(
-        _pinMarker(
-          via,
-          color: Colors.amber.shade700,
-          icon: Icons.radio_button_checked_rounded,
-          small: true,
-        ),
-      );
+    for (final via in viaPoints) {
+      markers.add(_pinMarker(
+        via,
+        color: Colors.amber.shade700,
+        icon: Icons.radio_button_checked_rounded,
+        small: true,
+      ));
     }
 
     return markers;
@@ -208,10 +216,10 @@ class LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
     );
   }
 
-  List<Polyline> _buildPolylines(RouteBuilderState state) {
-    if (state.route == null || state.route!.geometry.isEmpty) return [];
+  List<Polyline> _buildPolylines(RouteSessionState session) {
+    if (session.route == null || session.route!.geometry.isEmpty) return [];
 
-    final points = state.route!.geometry
+    final points = session.route!.geometry
         .map((c) => LatLng(c[1], c[0]))
         .toList();
 
@@ -235,14 +243,5 @@ class LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
         ],
       ),
     ];
-  }
-  void _onMapReady() {
-    _flyToCurrentLocation();
-  }
-
-  void _onStateChange(RouteBuilderState state) {
-    _lastOrigin = state.origin;
-    _lastDest = state.destination;
-    _lastRouteId = state.route?.id;
   }
 }

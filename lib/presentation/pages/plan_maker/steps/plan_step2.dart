@@ -21,7 +21,6 @@ class PlanStep2 extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<WaypointsCubit>();
 
-    // Read origin/destination names from session (they never change here)
     final session = context.read<RouteSessionCubit>();
 
     return BlocBuilder<WaypointsCubit, WaypointsState>(

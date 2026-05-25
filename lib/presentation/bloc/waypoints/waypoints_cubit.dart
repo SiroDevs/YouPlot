@@ -16,7 +16,6 @@ import '../route_builder/route_session_cubit.dart';
 
 part 'waypoints_state.dart';
 
-/// Cubit for Step 2: suggestion vs custom waypoints, then triggers route build.
 class WaypointsCubit extends Cubit<WaypointsState> {
   final SuggestWaypoints _suggestWaypoints;
   final BuildRoute _buildRoute;
@@ -34,8 +33,6 @@ class WaypointsCubit extends Cubit<WaypointsState> {
         _session = session,
         super(const WaypointsState());
 
-  // ── Custom via points ──────────────────────────────────────────────────────
-
   void addVia(Location loc) {
     final updated = [...state.viaPoints, loc];
     emit(state.copyWith(viaPoints: updated));
@@ -46,8 +43,6 @@ class WaypointsCubit extends Cubit<WaypointsState> {
     final updated = [...state.viaPoints]..removeAt(index);
     emit(state.copyWith(viaPoints: updated));
   }
-
-  // ── AI suggestions ─────────────────────────────────────────────────────────
 
   Future<void> requestSuggestions() async {
     final origin = _session.state.origin;
@@ -76,15 +71,12 @@ class WaypointsCubit extends Cubit<WaypointsState> {
 
   void acceptSuggestions() => emit(state.copyWith(usingSuggestions: true));
 
-  // ── Route generation ───────────────────────────────────────────────────────
-
   Future<void> generateRoute() async {
     final origin = _session.state.origin;
     final destination = _session.state.destination;
     if (origin == null || destination == null) return;
 
     emit(state.copyWith(loading: true, clearError: true));
-    // Immediately push session to map step so PlanStep3 shows the spinner
     _session.goToStep(AppStep.map);
 
     final via = state.usingSuggestions
@@ -113,16 +105,12 @@ class WaypointsCubit extends Cubit<WaypointsState> {
     await _local.saveRoute(route);
 
     emit(state.copyWith(loading: false));
-    _session.setRoute(route); // also transitions session to AppStep.map
+    _session.setRoute(route);
 
     _fitCameraLocs([route.origin, route.destination]);
   }
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
-
   void goBack() => _session.goToStep(AppStep.setup);
-
-  // ── Map helpers ────────────────────────────────────────────────────────────
 
   void _fitCamera(List<Location> via) {
     final all = [

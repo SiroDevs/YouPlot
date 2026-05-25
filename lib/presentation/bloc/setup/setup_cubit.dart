@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,8 +12,6 @@ import '../route_builder/route_session_cubit.dart';
 
 part 'setup_state.dart';
 
-/// Cubit for Step 1: sport selector, unit toggle, origin & destination pickers.
-/// Writes back to [RouteSessionCubit] when the user taps "Continue".
 class SetupCubit extends Cubit<SetupState> {
   final RouteSessionCubit _session;
 
@@ -23,8 +22,6 @@ class SetupCubit extends Cubit<SetupState> {
           origin: _session.state.origin,
           destination: _session.state.destination,
         ));
-
-  // ── Local mutations ────────────────────────────────────────────────────────
 
   void setSport(SportType sport) {
     emit(state.copyWith(sport: sport));
@@ -50,14 +47,10 @@ class SetupCubit extends Cubit<SetupState> {
 
   void dismissError() => emit(state.copyWith(clearError: true));
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
-
   void proceed() {
     if (!state.canProceed) return;
     _session.goToStep(AppStep.waypoints);
   }
-
-  // ── Map helper ────────────────────────────────────────────────────────────
 
   void _fitCamera() {
     final ctrl = _session.state.mapController;

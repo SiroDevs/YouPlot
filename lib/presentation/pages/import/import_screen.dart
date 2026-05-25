@@ -8,7 +8,6 @@ import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/location.dart';
 import '../../../domain/entities/route_map.dart';
 import '../../../domain/repositories/local_repository.dart';
-import '../../bloc/route_builder/route_builder_bloc.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/steps/icon_text_button.dart';
 import '../plan_maker/plan_maker_screen.dart';
@@ -127,12 +126,11 @@ class _ImportScreenState extends State<ImportScreen> {
   void _proceedToPlan() {
     final route = _importedRoute;
     if (route == null) return;
-    final routeBloc = context.read<RouteBuilderBloc>();
-    routeBloc.add(ResetAll());
-    routeBloc.add(SetImportedRoute(route));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const PlanMakerScreen()),
+      MaterialPageRoute(
+        builder: (_) => PlanMakerScreen(importedRoute: route),
+      ),
     );
   }
 
