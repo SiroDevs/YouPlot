@@ -43,7 +43,7 @@ class HomeContent extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: state.routes.length,
-              separatorBuilder: (_, _) => const Gap(10),
+              separatorBuilder: (_, __) => const Gap(10),
               itemBuilder: (_, i) => GestureDetector(
                 onTap: () => onRouteSelected(state.routes[i]),
                 child: RouteCard(

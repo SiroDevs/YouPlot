@@ -10,10 +10,6 @@ import '../../bloc/route_builder/route_session_cubit.dart';
 import '../../bloc/waypoints/waypoints_cubit.dart';
 import '../../theme/app_colors.dart';
 
-/// Live map shown in the background of Steps 1 & 2.
-/// Reads origin/destination/route from [RouteSessionCubit] and via-points
-/// from [WaypointsCubit]. Both cubits are available anywhere inside
-/// PlanMakerScreen.
 class LiveMap extends StatefulWidget {
   const LiveMap({super.key});
 

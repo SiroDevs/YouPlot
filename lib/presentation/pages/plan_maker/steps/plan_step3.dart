@@ -31,10 +31,10 @@ class PlanStep3 extends StatelessWidget {
             children: [
               Positioned.fill(
                 child: MapCanvas(
-                  route: route,
+                  sport: route.sport,
                   brightness: b,
                   isDark: isDark,
-                  stepNumber: 2,
+                  stepNumber: 3,
                   totalSteps: 5,
                   onBack: () => ctx.read<RouteSessionCubit>().goToStep(AppStep.waypoints),
                   onReset: () => ctx.read<RouteSessionCubit>().reset(),

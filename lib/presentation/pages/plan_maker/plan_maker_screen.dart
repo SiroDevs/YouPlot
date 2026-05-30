@@ -16,11 +16,6 @@ import 'steps/plan_step3.dart';
 import 'steps/plan_step4.dart';
 import 'steps/plan_step5.dart';
 
-/// Provides [RouteSessionCubit] and all step-level cubits, then delegates
-/// rendering to the correct step widget based on [RouteSessionState.step].
-///
-/// Pass [importedRoute] when opening from RouteDetailScreen or PlanDetailScreen
-/// to skip setup/waypoints and land directly on the plan-config step.
 class PlanMakerScreen extends StatelessWidget {
   final RouteMap? importedRoute;
 
@@ -31,8 +26,6 @@ class PlanMakerScreen extends StatelessWidget {
     return BlocProvider<RouteSessionCubit>(
       create: (_) {
         final session = sl<RouteSessionCubit>();
-        // Seed from an imported route if provided — this transitions the
-        // session straight to AppStep.plan so the user skips steps 1-3.
         if (importedRoute != null) {
           session.setImportedRoute(importedRoute!);
         }
@@ -51,7 +44,6 @@ class PlanMakerScreen extends StatelessWidget {
                 session: session,
               ),
             ),
-            // Step 3 (map) has no cubit — reads session directly.
             BlocProvider(
               create: (_) => PlanConfigCubit(
                 buildPlan: sl(),

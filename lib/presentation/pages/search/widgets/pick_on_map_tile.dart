@@ -57,8 +57,8 @@ class PickOnMapTile extends StatelessWidget {
         final loc = await Navigator.push<Location>(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, _, _) => MapPointPicker(brightness: b),
-            transitionsBuilder: (_, anim, _, child) =>
+            pageBuilder: (_, __, ___) => MapPointPicker(brightness: b),
+            transitionsBuilder: (_, anim, __, child) =>
                 FadeTransition(opacity: anim, child: child),
             transitionDuration: const Duration(milliseconds: 240),
           ),

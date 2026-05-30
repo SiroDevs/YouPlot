@@ -32,9 +32,9 @@ class MapSearchField extends StatelessWidget {
         final loc = await Navigator.push<Location>(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, _, _) =>
+            pageBuilder: (_, __, ___) =>
                 MapPointSearch(hint: hint, showGps: showGps, brightness: b),
-            transitionsBuilder: (_, anim, _, child) => FadeTransition(
+            transitionsBuilder: (_, anim, __, child) => FadeTransition(
               opacity: anim,
               child: SlideTransition(
                 position: Tween(

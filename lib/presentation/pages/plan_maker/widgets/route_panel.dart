@@ -56,7 +56,6 @@ class RoutePanel extends StatelessWidget {
           ),
           const Gap(14),
 
-          // Stats row
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(

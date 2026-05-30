@@ -46,10 +46,10 @@ class _ImportScreenState extends State<ImportScreen> {
 
   Future<void> _pickFile() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['gpx', 'kml', 'tcx', 'fit'],
-        dialogTitle: 'Select a route file',
+        // dialogTitle: 'Select a route file',
       );
 
       if (result == null || result.files.isEmpty) {

@@ -128,8 +128,6 @@ class RouteDetailScreen extends StatelessWidget {
             icon: Icons.calendar_today_rounded,
             brightness: b,
             onPressed: () {
-              // Pass the route to PlanMakerScreen; it seeds the session with
-              // setImportedRoute so the user lands on Step 4 (plan config).
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(

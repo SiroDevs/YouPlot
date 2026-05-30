@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../domain/entities/route_map.dart';
+import '../../../core/constants/app_constants.dart';
 import '../steps/step_header.dart';
 import '../steps/badges.dart';
 import 'map_background.dart';
 
 class MapCanvas extends StatelessWidget {
-  final RouteMap route;
+  final SportType sport;
   final Brightness brightness;
   final bool isDark;
   final VoidCallback onBack;
@@ -16,7 +16,7 @@ class MapCanvas extends StatelessWidget {
 
   const MapCanvas({
     super.key,
-    required this.route,
+    required this.sport,
     required this.brightness,
     required this.isDark,
     required this.onBack,
@@ -46,7 +46,7 @@ class MapCanvas extends StatelessWidget {
 
         Positioned(
           top: 110, left: 12,
-          child: SportBadge(sport: route.sport, brightness: b),
+          child: SportBadge(sport: sport, brightness: b),
         ),
       ],
     );

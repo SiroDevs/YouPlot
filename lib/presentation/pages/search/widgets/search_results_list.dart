@@ -25,7 +25,7 @@ class SearchResultsList extends StatelessWidget {
 
     return ListView.separated(
       itemCount: results.length,
-      separatorBuilder: (_, _) => Divider(height: 0, color: AppColors.border(brightness)),
+      separatorBuilder: (_, __) => Divider(height: 0, color: AppColors.border(brightness)),
       itemBuilder: (context, index) {
         final location = results[index];
         return _ResultTile(

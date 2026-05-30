@@ -37,7 +37,7 @@ class PlanStep4 extends StatelessWidget {
               StepHeader(
                 showBack: true,
                 onBack: cubit.goBack,
-                stepNumber: 3,
+                stepNumber: 4,
                 totalSteps: 5,
               ),
               SingleChildScrollView(

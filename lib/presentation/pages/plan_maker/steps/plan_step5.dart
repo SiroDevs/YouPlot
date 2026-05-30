@@ -60,7 +60,7 @@ class _PlanStep5State extends State<PlanStep5>
               StepHeader(
                 showBack: true,
                 onBack: cubit.goBack,
-                stepNumber: 4,
+                stepNumber: 5,
                 totalSteps: 5,
               ),
 
