@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.youplot"
+    namespace = "com.sirodevs.youplot"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
