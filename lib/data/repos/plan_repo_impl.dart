@@ -10,13 +10,13 @@ import '../../domain/entities/daily_segment.dart';
 import '../../domain/entities/route_break.dart';
 import '../../domain/entities/route_map.dart';
 import '../../domain/entities/route_plan.dart';
-import '../../domain/repositories/plan_repository.dart';
+import '../../domain/repos/plan_repository.dart';
 
-class PlanRepositoryImpl implements PlanRepository {
+class PlanRepoImpl implements PlanRepo {
   final SharedPreferences _prefs;
   final _uuid = const Uuid();
 
-  PlanRepositoryImpl(this._prefs);
+  PlanRepoImpl(this._prefs);
 
   @override
   Future<Either<Failure, RoutePlan>> buildPlan({

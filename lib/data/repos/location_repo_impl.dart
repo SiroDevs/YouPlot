@@ -2,14 +2,14 @@ import 'package:dartz/dartz.dart';
 
 import '../../core/errors/failures.dart';
 import '../../domain/entities/location.dart';
-import '../../domain/repositories/location_repository.dart';
+import '../../domain/repos/location_repo.dart';
 import '../datasources/location_datasource.dart';
 import '../datasources/osm_datasource.dart';
 
-class LocationRepositoryImpl implements LocationRepository {
+class LocationRepoImpl implements LocationRepo {
   final LocationDatasource _gps;
   final OsmDatasource _osm;
-  LocationRepositoryImpl(this._gps, this._osm);
+  LocationRepoImpl(this._gps, this._osm);
 
   @override
   Future<Either<Failure, Location>> getCurrentLocation() async {

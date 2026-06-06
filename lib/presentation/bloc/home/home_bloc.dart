@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/entities/route_map.dart';
 import '../../../domain/entities/route_plan.dart';
-import '../../../domain/repositories/local_repository.dart';
+import '../../../domain/repos/local_repo.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final LocalRepository _local;
+  final LocalRepo _local;
 
   HomeBloc(this._local) : super(const HomeState()) {
     on<LoadHome>(_onLoad);

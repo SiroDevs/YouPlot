@@ -5,10 +5,10 @@ import '../../core/errors/failures.dart';
 import '../../core/usecases/usecase.dart';
 import '../../core/constants/app_constants.dart';
 import '../entities/route_plan.dart';
-import '../repositories/export_repository.dart';
+import '../repos/export_repo.dart';
 
 class ExportPlan extends UseCase<String, ExportPlanParams> {
-  final ExportRepository _repo;
+  final ExportRepo _repo;
   ExportPlan(this._repo);
 
   @override

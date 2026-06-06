@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/usecases/build_plan.dart';
-import '../../../domain/repositories/local_repository.dart';
+import '../../../domain/repos/local_repo.dart';
 import '../route_builder/route_session_cubit.dart';
 
 part 'plan_config_state.dart';
@@ -11,12 +11,12 @@ part 'plan_config_state.dart';
 /// Cubit for Step 4: days, speed, start time, break toggles → build plan.
 class PlanConfigCubit extends Cubit<PlanConfigState> {
   final BuildPlan _buildPlan;
-  final LocalRepository _local;
+  final LocalRepo _local;
   final RouteSessionCubit _session;
 
   PlanConfigCubit({
     required BuildPlan buildPlan,
-    required LocalRepository local,
+    required LocalRepo local,
     required RouteSessionCubit session,
   })  : _buildPlan = buildPlan,
         _local = local,

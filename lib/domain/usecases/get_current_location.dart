@@ -3,10 +3,10 @@ import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
 import '../../core/usecases/usecase.dart';
 import '../entities/location.dart';
-import '../repositories/location_repository.dart';
+import '../repos/location_repo.dart';
 
 class GetCurrentLocation extends NoParamUseCase<Location> {
-  final LocationRepository _repo;
+  final LocationRepo _repo;
   GetCurrentLocation(this._repo);
 
   @override

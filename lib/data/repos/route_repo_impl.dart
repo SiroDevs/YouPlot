@@ -9,14 +9,14 @@ import '../../domain/entities/elevation_point.dart';
 import '../../domain/entities/location.dart';
 import '../../domain/entities/route_map.dart';
 import '../../domain/entities/waypoint.dart';
-import '../../domain/repositories/route_repository.dart';
+import '../../domain/repos/route_repository.dart';
 import '../datasources/osm_datasource.dart';
 
-class RouteRepositoryImpl implements RouteRepository {
+class RouteRepoImpl implements RouteRepo {
   final OsmDatasource _osm;
   final _uuid = const Uuid();
 
-  RouteRepositoryImpl(this._osm);
+  RouteRepoImpl(this._osm);
 
   @override
   Future<Either<Failure, RouteMap>> buildRoute({

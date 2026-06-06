@@ -4,7 +4,7 @@ import '../../core/errors/failures.dart';
 import '../entities/route_map.dart';
 import '../entities/route_plan.dart';
 
-abstract class LocalRepository {
+abstract class LocalRepo {
   Future<Either<Failure, void>> saveRoute(RouteMap route);
   Future<Either<Failure, List<RouteMap>>> loadRoutes({int limit = 20});
   Future<Either<Failure, void>> deleteRoute(String id);

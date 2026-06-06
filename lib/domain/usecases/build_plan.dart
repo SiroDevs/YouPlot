@@ -6,10 +6,10 @@ import '../../core/usecases/usecase.dart';
 import '../../core/constants/app_constants.dart';
 import '../entities/route_map.dart';
 import '../entities/route_plan.dart';
-import '../repositories/plan_repository.dart';
+import '../repos/plan_repository.dart';
 
 class BuildPlan extends UseCase<RoutePlan, BuildPlanParams> {
-  final PlanRepository _repo;
+  final PlanRepo _repo;
   BuildPlan(this._repo);
 
   @override

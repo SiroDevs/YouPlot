@@ -6,7 +6,7 @@ import '../entities/location.dart';
 import '../entities/route_map.dart';
 import '../entities/waypoint.dart';
 
-abstract class RouteRepository {
+abstract class RouteRepo {
   Future<Either<Failure, RouteMap>> buildRoute({
     required Location origin,
     required Location destination,

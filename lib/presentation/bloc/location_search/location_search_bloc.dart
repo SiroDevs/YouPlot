@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../domain/entities/location.dart';
-import '../../../domain/repositories/location_repository.dart';
+import '../../../domain/repos/location_repo.dart';
 import '../../../domain/usecases/get_current_location.dart';
 import '../../../domain/usecases/search_places.dart';
 
@@ -19,7 +19,7 @@ const _kMaxHistory = 8;
 class LocationSearchBloc extends Bloc<LocationSearchEvent, LocationSearchState> {
   final SearchPlaces _searchPlaces;
   final GetCurrentLocation _getCurrentLocation;
-  final LocationRepository _locationRepo;
+  final LocationRepo _locationRepo;
   final SharedPreferences _prefs;
 
   Timer? _debounce;
@@ -27,7 +27,7 @@ class LocationSearchBloc extends Bloc<LocationSearchEvent, LocationSearchState> 
   LocationSearchBloc({
     required SearchPlaces searchPlaces,
     required GetCurrentLocation getCurrentLocation,
-    required LocationRepository locationRepo,
+    required LocationRepo locationRepo,
     required SharedPreferences prefs,
   })  : _searchPlaces = searchPlaces,
         _getCurrentLocation = getCurrentLocation,

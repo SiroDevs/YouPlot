@@ -4,10 +4,10 @@ import 'package:equatable/equatable.dart';
 import '../../core/errors/failures.dart';
 import '../../core/usecases/usecase.dart';
 import '../entities/location.dart';
-import '../repositories/location_repository.dart';
+import '../repos/location_repo.dart';
 
 class SearchPlaces extends UseCase<List<Location>, SearchPlacesParams> {
-  final LocationRepository _repo;
+  final LocationRepo _repo;
   SearchPlaces(this._repo);
 
   @override

@@ -10,9 +10,9 @@ import '../../core/constants/app_constants.dart';
 import '../../core/errors/failures.dart';
 import '../../core/utils/formatters.dart';
 import '../../domain/entities/route_plan.dart';
-import '../../domain/repositories/export_repository.dart';
+import '../../domain/repos/export_repo.dart';
 
-class ExportRepositoryImpl implements ExportRepository {
+class ExportRepoImpl implements ExportRepo {
   @override
   Future<Either<Failure, String>> toGpx(RoutePlan plan) async {
     try {

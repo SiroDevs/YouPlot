@@ -7,7 +7,7 @@ import 'package:styled_widget/styled_widget.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/location.dart';
 import '../../../domain/entities/route_map.dart';
-import '../../../domain/repositories/local_repository.dart';
+import '../../../domain/repos/local_repo.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/steps/icon_text_button.dart';
 import '../plan_maker/plan_maker_screen.dart';
@@ -96,7 +96,7 @@ class _ImportScreenState extends State<ImportScreen> {
         _importedRoute = route;
       });
 
-      final local = context.read<LocalRepository>();
+      final local = context.read<LocalRepo>();
       await local.saveRoute(route);
     } catch (e) {
       if (!mounted) return;

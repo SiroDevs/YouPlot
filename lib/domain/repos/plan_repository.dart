@@ -5,7 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../entities/route_map.dart';
 import '../entities/route_plan.dart';
 
-abstract class PlanRepository {
+abstract class PlanRepo {
   Future<Either<Failure, RoutePlan>> buildPlan({
     required RouteMap route,
     required int days,

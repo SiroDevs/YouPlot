@@ -11,15 +11,15 @@ import '../../domain/entities/route_break.dart';
 import '../../domain/entities/route_map.dart';
 import '../../domain/entities/route_plan.dart';
 import '../../domain/entities/waypoint.dart';
-import '../../domain/repositories/local_repository.dart';
+import '../../domain/repos/local_repo.dart';
 import '../local/app_database.dart';
 import '../local/entities/plan_entity.dart';
 import '../local/entities/route_entity.dart';
 
-class LocalRepositoryImpl implements LocalRepository {
+class LocalRepoImpl implements LocalRepo {
   final AppDatabase _db;
 
-  LocalRepositoryImpl(this._db);
+  LocalRepoImpl(this._db);
 
   @override
   Future<Either<Failure, void>> saveRoute(RouteMap route) async {
