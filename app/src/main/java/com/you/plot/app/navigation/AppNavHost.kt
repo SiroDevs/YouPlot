@@ -1,10 +1,12 @@
 package com.you.plot.app.navigation
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -23,8 +25,6 @@ import com.you.plot.feature.plan.view.screen.PlanListScreen
 import com.you.plot.feature.route.view.screen.RouteListScreen
 import com.you.plot.feature.route.view.screen.RoutePlotterScreen
 import com.you.plot.feature.tracker.view.screen.TrackerScreen
-
-// ─── Bottom nav items ─────────────────────────────────────────────────────────
 
 data class BottomNavItem(val route: String, val label: String, val icon: ImageVector)
 
@@ -68,12 +68,12 @@ fun AppNavHost(
                 }
             }
         },
-    ) { _ ->
+    ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = Routes.ROUTE_LIST,
+            modifier = Modifier.padding(innerPadding),
         ) {
-            // ── Routes ──────────────────────────────────────────────────────
             composable(Routes.ROUTE_LIST) {
                 RouteListScreen(
                     viewModel = hiltViewModel(),
@@ -90,7 +90,6 @@ fun AppNavHost(
                 )
             }
 
-            // ── Plans ────────────────────────────────────────────────────────
             composable(Routes.PLAN_LIST) {
                 PlanListScreen(
                     viewModel = hiltViewModel(),
@@ -129,7 +128,6 @@ fun AppNavHost(
                 )
             }
 
-            // ── Tracker ──────────────────────────────────────────────────────
             composable(
                 route = Routes.TRACKER,
                 arguments = listOf(navArgument("planId") { type = NavType.LongType }),

@@ -69,7 +69,7 @@ devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 io-sentry = { id = "io.sentry.android.gradle", version.ref = "sentry" }
 
 # Convention plugin aliases (defined in build-logic)
-you.plot-android-library = { id = "you.plot.android.library", version = "unspecified" }
-you.plot-android-library-compose = { id = "you.plot.android.library.compose", version = "unspecified" }
-you.plot-android-feature = { id = "you.plot.android.feature", version = "unspecified" }
-you.plot-hilt = { id = "you.plot.hilt", version = "unspecified" }
+you-plot-android-library = { id = "you.plot.android.library", version = "unspecified" }
+you-plot-android-library-compose = { id = "you.plot.android.library.compose", version = "unspecified" }
+you-plot-android-feature = { id = "you.plot.android.feature", version = "unspecified" }
+you-plot-hilt = { id = "you.plot.hilt", version = "unspecified" }

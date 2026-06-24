@@ -10,7 +10,6 @@ android {
 dependencies {
     api(project(":core:common"))
     api(project(":core:database"))
-    api(project(":core:network"))
 
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.core.ktx)
