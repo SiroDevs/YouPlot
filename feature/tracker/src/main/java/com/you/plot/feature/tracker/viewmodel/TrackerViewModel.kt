@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.you.plot.core.domain.entity.*
-import com.you.plot.core.domain.repository.LocationRepository
+import com.you.plot.core.domain.repos.LocationRepository
 import com.you.plot.core.domain.usecase.tracker.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*

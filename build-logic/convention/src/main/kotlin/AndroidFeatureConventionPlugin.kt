@@ -11,8 +11,8 @@ import org.gradle.kotlin.dsl.dependencies
 class AndroidFeatureConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("swahilib.android.library.compose")
-            pluginManager.apply("swahilib.hilt")
+            pluginManager.apply("you.plot.android.library.compose")
+            pluginManager.apply("you.plot.hilt")
 
             dependencies {
                 "implementation"(project(":core:ui"))

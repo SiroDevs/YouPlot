@@ -1,16 +1,24 @@
-package com.you.plot.core.data.repository
+package com.you.plot.core.data.impls
 
-import com.you.plot.core.database.converter.*
-import com.you.plot.core.database.daos.*
-import com.you.plot.core.domain.entity.*
-import com.you.plot.core.domain.repository.*
+import com.you.plot.core.database.converter.toDomain
+import com.you.plot.core.database.converter.toEntity
+import com.you.plot.core.database.daos.PlanDao
+import com.you.plot.core.database.daos.PlanEventDao
+import com.you.plot.core.database.daos.RouteDao
+import com.you.plot.core.database.daos.SessionDao
+import com.you.plot.core.domain.entity.ActivityPlan
+import com.you.plot.core.domain.entity.ActivitySession
+import com.you.plot.core.domain.entity.Route
+import com.you.plot.core.domain.repos.PlanRepo
+import com.you.plot.core.domain.repos.RouteRepo
+import com.you.plot.core.domain.repos.SessionRepo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class RouteRepositoryImpl @Inject constructor(
+class RouteRepoImpl @Inject constructor(
     private val routeDao: RouteDao,
-) : RouteRepository {
+) : RouteRepo {
     override fun getAllRoutes(): Flow<List<Route>> =
         routeDao.getAllRoutes().map { list -> list.map { it.toDomain() } }
 
@@ -25,10 +33,10 @@ class RouteRepositoryImpl @Inject constructor(
     override suspend fun updateRoute(route: Route) = routeDao.updateRoute(route.toEntity())
 }
 
-class PlanRepositoryImpl @Inject constructor(
+class PlanRepoImpl @Inject constructor(
     private val planDao: PlanDao,
     private val planEventDao: PlanEventDao,
-) : PlanRepository {
+) : PlanRepo {
     override fun getAllPlans(): Flow<List<ActivityPlan>> =
         planDao.getAllPlans().map { list ->
             list.map { entity ->
@@ -67,9 +75,9 @@ class PlanRepositoryImpl @Inject constructor(
     }
 }
 
-class SessionRepositoryImpl @Inject constructor(
+class SessionRepoImpl @Inject constructor(
     private val sessionDao: SessionDao,
-) : SessionRepository {
+) : SessionRepo {
     override fun getSessionsByPlanId(planId: Long): Flow<List<ActivitySession>> =
         sessionDao.getSessionsByPlanId(planId).map { list -> list.map { it.toDomain() } }
 

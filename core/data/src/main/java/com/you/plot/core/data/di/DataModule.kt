@@ -1,7 +1,7 @@
 package com.you.plot.core.data.di
 
-import com.you.plot.core.data.repository.*
-import com.you.plot.core.domain.repository.*
+import com.you.plot.core.data.impls.*
+import com.you.plot.core.domain.repos.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

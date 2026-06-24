@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.swahilib.android.library)
-    alias(libs.plugins.swahilib.hilt)
+    alias(libs.plugins.you.plot.android.library)
+    alias(libs.plugins.you.plot.hilt)
 }
 
 android {
@@ -10,8 +10,12 @@ android {
 dependencies {
     api(project(":core:common"))
     api(project(":core:database"))
-    api(project(":core:domain"))
+    api(project(":core:network"))
 
+    implementation(libs.androidx.compose.material)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.play.services.location)
+
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 }

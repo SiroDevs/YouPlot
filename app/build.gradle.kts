@@ -3,7 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.swahilib.hilt)
+    alias(libs.plugins.you.plot.hilt)
     alias(libs.plugins.devtools.ksp)
     id("kotlin-parcelize")
     alias(libs.plugins.io.sentry)

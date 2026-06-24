@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.swahilib.android.library)
-    alias(libs.plugins.swahilib.hilt)
+    alias(libs.plugins.you.plot.android.library)
+    alias(libs.plugins.you.plot.hilt)
     alias(libs.plugins.devtools.ksp)
     id("kotlin-parcelize")
 }

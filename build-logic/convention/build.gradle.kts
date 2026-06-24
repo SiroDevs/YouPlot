@@ -33,19 +33,19 @@ fun Provider<PluginDependency>.toDep() = map {
 gradlePlugin {
     plugins {
         register("androidLibrary") {
-            id = "swahilib.android.library"
+            id = "you.plot.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
         }
         register("androidLibraryCompose") {
-            id = "swahilib.android.library.compose"
+            id = "you.plot.android.library.compose"
             implementationClass = "AndroidLibraryComposeConventionPlugin"
         }
         register("androidFeature") {
-            id = "swahilib.android.feature"
+            id = "you.plot.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
         }
         register("hilt") {
-            id = "swahilib.hilt"
+            id = "you.plot.hilt"
             implementationClass = "HiltConventionPlugin"
         }
     }

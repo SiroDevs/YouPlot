@@ -12,7 +12,7 @@ import org.gradle.kotlin.dsl.dependencies
 class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("swahilib.android.library")
+            pluginManager.apply("you.plot.android.library")
             pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
 
             dependencies {

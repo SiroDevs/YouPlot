@@ -1,4 +1,4 @@
-package com.you.plot.core.domain.repository
+package com.you.plot.core.domain.repos
 
 import com.you.plot.core.domain.entity.ActivitySession
 import com.you.plot.core.domain.entity.ActivityPlan
@@ -6,7 +6,7 @@ import com.you.plot.core.domain.entity.LatLng
 import com.you.plot.core.domain.entity.Route
 import kotlinx.coroutines.flow.Flow
 
-interface RouteRepository {
+interface RouteRepo {
     fun getAllRoutes(): Flow<List<Route>>
     suspend fun getRouteById(id: Long): Route?
     suspend fun saveRoute(route: Route): Long
@@ -14,7 +14,7 @@ interface RouteRepository {
     suspend fun updateRoute(route: Route)
 }
 
-interface PlanRepository {
+interface PlanRepo {
     fun getAllPlans(): Flow<List<ActivityPlan>>
     fun getPlansByRouteId(routeId: Long): Flow<List<ActivityPlan>>
     suspend fun getPlanById(id: Long): ActivityPlan?
@@ -23,7 +23,7 @@ interface PlanRepository {
     suspend fun updatePlan(plan: ActivityPlan)
 }
 
-interface SessionRepository {
+interface SessionRepo {
     fun getSessionsByPlanId(planId: Long): Flow<List<ActivitySession>>
     suspend fun getSessionById(id: Long): ActivitySession?
     suspend fun getActiveSession(): ActivitySession?
@@ -32,8 +32,7 @@ interface SessionRepository {
     suspend fun deleteSession(id: Long)
 }
 
-/** Wraps FusedLocationProviderClient as a clean-arch interface */
-interface LocationRepository {
+interface LocationRepo {
     fun getLocationUpdates(intervalMs: Long): Flow<LatLng>
     suspend fun getLastKnownLocation(): LatLng?
 }

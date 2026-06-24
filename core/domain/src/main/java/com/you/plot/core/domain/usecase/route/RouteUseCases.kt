@@ -1,7 +1,7 @@
 package com.you.plot.core.domain.usecase.route
 
 import com.you.plot.core.domain.entity.Route
-import com.you.plot.core.domain.repository.RouteRepository
+import com.you.plot.core.domain.repos.RouteRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

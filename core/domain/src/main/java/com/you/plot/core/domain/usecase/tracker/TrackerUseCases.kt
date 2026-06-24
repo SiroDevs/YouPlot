@@ -4,9 +4,9 @@ import com.you.plot.core.domain.entity.ActivitySession
 import com.you.plot.core.domain.entity.LatLng
 import com.you.plot.core.domain.entity.SessionStatus
 import com.you.plot.core.domain.entity.WaypointProgress
-import com.you.plot.core.domain.repository.PlanRepository
-import com.you.plot.core.domain.repository.RouteRepository
-import com.you.plot.core.domain.repository.SessionRepository
+import com.you.plot.core.domain.repos.PlanRepository
+import com.you.plot.core.domain.repos.RouteRepository
+import com.you.plot.core.domain.repos.SessionRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import kotlin.math.*

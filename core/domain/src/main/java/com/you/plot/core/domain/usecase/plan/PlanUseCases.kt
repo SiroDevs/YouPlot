@@ -2,8 +2,8 @@ package com.you.plot.core.domain.usecase.plan
 
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.domain.entity.PlanEvent
-import com.you.plot.core.domain.repository.PlanRepository
-import com.you.plot.core.domain.repository.RouteRepository
+import com.you.plot.core.domain.repos.PlanRepository
+import com.you.plot.core.domain.repos.RouteRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

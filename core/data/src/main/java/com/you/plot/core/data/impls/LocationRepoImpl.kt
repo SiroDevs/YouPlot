@@ -1,21 +1,25 @@
-package com.you.plot.core.data.repository
+package com.you.plot.core.data.impls
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Looper
-import com.google.android.gms.location.*
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.you.plot.core.domain.entity.LatLng
-import com.you.plot.core.domain.repository.LocationRepository
+import com.you.plot.core.domain.repos.LocationRepo
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class LocationRepositoryImpl @Inject constructor(
+class LocationRepoImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-) : LocationRepository {
+) : LocationRepo {
 
     private val fusedClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)

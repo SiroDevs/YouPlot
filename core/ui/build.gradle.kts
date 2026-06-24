@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.swahilib.android.library.compose)
+    alias(libs.plugins.you.plot.android.library.compose)
 }
 
 android {

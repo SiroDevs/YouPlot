@@ -2,14 +2,12 @@ package com.you.plot.feature.tracker.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.you.plot.core.common.utils.NotifConstants
-import com.you.plot.core.domain.repository.LocationRepository
-import com.you.plot.core.domain.repository.SessionRepository
+import com.you.plot.core.domain.repos.LocationRepository
 import com.you.plot.core.domain.usecase.tracker.CompleteSessionUseCase
 import com.you.plot.core.domain.usecase.tracker.GetActiveSessionUseCase
 import com.you.plot.core.domain.usecase.tracker.UpdateSessionLocationUseCase
