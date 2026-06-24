@@ -1,40 +1,37 @@
-package com.you.plot.feature.route.viewmodel
+/*
+ * Copyright 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.you.plot.feature.route.plotter.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.you.plot.core.domain.entity.LatLng
+import com.you.plot.core.domain.entity.Route
+import com.you.plot.core.domain.entity.SportType
+import com.you.plot.core.domain.entity.Waypoint
+import com.you.plot.core.domain.usecase.route.DeleteRouteUseCase
+import com.you.plot.core.domain.usecase.route.SaveRouteUseCase
+import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.you.plot.core.domain.entity.*
-import com.you.plot.core.domain.usecase.route.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class RouteListUiState(
-    val routes: List<Route> = emptyList(),
-    val isLoading: Boolean = true,
-)
-
-data class RoutePlotterUiState(
-    val name: String = "",
-    val description: String = "",
-    val sportType: SportType = SportType.RUNNING,
-    val startPoint: LatLng? = null,
-    val endPoint: LatLng? = null,
-    val waypoints: List<LatLng> = emptyList(),
-    val isRoundTrip: Boolean = false,
-    val isSaving: Boolean = false,
-    val savedRouteId: Long? = null,
-    val error: String? = null,
-)
-
-@HiltViewModel
-class RouteListViewModel @Inject constructor(
-    getAllRoutesUseCase: GetAllRoutesUseCase,
-) : ViewModel() {
-    val uiState: StateFlow<RouteListUiState> = getAllRoutesUseCase()
-        .map { RouteListUiState(routes = it, isLoading = false) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RouteListUiState())
-}
 
 @HiltViewModel
 class RoutePlotterViewModel @Inject constructor(
@@ -95,7 +92,9 @@ class RoutePlotterViewModel @Inject constructor(
         return all.mapIndexed { index, latLng ->
             Waypoint(
                 routeId = 0L,
-                name = when (index) { 0 -> "Start"; all.lastIndex -> "Finish"; else -> "Waypoint $index" },
+                name = when (index) {
+                    0 -> "Start"; all.lastIndex -> "Finish"; else -> "Waypoint $index"
+                },
                 position = latLng,
                 orderIndex = index,
                 isStopPlanned = index != 0 && index != all.lastIndex,
@@ -113,8 +112,8 @@ class RoutePlotterViewModel @Inject constructor(
         val dLat = Math.toRadians(b.latitude - a.latitude)
         val dLng = Math.toRadians(b.longitude - a.longitude)
         val h = Math.sin(dLat / 2).let { it * it } +
-                Math.cos(Math.toRadians(a.latitude)) * Math.cos(Math.toRadians(b.latitude)) *
-                Math.sin(dLng / 2).let { it * it }
+            Math.cos(Math.toRadians(a.latitude)) * Math.cos(Math.toRadians(b.latitude)) *
+            Math.sin(dLng / 2).let { it * it }
         return r * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
     }
 }

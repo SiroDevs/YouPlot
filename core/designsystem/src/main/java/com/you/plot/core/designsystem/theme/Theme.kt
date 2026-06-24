@@ -142,4 +142,3 @@ fun AppTheme(
         shapes = shapes,
     )
 }
-enum class ThemeMode { LIGHT, DARK, SYSTEM }

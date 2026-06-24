@@ -19,12 +19,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.you.plot.core.common.utils.Routes
-import com.you.plot.feature.plan.view.screen.PlanCreatorScreen
-import com.you.plot.feature.plan.view.screen.PlanDetailScreen
-import com.you.plot.feature.plan.view.screen.PlanListScreen
-import com.you.plot.feature.route.view.screen.RouteListScreen
-import com.you.plot.feature.route.view.screen.RoutePlotterScreen
-import com.you.plot.feature.tracker.view.screen.TrackerScreen
+import com.you.plot.core.data.repos.PrefsRepo
+import com.you.plot.core.data.repos.ThemeRepo
+import com.you.plot.feature.plan.creator.view.PlanCreatorScreen
+import com.you.plot.feature.plan.details.view.PlanDetailScreen
+import com.you.plot.feature.plan.list.view.PlanListScreen
+import com.you.plot.feature.route.list.view.RouteListScreen
+import com.you.plot.feature.route.plotter.view.RoutePlotterScreen
+import com.you.plot.feature.tracker.view.TrackerScreen
 
 data class BottomNavItem(val route: String, val label: String, val icon: ImageVector)
 
@@ -36,6 +38,8 @@ val bottomNavItems = listOf(
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
+    themeRepo: ThemeRepo,
+    prefsRepo: PrefsRepo,
 ) {
     val navBackStack by navController.currentBackStackEntryAsState()
     val currentDest = navBackStack?.destination

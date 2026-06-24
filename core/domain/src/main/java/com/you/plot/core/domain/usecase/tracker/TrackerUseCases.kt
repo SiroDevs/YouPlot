@@ -4,21 +4,21 @@ import com.you.plot.core.domain.entity.ActivitySession
 import com.you.plot.core.domain.entity.LatLng
 import com.you.plot.core.domain.entity.SessionStatus
 import com.you.plot.core.domain.entity.WaypointProgress
-import com.you.plot.core.domain.repos.PlanRepository
-import com.you.plot.core.domain.repos.RouteRepository
-import com.you.plot.core.domain.repos.SessionRepository
+import com.you.plot.core.domain.repos.PlanRepo
+import com.you.plot.core.domain.repos.RouteRepo
+import com.you.plot.core.domain.repos.SessionRepo
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import kotlin.math.*
 
 class StartSessionUseCase @Inject constructor(
-    private val sessionRepository: SessionRepository,
-    private val planRepository: PlanRepository,
-    private val routeRepository: RouteRepository,
+    private val sessionRepo: SessionRepo,
+    private val planRepo: PlanRepo,
+    private val routeRepo: RouteRepo,
 ) {
     suspend operator fun invoke(planId: Long): Long {
-        val plan = requireNotNull(planRepository.getPlanById(planId)) { "Plan not found" }
-        val route = requireNotNull(routeRepository.getRouteById(plan.routeId)) { "Route not found" }
+        val plan = requireNotNull(planRepo.getPlanById(planId)) { "Plan not found" }
+        val route = requireNotNull(routeRepo.getRouteById(plan.routeId)) { "Route not found" }
 
         val waypointProgress = route.waypoints.map { wp ->
             val event = plan.events.firstOrNull { it.waypointId == wp.id }
@@ -37,12 +37,12 @@ class StartSessionUseCase @Inject constructor(
             startedAtMillis = System.currentTimeMillis(),
             waypointProgress = waypointProgress,
         )
-        return sessionRepository.saveSession(session)
+        return sessionRepo.saveSession(session)
     }
 }
 
 class UpdateSessionLocationUseCase @Inject constructor(
-    private val sessionRepository: SessionRepository,
+    private val sessionRepo: SessionRepo,
 ) {
     suspend operator fun invoke(
         sessionId: Long,
@@ -50,50 +50,50 @@ class UpdateSessionLocationUseCase @Inject constructor(
         speedKmh: Double,
         elapsedSeconds: Long,
     ) {
-        val session = sessionRepository.getSessionById(sessionId) ?: return
+        val session = sessionRepo.getSessionById(sessionId) ?: return
         val updated = session.recalculate(newLocation, speedKmh, elapsedSeconds)
-        sessionRepository.updateSession(updated)
+        sessionRepo.updateSession(updated)
     }
 }
 
 class PauseSessionUseCase @Inject constructor(
-    private val sessionRepository: SessionRepository
+    private val sessionRepo: SessionRepo
 ) {
     suspend operator fun invoke(sessionId: Long) {
-        val session = sessionRepository.getSessionById(sessionId) ?: return
-        sessionRepository.updateSession(session.copy(status = SessionStatus.PAUSED))
+        val session = sessionRepo.getSessionById(sessionId) ?: return
+        sessionRepo.updateSession(session.copy(status = SessionStatus.PAUSED))
     }
 }
 
 class ResumeSessionUseCase @Inject constructor(
-    private val sessionRepository: SessionRepository
+    private val sessionRepo: SessionRepo
 ) {
     suspend operator fun invoke(sessionId: Long) {
-        val session = sessionRepository.getSessionById(sessionId) ?: return
-        sessionRepository.updateSession(session.copy(status = SessionStatus.IN_PROGRESS))
+        val session = sessionRepo.getSessionById(sessionId) ?: return
+        sessionRepo.updateSession(session.copy(status = SessionStatus.IN_PROGRESS))
     }
 }
 
 class CompleteSessionUseCase @Inject constructor(
-    private val sessionRepository: SessionRepository
+    private val sessionRepo: SessionRepo
 ) {
     suspend operator fun invoke(sessionId: Long) {
-        val session = sessionRepository.getSessionById(sessionId) ?: return
-        sessionRepository.updateSession(session.copy(status = SessionStatus.COMPLETED))
+        val session = sessionRepo.getSessionById(sessionId) ?: return
+        sessionRepo.updateSession(session.copy(status = SessionStatus.COMPLETED))
     }
 }
 
 class GetActiveSessionUseCase @Inject constructor(
-    private val sessionRepository: SessionRepository
+    private val sessionRepo: SessionRepo
 ) {
-    suspend operator fun invoke(): ActivitySession? = sessionRepository.getActiveSession()
+    suspend operator fun invoke(): ActivitySession? = sessionRepo.getActiveSession()
 }
 
 class GetSessionsByPlanUseCase @Inject constructor(
-    private val sessionRepository: SessionRepository
+    private val sessionRepo: SessionRepo
 ) {
     operator fun invoke(planId: Long): Flow<List<ActivitySession>> =
-        sessionRepository.getSessionsByPlanId(planId)
+        sessionRepo.getSessionsByPlanId(planId)
 }
 
 // ─── Extension: recalculate ETAs and distances ───────────────────────────────

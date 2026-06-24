@@ -1,24 +1,24 @@
 package com.you.plot.core.domain.usecase.route
 
 import com.you.plot.core.domain.entity.Route
-import com.you.plot.core.domain.repos.RouteRepository
+import com.you.plot.core.domain.repos.RouteRepo
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetAllRoutesUseCase @Inject constructor(
-    private val repository: RouteRepository
+    private val repository: RouteRepo
 ) {
     operator fun invoke(): Flow<List<Route>> = repository.getAllRoutes()
 }
 
 class GetRouteByIdUseCase @Inject constructor(
-    private val repository: RouteRepository
+    private val repository: RouteRepo
 ) {
     suspend operator fun invoke(id: Long): Route? = repository.getRouteById(id)
 }
 
 class SaveRouteUseCase @Inject constructor(
-    private val repository: RouteRepository
+    private val repository: RouteRepo
 ) {
     suspend operator fun invoke(route: Route): Long {
         require(route.name.isNotBlank()) { "Route name cannot be empty" }
@@ -28,7 +28,7 @@ class SaveRouteUseCase @Inject constructor(
 }
 
 class DeleteRouteUseCase @Inject constructor(
-    private val repository: RouteRepository
+    private val repository: RouteRepo
 ) {
     suspend operator fun invoke(id: Long) = repository.deleteRoute(id)
 }

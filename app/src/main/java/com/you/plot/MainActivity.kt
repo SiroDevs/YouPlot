@@ -7,13 +7,18 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.you.plot.app.navigation.AppNavHost
 import com.you.plot.core.designsystem.theme.AppTheme
-import com.you.plot.core.designsystem.theme.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
 import com.you.plot.core.data.repos.ThemeRepo
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.you.plot.core.data.repos.PrefsRepo
+import com.you.plot.core.data.repos.ThemeMode
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var prefsRepo: PrefsRepo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -21,16 +26,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val themeRepo: ThemeRepo = hiltViewModel()
+
             val themeMode = themeRepo.selectedTheme
             val isDarkTheme = when (themeMode) {
                 ThemeMode.DARK -> true
                 ThemeMode.LIGHT -> false
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
-                else -> true
             }
 
             AppTheme(useDarkTheme = isDarkTheme) {
-                AppNavHost()
+                AppNavHost(themeRepo = themeRepo, prefsRepo = prefsRepo)
             }
         }
     }

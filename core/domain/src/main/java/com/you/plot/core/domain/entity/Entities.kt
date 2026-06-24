@@ -1,7 +1,5 @@
 package com.you.plot.core.domain.entity
 
-// ─── Route ───────────────────────────────────────────────────────────────────
-
 enum class SportType { RUNNING, CYCLING, HIKING, WALKING }
 
 data class LatLng(val latitude: Double, val longitude: Double)
@@ -34,8 +32,6 @@ data class Route(
     val createdAt: Long = System.currentTimeMillis(),
 )
 
-// ─── Plan ────────────────────────────────────────────────────────────────────
-
 data class PlanEvent(
     val id: Long = 0L,
     val planId: Long,
@@ -60,8 +56,6 @@ data class ActivityPlan(
     val events: List<PlanEvent> = emptyList(),
     val createdAt: Long = System.currentTimeMillis(),
 )
-
-// ─── Activity Session ────────────────────────────────────────────────────────
 
 enum class SessionStatus { NOT_STARTED, IN_PROGRESS, PAUSED, COMPLETED }
 

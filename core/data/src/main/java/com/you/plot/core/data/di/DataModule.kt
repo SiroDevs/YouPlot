@@ -1,7 +1,13 @@
 package com.you.plot.core.data.di
 
-import com.you.plot.core.data.impls.*
-import com.you.plot.core.domain.repos.*
+import com.you.plot.core.data.impls.LocationRepoImpl
+import com.you.plot.core.data.impls.PlanRepoImpl
+import com.you.plot.core.data.impls.RouteRepoImpl
+import com.you.plot.core.data.impls.SessionRepoImpl
+import com.you.plot.core.domain.repos.LocationRepo
+import com.you.plot.core.domain.repos.PlanRepo
+import com.you.plot.core.domain.repos.RouteRepo
+import com.you.plot.core.domain.repos.SessionRepo
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,14 +19,14 @@ import javax.inject.Singleton
 abstract class DataModule {
 
     @Binds @Singleton
-    abstract fun bindRouteRepository(impl: RouteRepositoryImpl): RouteRepository
+    abstract fun bindRouteRepo(impl: RouteRepoImpl): RouteRepo
 
     @Binds @Singleton
-    abstract fun bindPlanRepository(impl: PlanRepositoryImpl): PlanRepository
+    abstract fun bindPlanRepo(impl: PlanRepoImpl): PlanRepo
 
     @Binds @Singleton
-    abstract fun bindSessionRepository(impl: SessionRepositoryImpl): SessionRepository
+    abstract fun bindSessionRepo(impl: SessionRepoImpl): SessionRepo
 
     @Binds @Singleton
-    abstract fun bindLocationRepository(impl: LocationRepositoryImpl): LocationRepository
+    abstract fun bindLocationRepo(impl: LocationRepoImpl): LocationRepo
 }

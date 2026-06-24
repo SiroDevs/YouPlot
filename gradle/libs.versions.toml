@@ -22,6 +22,7 @@ hilt-work = "1.2.0"
 workmanager = "2.11.2"
 splashscreen = "1.0.1"
 playServicesLocation = "21.3.0"
+coroutinesPlayServices = "1.8.1"
 osmdroid = "6.1.20"
 ktor = "3.5.0"
 
@@ -57,6 +58,7 @@ androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hilt-w
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt-work" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
 
 [plugins]

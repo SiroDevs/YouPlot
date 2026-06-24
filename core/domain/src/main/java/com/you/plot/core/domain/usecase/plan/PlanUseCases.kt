@@ -2,55 +2,55 @@ package com.you.plot.core.domain.usecase.plan
 
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.domain.entity.PlanEvent
-import com.you.plot.core.domain.repos.PlanRepository
-import com.you.plot.core.domain.repos.RouteRepository
+import com.you.plot.core.domain.repos.PlanRepo
+import com.you.plot.core.domain.repos.RouteRepo
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetAllPlansUseCase @Inject constructor(
-    private val repository: PlanRepository
+    private val repository: PlanRepo
 ) {
     operator fun invoke(): Flow<List<ActivityPlan>> = repository.getAllPlans()
 }
 
 class GetPlansByRouteUseCase @Inject constructor(
-    private val repository: PlanRepository
+    private val repository: PlanRepo
 ) {
     operator fun invoke(routeId: Long): Flow<List<ActivityPlan>> =
         repository.getPlansByRouteId(routeId)
 }
 
 class GetPlanByIdUseCase @Inject constructor(
-    private val repository: PlanRepository
+    private val repository: PlanRepo
 ) {
     suspend operator fun invoke(id: Long): ActivityPlan? = repository.getPlanById(id)
 }
 
 class SavePlanUseCase @Inject constructor(
-    private val planRepository: PlanRepository,
-    private val routeRepository: RouteRepository,
+    private val planRepo: PlanRepo,
+    private val routeRepo: RouteRepo,
 ) {
     suspend operator fun invoke(plan: ActivityPlan): Long {
         require(plan.name.isNotBlank()) { "Plan name cannot be empty" }
-        requireNotNull(routeRepository.getRouteById(plan.routeId)) {
+        requireNotNull(routeRepo.getRouteById(plan.routeId)) {
             "Route ${plan.routeId} does not exist"
         }
-        return planRepository.savePlan(plan)
+        return planRepo.savePlan(plan)
     }
 }
 
 class DeletePlanUseCase @Inject constructor(
-    private val repository: PlanRepository
+    private val repository: PlanRepo
 ) {
     suspend operator fun invoke(id: Long) = repository.deletePlan(id)
 }
 
 /** Generates a default daily schedule from route + speed parameters */
 class GeneratePlanEventsUseCase @Inject constructor(
-    private val routeRepository: RouteRepository,
+    private val routeRepo: RouteRepo,
 ) {
     suspend operator fun invoke(plan: ActivityPlan): List<PlanEvent> {
-        val route = routeRepository.getRouteById(plan.routeId) ?: return emptyList()
+        val route = routeRepo.getRouteById(plan.routeId) ?: return emptyList()
         val events = mutableListOf<PlanEvent>()
         val distancePerDay = if (plan.avgDistancePerDayKm > 0)
             plan.avgDistancePerDayKm else route.totalDistanceKm / plan.numberOfDays

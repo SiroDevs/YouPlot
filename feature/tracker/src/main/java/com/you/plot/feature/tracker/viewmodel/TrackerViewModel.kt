@@ -1,14 +1,40 @@
+/*
+ * Copyright 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.you.plot.feature.tracker.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.you.plot.core.domain.entity.ActivitySession
+import com.you.plot.core.domain.entity.SessionStatus
+import com.you.plot.core.domain.entity.WaypointProgress
+import com.you.plot.core.domain.repos.LocationRepo
+import com.you.plot.core.domain.usecase.tracker.CompleteSessionUseCase
+import com.you.plot.core.domain.usecase.tracker.GetActiveSessionUseCase
+import com.you.plot.core.domain.usecase.tracker.PauseSessionUseCase
+import com.you.plot.core.domain.usecase.tracker.ResumeSessionUseCase
+import com.you.plot.core.domain.usecase.tracker.StartSessionUseCase
+import com.you.plot.core.domain.usecase.tracker.UpdateSessionLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.you.plot.core.domain.entity.*
-import com.you.plot.core.domain.repos.LocationRepository
-import com.you.plot.core.domain.usecase.tracker.*
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,7 +55,7 @@ class TrackerViewModel @Inject constructor(
     private val resumeSessionUseCase: ResumeSessionUseCase,
     private val completeSessionUseCase: CompleteSessionUseCase,
     private val getActiveSessionUseCase: GetActiveSessionUseCase,
-    private val locationRepository: LocationRepository,
+    private val locationRepository: LocationRepo,
 ) : ViewModel() {
 
     private val planId: Long = checkNotNull(savedStateHandle["planId"])
