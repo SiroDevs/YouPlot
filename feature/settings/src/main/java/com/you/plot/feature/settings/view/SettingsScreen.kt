@@ -38,7 +38,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppConstants
 import com.you.plot.core.data.repos.ThemeRepo
@@ -62,7 +61,6 @@ fun SettingsScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
     val theme = themeRepo.selectedTheme
     var showThemeDialog by remember { mutableStateOf(false) }
 
@@ -90,6 +88,7 @@ fun SettingsScreen(
         topBar = {
             AppTopBar(
                 title = "Settings",
+                showGoBack = true,
                 onNavIconClick = onBack,
             )
         },
@@ -105,7 +104,7 @@ fun SettingsScreen(
                     icon = Icons.Default.Palette,
                     title = "Theme",
                     value = themeName(state.themeMode),
-                    onClick = viewModel::showThemeDialog,
+                    onClick = { showThemeDialog = true },
                 )
             }
 

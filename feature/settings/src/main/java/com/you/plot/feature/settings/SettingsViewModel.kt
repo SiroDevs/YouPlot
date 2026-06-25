@@ -45,8 +45,6 @@ class SettingsViewModel @Inject constructor(
         _state.update { it.copy(defaultSport = sport, showDefaultSportDialog = false) }
     }
 
-    fun showThemeDialog() = _state.update { it.copy(showThemeDialog = true) }
-    fun dismissThemeDialog() = _state.update { it.copy(showThemeDialog = false) }
     fun showDefaultSportDialog() = _state.update { it.copy(showDefaultSportDialog = true) }
     fun dismissDefaultSportDialog() = _state.update { it.copy(showDefaultSportDialog = false) }
 }

@@ -94,16 +94,18 @@ fun DashboardScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            if (!state.isEmpty && !state.isLoading) ExtendedFloatingActionButton(
                 onClick = onPlotRoute,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("+ Plot Now") },
+                text = { Text("Plot Now") },
             )
         },
     ) { padding ->
 
         if (state.isLoading) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            Box(Modifier
+                .fillMaxSize()
+                .padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
             return@Scaffold
@@ -111,14 +113,18 @@ fun DashboardScreen(
 
         if (state.isEmpty) {
             EmptyDashboard(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 onGetStarted = onPlotRoute,
             )
             return@Scaffold
         }
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             if (state.recentRoutes.isNotEmpty()) {
@@ -155,13 +161,15 @@ fun DashboardScreen(
             if (state.filteredPlans.isEmpty()) {
                 item {
                     Box(
-                        Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             when (state.planFilter) {
                                 PlanFilter.UPCOMING -> "No upcoming plans"
-                                PlanFilter.PAST     -> "No past plans"
+                                PlanFilter.PAST -> "No past plans"
                                 else -> "No plans yet — create one from a route"
                             },
                             style = MaterialTheme.typography.bodyMedium,
