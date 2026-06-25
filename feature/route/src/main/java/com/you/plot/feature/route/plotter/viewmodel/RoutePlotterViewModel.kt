@@ -2,6 +2,8 @@ package com.you.plot.feature.route.plotter.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.you.plot.core.common.entity.DestinationMode
+import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.domain.entity.ElevationPoint
 import com.you.plot.core.domain.entity.LatLng
 import com.you.plot.core.domain.entity.Route
@@ -9,8 +11,6 @@ import com.you.plot.core.domain.entity.SportType
 import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.domain.usecase.route.DeleteRouteUseCase
 import com.you.plot.core.domain.usecase.route.SaveRouteUseCase
-import com.you.plot.feature.route.list.viewmodel.DestinationMode
-import com.you.plot.feature.route.list.viewmodel.PlotterStage
 import com.you.plot.feature.route.list.viewmodel.RouteCandidate
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.list.viewmodel.SearchResult

@@ -52,7 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.you.plot.feature.plan.details.view.screen.dateFmt
+import com.you.plot.core.common.utils.dateFmt
 import java.util.Calendar
 import java.util.Date
 
@@ -124,7 +124,6 @@ fun AddReminderDialog(
                     placeholder = { Text("e.g. Prepare gear tonight") },
                 )
 
-                // Date picker trigger
                 OutlinedTextField(
                     value = dateFmt.format(Date(selectedDateMillis)),
                     onValueChange = {},
@@ -138,7 +137,6 @@ fun AddReminderDialog(
                     },
                 )
 
-                // Time picker trigger
                 OutlinedTextField(
                     value = "%02d:%02d".format(selectedHour, selectedMinute),
                     onValueChange = {},

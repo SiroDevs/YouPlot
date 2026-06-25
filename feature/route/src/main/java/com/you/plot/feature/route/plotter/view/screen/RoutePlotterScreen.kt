@@ -24,8 +24,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.you.plot.feature.route.list.viewmodel.PlotterStage
-import com.you.plot.feature.route.plotter.view.components.StageProgressBar
+import com.you.plot.core.common.entity.PlotterStage
+import com.you.plot.core.ui.components.state.StageProgressBar
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage1
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage2
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage3

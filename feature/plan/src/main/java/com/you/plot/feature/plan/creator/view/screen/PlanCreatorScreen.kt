@@ -18,7 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.you.plot.feature.plan.creator.view.components.StepIndicator
+import com.you.plot.core.ui.components.state.StepIndicator
 import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep0
 import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep1
 import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep2

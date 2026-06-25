@@ -11,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.ui.components.action.NextButton
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
-import com.you.plot.feature.route.plotter.view.components.NextButton
 import com.you.plot.feature.route.plotter.view.components.RouteTypeCard
 import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 

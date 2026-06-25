@@ -1,4 +1,4 @@
-package com.you.plot.feature.settings.settings.utils
+package com.you.plot.feature.settings.utils
 
 import com.you.plot.core.data.repos.ThemeMode
 import com.you.plot.core.domain.entity.SportType

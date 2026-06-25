@@ -1,4 +1,20 @@
-package com.you.plot.feature.settings.settings.view.screen
+/*
+ * Copyright 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.you.plot.feature.settings.view
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -29,13 +45,13 @@ import com.you.plot.core.common.utils.AppConstants
 import com.you.plot.core.data.repos.ThemeMode
 import com.you.plot.core.domain.entity.SportType
 import com.you.plot.core.designsystem.theme.ThemeSelectorDialog
-import com.you.plot.feature.settings.settings.view.components.PickerDialog
-import com.you.plot.feature.settings.settings.view.components.SettingsDivider
-import com.you.plot.feature.settings.settings.view.components.SettingsInfoItem
-import com.you.plot.feature.settings.settings.view.components.SettingsSection
-import com.you.plot.feature.settings.settings.view.components.SettingsToggleItem
-import com.you.plot.feature.settings.settings.view.components.SettingsValueItem
-import com.you.plot.feature.settings.settings.viewmodel.SettingsViewModel
+import com.you.plot.core.ui.components.action.ToggleItem
+import com.you.plot.core.ui.components.general.InfoDivider
+import com.you.plot.core.ui.components.general.InfoItem
+import com.you.plot.core.ui.components.general.InfoSection
+import com.you.plot.core.ui.components.general.ValueItem
+import com.you.plot.core.ui.components.dialog.PickerDialog
+import com.you.plot.feature.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +63,7 @@ fun SettingsScreen(
 
     if (state.showThemeDialog) {
         ThemeSelectorDialog(
-            current   = state.themeMode,
+            current = state.themeMode,
             onDismiss = viewModel::dismissThemeDialog,
             onThemeSelected = viewModel::setTheme,
         )
@@ -55,8 +71,10 @@ fun SettingsScreen(
 
     if (state.showDefaultSportDialog) {
         PickerDialog(
-            title    = "Default Sport",
-            options  = SportType.entries.map { it to it.name.lowercase().replaceFirstChar { c -> c.uppercase() } },
+            title = "Default Sport",
+            options = SportType.entries.map {
+                it to it.name.lowercase().replaceFirstChar { c -> c.uppercase() }
+            },
             selected = state.defaultSport,
             onDismiss = viewModel::dismissDefaultSportDialog,
             onConfirm = viewModel::setDefaultSport,
@@ -81,46 +99,45 @@ fun SettingsScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState()),
         ) {
-            SettingsSection("Appearance") {
-                SettingsValueItem(
-                    icon    = Icons.Default.Palette,
-                    title   = "Theme",
-                    value   = themeName(state.themeMode),
+            InfoSection("Appearance") {
+                ValueItem(
+                    icon = Icons.Default.Palette,
+                    title = "Theme",
+                    value = themeName(state.themeMode),
                     onClick = viewModel::showThemeDialog,
                 )
             }
 
-            SettingsSection("Activity") {
-                SettingsValueItem(
-                    icon    = Icons.Default.DirectionsRun,
-                    title   = "Default Sport",
-                    value   = state.defaultSport.name.lowercase().replaceFirstChar { it.uppercase() },
+            InfoSection("Activity") {
+                ValueItem(
+                    icon = Icons.Default.DirectionsRun,
+                    title = "Default Sport",
+                    value = state.defaultSport.name.lowercase().replaceFirstChar { it.uppercase() },
                     onClick = viewModel::showDefaultSportDialog,
                 )
-                SettingsDivider()
-                SettingsToggleItem(
-                    icon             = Icons.Default.Straighten,
-                    title            = "Distance Unit",
-                    subtitle         = if (state.distanceUnitMetric) "Kilometres (km)" else "Miles (mi)",
-                    checked          = state.distanceUnitMetric,
-                    onCheckedChange  = viewModel::setDistanceUnitMetric,
+                InfoDivider()
+                ToggleItem(
+                    icon = Icons.Default.Straighten,
+                    title = "Distance Unit",
+                    subtitle = if (state.distanceUnitMetric) "Kilometres (km)" else "Miles (mi)",
+                    checked = state.distanceUnitMetric,
+                    onCheckedChange = viewModel::setDistanceUnitMetric,
                 )
             }
 
-            SettingsSection("Notifications") {
-                SettingsToggleItem(
-                    icon             = Icons.Default.Notifications,
-                    title            = "Plan Reminders",
-                    subtitle         = "Receive reminders for upcoming plans",
-                    checked          = state.notificationsEnabled,
-                    onCheckedChange  = viewModel::setNotificationsEnabled,
+            InfoSection("Notifications") {
+                ToggleItem(
+                    icon = Icons.Default.Notifications,
+                    title = "Plan Reminders",
+                    subtitle = "Receive reminders for upcoming plans",
+                    checked = state.notificationsEnabled,
+                    onCheckedChange = viewModel::setNotificationsEnabled,
                 )
             }
 
-            // ── App info ───────────────────────────────────────────────────────
-            SettingsSection("App") {
-                SettingsInfoItem(
-                    icon  = Icons.Default.Info,
+            InfoSection("App") {
+                InfoItem(
+                    icon = Icons.Default.Info,
                     title = "Version",
                     value = AppConstants.APP_VERSION,
                 )
@@ -133,6 +150,6 @@ fun SettingsScreen(
 
 private fun themeName(mode: ThemeMode) = when (mode) {
     ThemeMode.SYSTEM -> "System default"
-    ThemeMode.LIGHT  -> "Light"
-    ThemeMode.DARK   -> "Dark"
+    ThemeMode.LIGHT -> "Light"
+    ThemeMode.DARK -> "Dark"
 }

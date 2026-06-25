@@ -1,11 +1,11 @@
-package com.you.plot.feature.settings.settings.viewmodel
+package com.you.plot.feature.settings
 
 import androidx.lifecycle.ViewModel
 import com.you.plot.core.data.repos.PrefsRepo
 import com.you.plot.core.data.repos.ThemeMode
 import com.you.plot.core.data.repos.ThemeRepo
 import com.you.plot.core.domain.entity.SportType
-import com.you.plot.feature.settings.settings.utils.SettingsUiState
+import com.you.plot.feature.settings.utils.SettingsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

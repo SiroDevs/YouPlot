@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.feature.plan.details.view.components.AddReminderDialog
 import com.you.plot.feature.plan.details.view.components.DaySummaryCard
@@ -125,7 +126,6 @@ fun PlanDetailScreen(
                 Spacer(Modifier.height(8.dp))
             }
 
-            // ── Day tabs ──────────────────────────────────────────────────
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(plan.numberOfDays) { i ->

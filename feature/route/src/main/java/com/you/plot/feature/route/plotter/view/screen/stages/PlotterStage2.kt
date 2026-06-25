@@ -18,10 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.you.plot.feature.route.list.viewmodel.DestinationMode
+import com.you.plot.core.common.entity.DestinationMode
+import com.you.plot.core.ui.components.action.NextButton
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.plotter.view.components.LocationSearchBar
-import com.you.plot.feature.route.plotter.view.components.NextButton
 import com.you.plot.feature.route.plotter.view.components.PlotterMap
 import com.you.plot.feature.route.plotter.view.components.SelectedPointChip
 import com.you.plot.feature.route.plotter.view.components.SuggestionRow

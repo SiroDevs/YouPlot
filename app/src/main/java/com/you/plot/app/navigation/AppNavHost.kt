@@ -21,7 +21,7 @@ import com.you.plot.feature.route.list.view.RouteListScreen
 import com.you.plot.feature.route.plotter.view.screen.RoutePlotterScreen
 import com.you.plot.feature.extra.about.AboutScreen
 import com.you.plot.feature.extra.help.HelpFeedbackScreen
-import com.you.plot.feature.settings.settings.view.screen.SettingsScreen
+import com.you.plot.feature.settings.view.SettingsScreen
 import com.you.plot.feature.tracker.view.screen.TrackerScreen
 
 @Composable
