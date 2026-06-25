@@ -1,6 +1,6 @@
 package com.you.plot.feature.plan.creator.view.screen
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -14,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.core.ui.components.state.StepIndicator
 import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep0
 import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep1
 import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep2
@@ -48,19 +47,20 @@ fun PlanCreatorScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "New Plan — ${stepTitles.getOrElse(state.currentStep) { "" }}",
+                title = stepTitles.getOrElse(state.currentStep) { "New Plan" },
+                tagline = "New Plan",
                 showGoBack = true,
                 onNavIconClick = {
                     if (state.currentStep > 0) viewModel.prevStep() else onBack()
                 },
+                stepCurrent = state.currentStep,
+                stepTotal = stepTitles.size,
             )
         },
     ) { padding ->
-        Column(Modifier
+        Box(Modifier
             .fillMaxSize()
             .padding(padding)) {
-            StepIndicator(current = state.currentStep, total = stepTitles.size)
-
             when (state.currentStep) {
                 0 -> PlanCreatorStep0(state, viewModel)
                 1 -> PlanCreatorStep1(state, viewModel)

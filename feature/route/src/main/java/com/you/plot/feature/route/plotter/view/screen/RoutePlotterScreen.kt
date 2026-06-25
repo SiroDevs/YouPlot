@@ -7,7 +7,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.core.ui.components.action.NextButton
-import com.you.plot.core.ui.components.state.StepIndicator
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.plotter.view.components.PlotterMap
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage1
@@ -70,65 +68,63 @@ fun RoutePlotterScreen(
                     if (state.stage == PlotterStage.STAGE_1) onBack()
                     else viewModel.goBack()
                 },
+                stepCurrent = state.stage.ordinal,
+                stepTotal = PlotterStage.entries.size,
             )
         },
     ) { padding ->
-        Column(
+        Box(
             Modifier
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            StepIndicator(
-                current = state.stage.ordinal,
-                total = PlotterStage.entries.size,
+            // Layer 0 — shared map, always behind everything
+            PlotterMap(
+                modifier = Modifier.fillMaxSize(),
+                startPoint = state.startPoint,
+                endPoint = state.endPoint,
+                waypoints = state.activeWaypoints,
+                candidates = state.routeCandidates,
+                selectedCandidateId = state.selectedCandidateId,
+                onMapTap = if (state.stage.mapsAreTappable) viewModel::onMapTap else { _ -> },
             )
 
-            Box(Modifier.fillMaxSize()) {
-                PlotterMap(
-                    modifier = Modifier.fillMaxSize(),
-                    startPoint = state.startPoint,
-                    endPoint = state.endPoint,
-                    waypoints = state.activeWaypoints,
-                    candidates = state.routeCandidates,
-                    selectedCandidateId = state.selectedCandidateId,
-                    onMapTap = if (state.stage.mapsAreTappable) viewModel::onMapTap else { _ -> },
+            // Layer 1 — per-stage overlay with slide animation
+            AnimatedContent(
+                targetState = state.stage,
+                transitionSpec = {
+                    val forward = targetState.ordinal > initialState.ordinal
+                    if (forward)
+                        slideInHorizontally { it } + fadeIn() togetherWith
+                            slideOutHorizontally { -it } + fadeOut()
+                    else
+                        slideInHorizontally { -it } + fadeIn() togetherWith
+                            slideOutHorizontally { it } + fadeOut()
+                },
+                label = "stage_transition",
+                modifier = Modifier.fillMaxSize(),
+            ) { stage ->
+                when (stage) {
+                    PlotterStage.STAGE_1 -> PlotterStage1(state, viewModel)
+                    PlotterStage.STAGE_2 -> PlotterStage2(state, viewModel)
+                    PlotterStage.STAGE_3 -> PlotterStage3(state, viewModel)
+                    PlotterStage.STAGE_4 -> PlotterStage4(state, viewModel)
+                    PlotterStage.STAGE_5 -> PlotterStage5(state, viewModel)
+                    PlotterStage.STAGE_6 -> PlotterStage6(state, viewModel)
+                }
+            }
+
+            // Layer 2 — shared Next button pinned to the bottom (Stage 6 returns null)
+            state.stage.nextButtonConfig(state)?.let { cfg ->
+                NextButton(
+                    label = cfg.label,
+                    enabled = cfg.enabled,
+                    onClick = viewModel::advanceStage,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(16.dp),
                 )
-
-                AnimatedContent(
-                    targetState = state.stage,
-                    transitionSpec = {
-                        val forward = targetState.ordinal > initialState.ordinal
-                        if (forward)
-                            slideInHorizontally { it } + fadeIn() togetherWith
-                                slideOutHorizontally { -it } + fadeOut()
-                        else
-                            slideInHorizontally { -it } + fadeIn() togetherWith
-                                slideOutHorizontally { it } + fadeOut()
-                    },
-                    label = "stage_transition",
-                    modifier = Modifier.fillMaxSize(),
-                ) { stage ->
-                    when (stage) {
-                        PlotterStage.STAGE_1 -> PlotterStage1(state, viewModel)
-                        PlotterStage.STAGE_2 -> PlotterStage2(state, viewModel)
-                        PlotterStage.STAGE_3 -> PlotterStage3(state, viewModel)
-                        PlotterStage.STAGE_4 -> PlotterStage4(state, viewModel)
-                        PlotterStage.STAGE_5 -> PlotterStage5(state, viewModel)
-                        PlotterStage.STAGE_6 -> PlotterStage6(state, viewModel)
-                    }
-                }
-
-                state.stage.nextButtonConfig(state)?.let { cfg ->
-                    NextButton(
-                        label = cfg.label,
-                        enabled = cfg.enabled,
-                        onClick = viewModel::advanceStage,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                    )
-                }
             }
         }
     }
@@ -152,18 +148,10 @@ data class NextButtonConfig(val label: String, val enabled: Boolean)
 
 private fun PlotterStage.nextButtonConfig(state: RoutePlotterUiState): NextButtonConfig? =
     when (this) {
-        PlotterStage.STAGE_1 -> NextButtonConfig(
-            "Confirm Start → Destination",
-            state.startPoint != null
-        )
-
+        PlotterStage.STAGE_1 -> NextButtonConfig("Confirm Start → Destination", state.startPoint != null)
         PlotterStage.STAGE_2 -> NextButtonConfig("Add Waypoints →", state.endPoint != null)
         PlotterStage.STAGE_3 -> NextButtonConfig("Compare Routes →", true)
-        PlotterStage.STAGE_4 -> NextButtonConfig(
-            "Choose Route Type →",
-            state.selectedCandidateId != null
-        )
-
+        PlotterStage.STAGE_4 -> NextButtonConfig("Choose Route Type →", state.selectedCandidateId != null)
         PlotterStage.STAGE_5 -> NextButtonConfig("Review & Save →", true)
         PlotterStage.STAGE_6 -> null
     }

@@ -1,8 +1,18 @@
 package com.you.plot.core.ui.components.action
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
@@ -16,7 +26,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,36 +40,39 @@ fun AppTopBar(
     showGoBack: Boolean = false,
     showNavDrawer: Boolean = false,
     onNavIconClick: (() -> Unit)? = null,
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
+    stepCurrent: Int? = null,
+    stepTotal: Int? = null,
 ) {
     require(!(showGoBack && showNavDrawer)) {
         "showGoBack and showNavDrawer cannot both be true"
     }
 
+    val showStepIndicator = stepCurrent != null && stepTotal != null
+
     val titleContent: @Composable () -> Unit = {
-        if (tagline != null) {
-            Column(horizontalAlignment = if (centered) Alignment.CenterHorizontally else Alignment.Start) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+        Column(
+            horizontalAlignment = if (centered) Alignment.CenterHorizontally else Alignment.Start,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (tagline != null) {
                 Text(
                     text = tagline,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-        } else {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            if (showStepIndicator) {
+                Spacer(Modifier.height(6.dp))
+                StepPills(current = stepCurrent!!, total = stepTotal!!, showLabel = true)
+            }
         }
     }
 
@@ -100,5 +116,68 @@ fun AppTopBar(
             windowInsets = WindowInsets(0, 0, 0, 0),
             colors = colors,
         )
+    }
+}
+
+@Composable
+fun StepPills(
+    current: Int,
+    total: Int,
+    showLabel: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(total) { i ->
+            Box(
+                Modifier
+                    .weight(1f)
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(
+                        when {
+                            i < current  -> MaterialTheme.colorScheme.primary
+                            i == current -> MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+                            else         -> MaterialTheme.colorScheme.outlineVariant
+                        }
+                    ),
+            )
+        }
+        if (showLabel) {
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = "${current + 1}/$total",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+fun StepIndicator(
+    current: Int,
+    total: Int,
+    showLabel: Boolean = true,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+    ) {
+        StepPills(current = current, total = total)
+
+        if (showLabel) {
+            Spacer(Modifier.height(2.dp))
+            Text(
+                "Step ${current + 1} of $total",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
