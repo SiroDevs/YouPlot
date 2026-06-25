@@ -27,10 +27,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.ui.components.general.DayTimeline
 import com.you.plot.feature.plan.creator.utils.PlanCreatorUiState
 import com.you.plot.feature.plan.creator.view.components.AddEventDialog
 import com.you.plot.feature.plan.creator.view.components.DaySummaryCard
-import com.you.plot.feature.plan.creator.view.components.DayTimeline
 import com.you.plot.feature.plan.creator.view.components.EventRow
 import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
 

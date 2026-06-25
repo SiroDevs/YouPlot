@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.ui.components.general.SummaryRow
 import com.you.plot.feature.plan.details.utils.PlanDetailUiState
 import com.you.plot.feature.plan.details.view.screen.timeFmt
 import java.util.Date

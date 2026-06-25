@@ -25,8 +25,6 @@ import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
 @Composable
 fun PlanCreatorStep0(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-
-        // Source type toggle
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

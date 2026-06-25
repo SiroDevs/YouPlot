@@ -38,17 +38,13 @@ import androidx.compose.ui.unit.dp
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.feature.plan.details.view.components.AddReminderDialog
 import com.you.plot.feature.plan.details.view.components.DaySummaryCard
-import com.you.plot.feature.plan.details.view.components.DayTimeline
+import com.you.plot.core.ui.components.general.DayTimeline
 import com.you.plot.feature.plan.details.view.components.EventCard
 import com.you.plot.feature.plan.details.view.components.ReminderRow
 import com.you.plot.feature.plan.details.viewmodel.PlanDetailViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
-val dateFmt = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-val dateTimeFmt = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault())
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

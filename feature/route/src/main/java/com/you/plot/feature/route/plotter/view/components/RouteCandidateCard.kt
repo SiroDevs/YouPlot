@@ -55,7 +55,6 @@ fun RouteCandidateCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Colour dot
             Box(
                 Modifier
                     .size(16.dp)

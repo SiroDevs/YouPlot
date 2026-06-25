@@ -29,4 +29,15 @@ class PrefsRepo @Inject constructor(
         get() = prefs.getLong(PrefConstants.LAST_APP_OPEN_TIME, 0L)
         set(value) = prefs.edit { putLong(PrefConstants.LAST_APP_OPEN_TIME, value) }
 
+    var notificationsEnabled: Boolean
+        get() = prefs.getBoolean(PrefConstants.NOTIFICATIONS_ENABLED, true)
+        set(value) = prefs.edit { putBoolean(PrefConstants.NOTIFICATIONS_ENABLED, value) }
+
+    var distanceUnitMetric: Boolean
+        get() = prefs.getBoolean(PrefConstants.DISTANCE_UNIT_METRIC, true)
+        set(value) = prefs.edit { putBoolean(PrefConstants.DISTANCE_UNIT_METRIC, value) }
+
+    var defaultSport: String
+        get() = prefs.getString(PrefConstants.DEFAULT_SPORT, "RUNNING") ?: "RUNNING"
+        set(value) = prefs.edit { putString(PrefConstants.DEFAULT_SPORT, value) }
 }

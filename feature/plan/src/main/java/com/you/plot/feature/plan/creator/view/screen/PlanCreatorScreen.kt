@@ -24,11 +24,6 @@ import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep1
 import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep2
 import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep3
 import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
-
-val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
-val dateFmt = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

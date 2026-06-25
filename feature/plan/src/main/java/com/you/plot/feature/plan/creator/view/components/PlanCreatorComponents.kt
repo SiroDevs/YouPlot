@@ -59,12 +59,3 @@ fun StepIndicator(current: Int, total: Int) {
         }
     }
 }
-
-@Composable
-fun SummaryRow(label: String, value: String) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
-    }
-}

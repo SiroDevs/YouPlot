@@ -18,9 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.utils.dateFmt
+import com.you.plot.core.ui.components.general.SummaryRow
 import com.you.plot.feature.plan.creator.utils.PlanCreatorUiState
-import com.you.plot.feature.plan.creator.view.components.SummaryRow
-import com.you.plot.feature.plan.creator.view.screen.dateFmt
 import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
 import java.util.Date
 

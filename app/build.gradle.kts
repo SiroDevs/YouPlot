@@ -83,9 +83,12 @@ dependencies {
     implementation(project(":core:ui"))
 
     // Feature modules
+    implementation(project(":feature:dashboard"))
     implementation(project(":feature:route"))
     implementation(project(":feature:plan"))
     implementation(project(":feature:tracker"))
+    implementation(project(":feature:settings"))
+    implementation(project(":feature:extra"))
 
     // Android Room
     implementation(libs.androidx.room.runtime)

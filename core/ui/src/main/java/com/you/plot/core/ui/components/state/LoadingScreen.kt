@@ -1,4 +1,4 @@
-package com.you.plot.core.ui.components
+package com.you.plot.core.ui.components.state
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

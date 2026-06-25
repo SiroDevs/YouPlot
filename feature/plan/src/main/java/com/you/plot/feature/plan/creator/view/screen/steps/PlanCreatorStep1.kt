@@ -35,8 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.feature.plan.creator.utils.PlanCreatorUiState
-import com.you.plot.feature.plan.creator.view.screen.dateFmt
 import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
 import java.util.Date
 

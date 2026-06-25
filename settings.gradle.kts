@@ -34,6 +34,9 @@ include(":core:domain")
 include(":core:ui")
 
 // Feature modules
+include(":feature:dashboard")
 include(":feature:route")
 include(":feature:plan")
 include(":feature:tracker")
+include(":feature:settings")
+include(":feature:extra")
