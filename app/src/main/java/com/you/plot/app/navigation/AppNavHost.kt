@@ -21,12 +21,12 @@ import androidx.navigation.navArgument
 import com.you.plot.core.common.utils.Routes
 import com.you.plot.core.data.repos.PrefsRepo
 import com.you.plot.core.data.repos.ThemeRepo
-import com.you.plot.feature.plan.creator.view.PlanCreatorScreen
-import com.you.plot.feature.plan.details.view.PlanDetailScreen
-import com.you.plot.feature.plan.list.view.PlanListScreen
+import com.you.plot.feature.plan.creator.view.screen.PlanCreatorScreen
+import com.you.plot.feature.plan.details.view.screen.PlanDetailScreen
+import com.you.plot.feature.plan.list.view.screen.PlanListScreen
 import com.you.plot.feature.route.list.view.RouteListScreen
 import com.you.plot.feature.route.plotter.view.screen.RoutePlotterScreen
-import com.you.plot.feature.tracker.view.TrackerScreen
+import com.you.plot.feature.tracker.view.screen.TrackerScreen
 
 data class BottomNavItem(val route: String, val label: String, val icon: ImageVector)
 

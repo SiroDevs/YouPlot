@@ -64,7 +64,7 @@ fun RoutePlotterScreen(
                 title = { Text(stageTitles[state.stage] ?: "Plot Route") },
                 navigationIcon = {
                     IconButton(onClick = {
-                        if (state.stage == PlotterStage.SELECT_START) onBack()
+                        if (state.stage == PlotterStage.STAGE_1) onBack()
                         else viewModel.goBack()
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
@@ -89,12 +89,12 @@ fun RoutePlotterScreen(
                 label = "stage_transition",
             ) { stage ->
                 when (stage) {
-                    PlotterStage.SELECT_START -> PlotterStage1(state, viewModel)
-                    PlotterStage.SELECT_DESTINATION -> PlotterStage2(state, viewModel)
-                    PlotterStage.SELECT_WAYPOINTS -> PlotterStage3(state, viewModel)
-                    PlotterStage.COMPARE_ROUTES -> PlotterStage4(state, viewModel)
-                    PlotterStage.CHOOSE_ROUTE_TYPE -> PlotterStage5(state, viewModel)
-                    PlotterStage.SAVE_ROUTE -> PlotterStage6(state, viewModel)
+                    PlotterStage.STAGE_1 -> PlotterStage1(state, viewModel)
+                    PlotterStage.STAGE_2 -> PlotterStage2(state, viewModel)
+                    PlotterStage.STAGE_3 -> PlotterStage3(state, viewModel)
+                    PlotterStage.STAGE_4 -> PlotterStage4(state, viewModel)
+                    PlotterStage.STAGE_5 -> PlotterStage5(state, viewModel)
+                    PlotterStage.STAGE_6 -> PlotterStage6(state, viewModel)
                 }
             }
         }
@@ -102,12 +102,12 @@ fun RoutePlotterScreen(
 }
 
 val stageTitles = mapOf(
-    PlotterStage.SELECT_START to "Select Start Point",
-    PlotterStage.SELECT_DESTINATION to "Select Destination",
-    PlotterStage.SELECT_WAYPOINTS to "Add Waypoints",
-    PlotterStage.COMPARE_ROUTES to "Compare Routes",
-    PlotterStage.CHOOSE_ROUTE_TYPE to "Route Type",
-    PlotterStage.SAVE_ROUTE to "Save Route",
+    PlotterStage.STAGE_1 to "Select Start Point",
+    PlotterStage.STAGE_2 to "Select Destination",
+    PlotterStage.STAGE_3 to "Add Waypoints",
+    PlotterStage.STAGE_4 to "Compare Routes",
+    PlotterStage.STAGE_5 to "Route Type",
+    PlotterStage.STAGE_6 to "Save Route",
 )
 
 fun Double.fmt() = "%.5f".format(this)

@@ -1,26 +1,16 @@
-/*
- * Copyright 2026 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.you.plot.feature.plan.details.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.domain.usecase.plan.GetPlanByIdUseCase
+import com.you.plot.feature.plan.details.utils.PlanDetailUiState
+import com.you.plot.feature.plan.details.utils.ReminderEntry
+import com.you.plot.feature.plan.reminder.PlanReminder
+import com.you.plot.feature.plan.reminder.cancelReminder
+import com.you.plot.feature.plan.reminder.reminderTag
+import com.you.plot.feature.plan.reminder.scheduleReminder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,11 +19,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class PlanDetailUiState(
-    val plan: ActivityPlan? = null,
-    val selectedDay: Int = 1,
-    val isLoading: Boolean = true,
-)
 
 @HiltViewModel
 class PlanDetailViewModel @Inject constructor(
@@ -54,4 +39,32 @@ class PlanDetailViewModel @Inject constructor(
     }
 
     fun selectDay(day: Int) = _state.update { it.copy(selectedDay = day) }
+
+    // ── Reminders ─────────────────────────────────────────────────────────────
+
+    fun showAddReminderDialog() = _state.update { it.copy(showAddReminderDialog = true) }
+    fun hideAddReminderDialog() = _state.update { it.copy(showAddReminderDialog = false) }
+
+    fun addReminder(context: Context, label: String, fireAtMillis: Long) {
+        val plan = _state.value.plan ?: return
+        val index = _state.value.reminders.size
+        val tag = reminderTag(plan.id, index)
+        val entry = ReminderEntry(index = index, label = label, fireAtMillis = fireAtMillis)
+        scheduleReminder(
+            context,
+            PlanReminder(
+                tag = tag,
+                title = "YouPlot – ${plan.name}",
+                message = label,
+                fireAtMillis = fireAtMillis,
+            ),
+        )
+        _state.update { it.copy(reminders = it.reminders + entry, showAddReminderDialog = false) }
+    }
+
+    fun removeReminder(context: Context, entry: ReminderEntry) {
+        val plan = _state.value.plan ?: return
+        cancelReminder(context, reminderTag(plan.id, entry.index))
+        _state.update { it.copy(reminders = it.reminders.filter { r -> r.index != entry.index }) }
+    }
 }

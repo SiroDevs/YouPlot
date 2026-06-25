@@ -20,12 +20,12 @@ data class RouteListUiState(
 )
 
 enum class PlotterStage {
-    SELECT_START,
-    SELECT_DESTINATION,
-    SELECT_WAYPOINTS,
-    COMPARE_ROUTES,
-    CHOOSE_ROUTE_TYPE,
-    SAVE_ROUTE,
+    STAGE_1,
+    STAGE_2,
+    STAGE_3,
+    STAGE_4,
+    STAGE_5,
+    STAGE_6,
 }
 
 enum class DestinationMode { PICK_POINT, TARGET_DISTANCE }
@@ -47,7 +47,7 @@ data class SearchResult(
 
 data class RoutePlotterUiState(
     // ── meta ──────────────────────────────────────────────────────────────────
-    val stage: PlotterStage = PlotterStage.SELECT_START,
+    val stage: PlotterStage = PlotterStage.STAGE_1,
 
     // ── Stage 1 ───────────────────────────────────────────────────────────────
     val searchQuery: String = "",

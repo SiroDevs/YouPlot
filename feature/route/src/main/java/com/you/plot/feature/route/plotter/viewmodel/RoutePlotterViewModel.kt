@@ -52,20 +52,20 @@ class RoutePlotterViewModel @Inject constructor(
     fun advanceStage() {
         val s = _state.value
         when (s.stage) {
-            PlotterStage.SELECT_START -> {
+            PlotterStage.STAGE_1 -> {
                 if (s.startPoint == null) {
                     setError("Set a start point first"); return
                 }
                 _state.update {
                     it.copy(
-                        stage = PlotterStage.SELECT_DESTINATION,
+                        stage = PlotterStage.STAGE_2,
                         searchQuery = "",
                         searchResults = emptyList()
                     )
                 }
             }
 
-            PlotterStage.SELECT_DESTINATION -> {
+            PlotterStage.STAGE_2 -> {
                 when (s.destinationMode) {
                     DestinationMode.PICK_POINT -> {
                         if (s.endPoint == null) {
@@ -80,37 +80,37 @@ class RoutePlotterViewModel @Inject constructor(
                     }
                 }
                 buildWaypointSuggestions()
-                _state.update { it.copy(stage = PlotterStage.SELECT_WAYPOINTS) }
+                _state.update { it.copy(stage = PlotterStage.STAGE_3) }
             }
 
-            PlotterStage.SELECT_WAYPOINTS -> {
+            PlotterStage.STAGE_3 -> {
                 buildRouteCandidates()
-                _state.update { it.copy(stage = PlotterStage.COMPARE_ROUTES) }
+                _state.update { it.copy(stage = PlotterStage.STAGE_4) }
             }
 
-            PlotterStage.COMPARE_ROUTES -> {
+            PlotterStage.STAGE_4 -> {
                 if (s.selectedCandidate == null) {
                     setError("Select a route to continue"); return
                 }
-                _state.update { it.copy(stage = PlotterStage.CHOOSE_ROUTE_TYPE) }
+                _state.update { it.copy(stage = PlotterStage.STAGE_5) }
             }
 
-            PlotterStage.CHOOSE_ROUTE_TYPE -> {
-                _state.update { it.copy(stage = PlotterStage.SAVE_ROUTE) }
+            PlotterStage.STAGE_5 -> {
+                _state.update { it.copy(stage = PlotterStage.STAGE_6) }
             }
 
-            PlotterStage.SAVE_ROUTE -> saveRoute()
+            PlotterStage.STAGE_6 -> saveRoute()
         }
     }
 
     fun goBack() {
         val prev = when (_state.value.stage) {
-            PlotterStage.SELECT_START -> null
-            PlotterStage.SELECT_DESTINATION -> PlotterStage.SELECT_START
-            PlotterStage.SELECT_WAYPOINTS -> PlotterStage.SELECT_DESTINATION
-            PlotterStage.COMPARE_ROUTES -> PlotterStage.SELECT_WAYPOINTS
-            PlotterStage.CHOOSE_ROUTE_TYPE -> PlotterStage.COMPARE_ROUTES
-            PlotterStage.SAVE_ROUTE -> PlotterStage.CHOOSE_ROUTE_TYPE
+            PlotterStage.STAGE_1 -> null
+            PlotterStage.STAGE_2 -> PlotterStage.STAGE_1
+            PlotterStage.STAGE_3 -> PlotterStage.STAGE_2
+            PlotterStage.STAGE_4 -> PlotterStage.STAGE_3
+            PlotterStage.STAGE_5 -> PlotterStage.STAGE_4
+            PlotterStage.STAGE_6 -> PlotterStage.STAGE_5
         }
         if (prev != null) _state.update { it.copy(stage = prev) }
     }
@@ -129,7 +129,7 @@ class RoutePlotterViewModel @Inject constructor(
 
     fun onSearchResultSelected(result: SearchResult) {
         when (_state.value.stage) {
-            PlotterStage.SELECT_START -> {
+            PlotterStage.STAGE_1 -> {
                 _state.update {
                     it.copy(
                         startPoint = result.latLng,
@@ -139,7 +139,7 @@ class RoutePlotterViewModel @Inject constructor(
                 }
             }
 
-            PlotterStage.SELECT_DESTINATION -> {
+            PlotterStage.STAGE_2 -> {
                 _state.update {
                     it.copy(
                         endPoint = result.latLng,
@@ -155,7 +155,7 @@ class RoutePlotterViewModel @Inject constructor(
 
     fun onMapTap(latLng: LatLng) {
         when (_state.value.stage) {
-            PlotterStage.SELECT_START -> {
+            PlotterStage.STAGE_1 -> {
                 _state.update {
                     it.copy(
                         startPoint = latLng,
@@ -164,13 +164,13 @@ class RoutePlotterViewModel @Inject constructor(
                 }
             }
 
-            PlotterStage.SELECT_DESTINATION -> {
+            PlotterStage.STAGE_2 -> {
                 if (_state.value.destinationMode == DestinationMode.PICK_POINT) {
                     _state.update { it.copy(endPoint = latLng) }
                 }
             }
 
-            PlotterStage.SELECT_WAYPOINTS -> {
+            PlotterStage.STAGE_3 -> {
                 _state.update { it.copy(manualWaypoints = it.manualWaypoints + latLng) }
             }
 

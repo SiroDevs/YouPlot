@@ -17,25 +17,30 @@ class StartSessionUseCase @Inject constructor(
     private val routeRepo: RouteRepo,
 ) {
     suspend operator fun invoke(planId: Long): Long {
-        val plan = requireNotNull(planRepo.getPlanById(planId)) { "Plan not found" }
+        val plan  = requireNotNull(planRepo.getPlanById(planId))  { "Plan not found" }
         val route = requireNotNull(routeRepo.getRouteById(plan.routeId)) { "Route not found" }
 
         val waypointProgress = route.waypoints.map { wp ->
             val event = plan.events.firstOrNull { it.waypointId == wp.id }
             WaypointProgress(
-                waypoint = wp,
-                plannedArrivalMillis = event?.plannedTimeMillis ?: System.currentTimeMillis(),
+                waypoint               = wp,
+                plannedArrivalMillis   = event?.plannedTimeMillis ?: System.currentTimeMillis(),
                 estimatedArrivalMillis = event?.plannedTimeMillis ?: System.currentTimeMillis(),
-                distanceRemainingKm = route.totalDistanceKm,
+                distanceRemainingKm    = route.totalDistanceKm,
             )
         }
 
+        val nowMs = System.currentTimeMillis()
+        // Estimated completion = start + (total distance / avg speed) hours
+        val estimatedCompletion = nowMs + ((route.totalDistanceKm / plan.avgSpeedKmh) * 3_600_000L).toLong()
+
         val session = ActivitySession(
-            planId = planId,
-            routeId = plan.routeId,
-            status = SessionStatus.IN_PROGRESS,
-            startedAtMillis = System.currentTimeMillis(),
-            waypointProgress = waypointProgress,
+            planId                  = planId,
+            routeId                 = plan.routeId,
+            status                  = SessionStatus.IN_PROGRESS,
+            startedAtMillis         = nowMs,
+            waypointProgress        = waypointProgress,
+            estimatedCompletionMillis = estimatedCompletion,
         )
         return sessionRepo.saveSession(session)
     }
@@ -56,87 +61,89 @@ class UpdateSessionLocationUseCase @Inject constructor(
     }
 }
 
-class PauseSessionUseCase @Inject constructor(
-    private val sessionRepo: SessionRepo
-) {
+class PauseSessionUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
     suspend operator fun invoke(sessionId: Long) {
         val session = sessionRepo.getSessionById(sessionId) ?: return
         sessionRepo.updateSession(session.copy(status = SessionStatus.PAUSED))
     }
 }
 
-class ResumeSessionUseCase @Inject constructor(
-    private val sessionRepo: SessionRepo
-) {
+class ResumeSessionUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
     suspend operator fun invoke(sessionId: Long) {
         val session = sessionRepo.getSessionById(sessionId) ?: return
         sessionRepo.updateSession(session.copy(status = SessionStatus.IN_PROGRESS))
     }
 }
 
-class CompleteSessionUseCase @Inject constructor(
-    private val sessionRepo: SessionRepo
-) {
+class CompleteSessionUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
     suspend operator fun invoke(sessionId: Long) {
         val session = sessionRepo.getSessionById(sessionId) ?: return
         sessionRepo.updateSession(session.copy(status = SessionStatus.COMPLETED))
     }
 }
 
-class GetActiveSessionUseCase @Inject constructor(
-    private val sessionRepo: SessionRepo
-) {
+class GetActiveSessionUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
     suspend operator fun invoke(): ActivitySession? = sessionRepo.getActiveSession()
 }
 
-class GetSessionsByPlanUseCase @Inject constructor(
-    private val sessionRepo: SessionRepo
-) {
+class GetSessionsByPlanUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
     operator fun invoke(planId: Long): Flow<List<ActivitySession>> =
         sessionRepo.getSessionsByPlanId(planId)
 }
 
-// ─── Extension: recalculate ETAs and distances ───────────────────────────────
+// ─── recalculate: ETAs, distances, estimated completion ──────────────────────
 
-private fun ActivitySession.recalculate(
+fun ActivitySession.recalculate(
     newLocation: LatLng,
     speedKmh: Double,
     elapsedSeconds: Long,
 ): ActivitySession {
     val distanceDelta = currentLocation?.distanceTo(newLocation) ?: 0.0
-    val newDistance = distanceCoveredKm + distanceDelta
+    val newDistance   = distanceCoveredKm + distanceDelta
+    val nowMs         = System.currentTimeMillis()
 
     val updatedProgress = waypointProgress.map { wp ->
         if (wp.isReached) return@map wp
-        val remaining = (wp.waypoint.orderIndex.toDouble() / waypointProgress.size) *
-                (waypointProgress.last().distanceRemainingKm) - newDistance
-        val etaMs = if (speedKmh > 0)
-            System.currentTimeMillis() + ((remaining / speedKmh) * 3_600_000).toLong()
+        val waypointFraction = wp.waypoint.orderIndex.toDouble() /
+            waypointProgress.size.coerceAtLeast(1)
+        val totalDist  = waypointProgress.lastOrNull()?.distanceRemainingKm
+            ?.plus(newDistance) ?: newDistance
+        val remaining  = (waypointFraction * totalDist - newDistance).coerceAtLeast(0.0)
+        val etaMs      = if (speedKmh > 0)
+            nowMs + ((remaining / speedKmh) * 3_600_000L).toLong()
         else wp.estimatedArrivalMillis
 
         wp.copy(
-            distanceRemainingKm = remaining.coerceAtLeast(0.0),
+            distanceRemainingKm    = remaining,
             estimatedArrivalMillis = etaMs,
-            isReached = remaining <= 0.05,
+            isReached              = remaining <= 0.05,
         )
     }
 
+    // Recalculate estimated completion from current position and speed
+    val lastWp         = updatedProgress.lastOrNull()
+    val distToFinish   = lastWp?.distanceRemainingKm ?: 0.0
+    val newCompletion  = if (speedKmh > 0)
+        nowMs + ((distToFinish / speedKmh) * 3_600_000L).toLong()
+    else estimatedCompletionMillis
+
     return copy(
-        currentLocation = newLocation,
-        currentSpeedKmh = speedKmh,
-        distanceCoveredKm = newDistance,
-        elapsedTimeSeconds = elapsedSeconds,
-        waypointProgress = updatedProgress,
+        currentLocation           = newLocation,
+        currentSpeedKmh           = speedKmh,
+        distanceCoveredKm         = newDistance,
+        elapsedTimeSeconds        = elapsedSeconds,
+        waypointProgress          = updatedProgress,
+        estimatedCompletionMillis = newCompletion,
     )
 }
 
 /** Haversine distance between two LatLng points in km */
 fun LatLng.distanceTo(other: LatLng): Double {
-    val r = 6371.0
-    val dLat = Math.toRadians(other.latitude - latitude)
+    val r    = 6371.0
+    val dLat = Math.toRadians(other.latitude  - latitude)
     val dLng = Math.toRadians(other.longitude - longitude)
-    val a = sin(dLat / 2).pow(2) +
-            cos(Math.toRadians(latitude)) * cos(Math.toRadians(other.latitude)) *
-            sin(dLng / 2).pow(2)
+    val a    = sin(dLat / 2).pow(2) +
+        cos(Math.toRadians(latitude)) * cos(Math.toRadians(other.latitude)) *
+        sin(dLng / 2).pow(2)
     return r * 2 * atan2(sqrt(a), sqrt(1 - a))
 }
