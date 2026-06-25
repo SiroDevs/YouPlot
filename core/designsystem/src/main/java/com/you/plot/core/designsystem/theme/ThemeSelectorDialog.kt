@@ -19,10 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.data.repos.ThemeMode
 
-/**
- * A Material 3 dialog that lets the user pick a [ThemeMode].
- * Extracted from ThemeRepo so that :core:data stays UI-free.
- */
 @Composable
 fun ThemeSelectorDialog(
     current: ThemeMode,
@@ -33,7 +29,7 @@ fun ThemeSelectorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Chagua Mandhari") },
+        title = { Text("Select Theme") },
         text = {
             Column {
                 ThemeMode.entries.forEach { mode ->
@@ -45,7 +41,7 @@ fun ThemeSelectorDialog(
                     ) {
                         RadioButton(selected = selected == mode, onClick = { selected = mode })
                         Text(
-                            appThemeName(mode),
+                            themeName(mode),
                             modifier = Modifier.padding(start = 8.dp),
                         )
                     }
@@ -54,17 +50,17 @@ fun ThemeSelectorDialog(
         },
         confirmButton = {
             TextButton(onClick = { onThemeSelected(selected); onDismiss() }) {
-                Text("Sawa")
+                Text("Okay")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Ghairi") }
+            TextButton(onClick = onDismiss) { Text("Cancel") }
         },
     )
 }
 
-fun appThemeName(mode: ThemeMode): String = when (mode) {
-    ThemeMode.SYSTEM -> "Chaguo la Mfumo (System)"
-    ThemeMode.LIGHT  -> "Mandhari ya Nuru (Light Theme)"
-    ThemeMode.DARK   -> "Mandhari ya Giza (Dark Theme)"
+fun themeName(mode: ThemeMode) = when (mode) {
+    ThemeMode.SYSTEM -> "System default"
+    ThemeMode.LIGHT -> "Light"
+    ThemeMode.DARK -> "Dark"
 }

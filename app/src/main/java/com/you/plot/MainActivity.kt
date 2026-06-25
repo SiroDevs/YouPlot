@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
             }
 
             AppTheme(useDarkTheme = isDarkTheme) {
-                AppNavHost(themeRepo = themeRepo, prefsRepo = prefsRepo)
+                AppNavHost(themeRepo = themeRepo)
             }
         }
     }

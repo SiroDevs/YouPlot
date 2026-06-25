@@ -16,7 +16,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val prefsRepo: PrefsRepo,
-    private val themeRepo: ThemeRepo,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -30,12 +29,6 @@ class SettingsViewModel @Inject constructor(
         )
     )
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
-
-    fun setTheme(mode: ThemeMode) {
-        themeRepo.setTheme(mode)
-        prefsRepo.appThemeMode = mode
-        _state.update { it.copy(themeMode = mode, showThemeDialog = false) }
-    }
 
     fun setNotificationsEnabled(enabled: Boolean) {
         prefsRepo.notificationsEnabled = enabled

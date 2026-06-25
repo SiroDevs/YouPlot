@@ -26,8 +26,7 @@ import com.you.plot.feature.tracker.view.screen.TrackerScreen
 
 @Composable
 fun AppNavHost(
-    themeRepo: ThemeRepo,
-    prefsRepo: PrefsRepo,
+    themeRepo: ThemeRepo
 ) {
     val navController = rememberNavController()
 
@@ -113,6 +112,7 @@ fun AppNavHost(
             composable(Routes.SETTINGS) {
                 SettingsScreen(
                     viewModel = hiltViewModel(),
+                    themeRepo = themeRepo,
                     onBack = { navController.popBackStack() },
                 )
             }

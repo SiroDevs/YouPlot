@@ -39,12 +39,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppConstants
 import com.you.plot.core.data.repos.ThemeMode
+import com.you.plot.core.data.repos.ThemeRepo
 import com.you.plot.core.domain.entity.SportType
 import com.you.plot.core.designsystem.theme.ThemeSelectorDialog
+import com.you.plot.core.designsystem.theme.themeName
 import com.you.plot.core.ui.components.action.ToggleItem
 import com.you.plot.core.ui.components.general.InfoDivider
 import com.you.plot.core.ui.components.general.InfoItem
@@ -57,15 +63,19 @@ import com.you.plot.feature.settings.SettingsViewModel
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    themeRepo: ThemeRepo,
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    val theme = themeRepo.selectedTheme
+    var showThemeDialog by remember { mutableStateOf(false) }
 
-    if (state.showThemeDialog) {
+    if (showThemeDialog) {
         ThemeSelectorDialog(
-            current = state.themeMode,
-            onDismiss = viewModel::dismissThemeDialog,
-            onThemeSelected = viewModel::setTheme,
+            current = theme,
+            onDismiss = { showThemeDialog = false },
+            onThemeSelected = { themeRepo.setTheme(it); showThemeDialog = false }
         )
     }
 
@@ -146,10 +156,4 @@ fun SettingsScreen(
             Spacer(Modifier.height(24.dp))
         }
     }
-}
-
-private fun themeName(mode: ThemeMode) = when (mode) {
-    ThemeMode.SYSTEM -> "System default"
-    ThemeMode.LIGHT -> "Light"
-    ThemeMode.DARK -> "Dark"
 }

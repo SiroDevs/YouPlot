@@ -4,16 +4,15 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import javax.inject.Singleton
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
-@Singleton
+@HiltViewModel
 class ThemeRepo @Inject constructor(
     private val prefs: PrefsRepo,
 ) : ViewModel() {
-
     var selectedTheme by mutableStateOf(prefs.appThemeMode)
         private set
 
