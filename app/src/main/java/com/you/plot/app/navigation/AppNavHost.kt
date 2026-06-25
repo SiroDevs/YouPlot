@@ -25,7 +25,7 @@ import com.you.plot.feature.plan.creator.view.PlanCreatorScreen
 import com.you.plot.feature.plan.details.view.PlanDetailScreen
 import com.you.plot.feature.plan.list.view.PlanListScreen
 import com.you.plot.feature.route.list.view.RouteListScreen
-import com.you.plot.feature.route.plotter.view.RoutePlotterScreen
+import com.you.plot.feature.route.plotter.view.screen.RoutePlotterScreen
 import com.you.plot.feature.tracker.view.TrackerScreen
 
 data class BottomNavItem(val route: String, val label: String, val icon: ImageVector)

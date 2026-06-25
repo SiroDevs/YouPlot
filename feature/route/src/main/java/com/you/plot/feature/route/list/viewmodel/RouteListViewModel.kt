@@ -1,23 +1,8 @@
-/*
- * Copyright 2026 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.you.plot.feature.route.list.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.you.plot.core.domain.entity.ElevationPoint
 import com.you.plot.core.domain.entity.LatLng
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.domain.entity.SportType
@@ -34,18 +19,78 @@ data class RouteListUiState(
     val isLoading: Boolean = true,
 )
 
+enum class PlotterStage {
+    SELECT_START,
+    SELECT_DESTINATION,
+    SELECT_WAYPOINTS,
+    COMPARE_ROUTES,
+    CHOOSE_ROUTE_TYPE,
+    SAVE_ROUTE,
+}
+
+enum class DestinationMode { PICK_POINT, TARGET_DISTANCE }
+
+data class RouteCandidate(
+    val id: Int,
+    val waypoints: List<LatLng>,
+    val elevationProfile: List<ElevationPoint>,
+    val totalDistanceKm: Double,
+    val totalElevationGainMeters: Double,
+    val totalElevationLossMeters: Double,
+    val colorArgb: Long,
+)
+
+data class SearchResult(
+    val displayName: String,
+    val latLng: LatLng,
+)
+
 data class RoutePlotterUiState(
+    // ── meta ──────────────────────────────────────────────────────────────────
+    val stage: PlotterStage = PlotterStage.SELECT_START,
+
+    // ── Stage 1 ───────────────────────────────────────────────────────────────
+    val searchQuery: String = "",
+    val searchResults: List<SearchResult> = emptyList(),
+    val isSearching: Boolean = false,
+    val startPoint: LatLng? = null,
+
+    // ── Stage 2 ───────────────────────────────────────────────────────────────
+    val destinationMode: DestinationMode = DestinationMode.PICK_POINT,
+    val endPoint: LatLng? = null,
+    val targetDistanceKm: Double = 10.0,
+    val targetDistanceQuery: String = "10",
+    val distanceSuggestions: List<SearchResult> = emptyList(), // suggested endpoints for distance mode
+
+    // ── Stage 3 ───────────────────────────────────────────────────────────────
+    val manualWaypoints: List<LatLng> = emptyList(),
+    val suggestedWaypoints: List<LatLng> = emptyList(),
+    val useSuggestedWaypoints: Boolean = false,
+
+    // ── Stage 4 ───────────────────────────────────────────────────────────────
+    val routeCandidates: List<RouteCandidate> = emptyList(),
+    val selectedCandidateId: Int? = null,
+
+    // ── Stage 5 ───────────────────────────────────────────────────────────────
+    val isRoundTrip: Boolean = false,
+
+    // ── Stage 6 ───────────────────────────────────────────────────────────────
     val name: String = "",
     val description: String = "",
-    val sportType: SportType = SportType.RUNNING,
-    val startPoint: LatLng? = null,
-    val endPoint: LatLng? = null,
-    val waypoints: List<LatLng> = emptyList(),
-    val isRoundTrip: Boolean = false,
+    val sportType: SportType = SportType.RUNNING,   // explicit default
+
+    // ── shared ────────────────────────────────────────────────────────────────
     val isSaving: Boolean = false,
     val savedRouteId: Long? = null,
     val error: String? = null,
-)
+) {
+    val activeWaypoints: List<LatLng>
+        get() = if (useSuggestedWaypoints) suggestedWaypoints else manualWaypoints
+
+    val selectedCandidate: RouteCandidate?
+        get() = routeCandidates.firstOrNull { it.id == selectedCandidateId }
+            ?: routeCandidates.firstOrNull()
+}
 
 @HiltViewModel
 class RouteListViewModel @Inject constructor(
