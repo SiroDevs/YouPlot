@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
@@ -26,7 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,15 +35,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.domain.entity.ActivityPlan
+import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.feature.plan.details.view.components.AddReminderDialog
 import com.you.plot.feature.plan.details.view.components.DaySummaryCard
 import com.you.plot.core.ui.components.general.DayTimeline
 import com.you.plot.feature.plan.details.view.components.EventCard
 import com.you.plot.feature.plan.details.view.components.ReminderRow
 import com.you.plot.feature.plan.details.viewmodel.PlanDetailViewModel
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,15 +63,10 @@ fun PlanDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(state.plan?.name ?: "Plan") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                },
+            AppTopBar(
+                title = state.plan?.name ?: "Plan",
+                onNavIconClick = onBack,
                 actions = {
-                    // Calendar export
                     state.plan?.let { plan ->
                         IconButton(onClick = {
                             val intent = buildCalendarIntent(plan)

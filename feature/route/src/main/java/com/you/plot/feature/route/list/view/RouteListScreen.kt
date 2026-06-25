@@ -37,7 +37,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.domain.entity.Route
+import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.feature.route.list.viewmodel.RouteListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +58,7 @@ fun RouteListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Routes") })
+            AppTopBar(title = "Routes")
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateRoute) {

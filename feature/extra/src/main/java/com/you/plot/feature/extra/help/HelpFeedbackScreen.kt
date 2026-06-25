@@ -9,23 +9,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppConstants
 import androidx.core.net.toUri
+import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.core.ui.components.general.InfoDivider
 import com.you.plot.core.ui.components.general.InfoNavItem
 import com.you.plot.core.ui.components.general.InfoSection
@@ -45,13 +41,10 @@ fun HelpFeedbackScreen(onBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Help & Feedback") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                },
+            AppTopBar(
+                title = "Help & Feedback",
+                showGoBack = true,
+                onNavIconClick = onBack
             )
         },
     ) { padding ->

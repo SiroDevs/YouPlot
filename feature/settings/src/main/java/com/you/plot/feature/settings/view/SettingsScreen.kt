@@ -24,18 +24,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,11 +41,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppConstants
-import com.you.plot.core.data.repos.ThemeMode
 import com.you.plot.core.data.repos.ThemeRepo
 import com.you.plot.core.domain.entity.SportType
 import com.you.plot.core.designsystem.theme.ThemeSelectorDialog
 import com.you.plot.core.designsystem.theme.themeName
+import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.core.ui.components.action.ToggleItem
 import com.you.plot.core.ui.components.general.InfoDivider
 import com.you.plot.core.ui.components.general.InfoItem
@@ -93,13 +88,9 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Settings") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                },
+            AppTopBar(
+                title = "Settings",
+                onNavIconClick = onBack,
             )
         },
     ) { padding ->

@@ -9,22 +9,18 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.you.plot.core.common.entity.PlotterStage
+import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.core.ui.components.state.StageProgressBar
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage1
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage2
@@ -60,22 +56,20 @@ fun RoutePlotterScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stageTitles[state.stage] ?: "Plot Route") },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (state.stage == PlotterStage.STAGE_1) onBack()
-                        else viewModel.goBack()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
+            AppTopBar(
+                title = stageTitles[state.stage] ?: "Plot Route",
+                onNavIconClick = {
+                    if (state.stage == PlotterStage.STAGE_1) onBack()
+                    else viewModel.goBack()
                 },
             )
         },
     ) { padding ->
-        Column(Modifier
-            .fillMaxSize()
-            .padding(padding)) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             StageProgressBar(state.stage)
             AnimatedContent(
                 targetState = state.stage,
