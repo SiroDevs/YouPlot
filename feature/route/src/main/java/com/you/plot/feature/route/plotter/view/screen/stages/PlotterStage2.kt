@@ -19,10 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.DestinationMode
-import com.you.plot.core.ui.components.action.NextButton
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.plotter.view.components.LocationSearchBar
-import com.you.plot.feature.route.plotter.view.components.PlotterMap
 import com.you.plot.feature.route.plotter.view.components.SelectedPointChip
 import com.you.plot.feature.route.plotter.view.components.SuggestionRow
 import com.you.plot.feature.route.plotter.view.screen.fmt
@@ -68,17 +66,7 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                     )
                 }
-                PlotterMap(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    startPoint = state.startPoint,
-                    endPoint = state.endPoint,
-                    waypoints = emptyList(),
-                    candidates = emptyList(),
-                    selectedCandidateId = null,
-                    onMapTap = vm::onMapTap,
-                )
+                // No map here — it's rendered by RoutePlotterScreen behind this overlay.
             }
 
             DestinationMode.TARGET_DISTANCE -> {
@@ -126,10 +114,6 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
             }
         }
 
-        NextButton(
-            label = "Add Waypoints →",
-            enabled = state.endPoint != null,
-            onClick = vm::advanceStage,
-        )
+        Spacer(Modifier.padding(bottom = 72.dp))
     }
 }

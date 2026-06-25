@@ -3,6 +3,7 @@ package com.you.plot.feature.route.plotter.view.screen.stages
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,9 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.ui.components.action.NextButton
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
-import com.you.plot.feature.route.plotter.view.components.PlotterMap
 import com.you.plot.feature.route.plotter.view.screen.fmt
 import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 
@@ -60,24 +59,17 @@ fun PlotterStage3(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
             )
         }
 
-        PlotterMap(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            startPoint = state.startPoint,
-            endPoint = state.endPoint,
-            waypoints = state.activeWaypoints,
-            candidates = emptyList(),
-            selectedCandidateId = null,
-            onMapTap = vm::onMapTap,
-        )
+        // The map fills the space between hints and the waypoint list / button.
+        Spacer(Modifier.weight(1f))
 
-        // Manual waypoint list with removal
+        // Manual waypoint list (only when user added some)
         if (!state.useSuggestedWaypoints && state.manualWaypoints.isNotEmpty()) {
-            LazyColumn(Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .padding(horizontal = 16.dp)) {
+            LazyColumn(
+                Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(horizontal = 16.dp),
+            ) {
                 itemsIndexed(state.manualWaypoints) { index, pt ->
                     Row(
                         Modifier
@@ -99,10 +91,6 @@ fun PlotterStage3(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
             }
         }
 
-        NextButton(
-            label = "Compare Routes →",
-            enabled = true,
-            onClick = vm::advanceStage,
-        )
+        Spacer(Modifier.height(72.dp))
     }
 }

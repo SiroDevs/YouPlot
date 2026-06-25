@@ -38,7 +38,6 @@ data class SearchResult(
 
 data class RoutePlotterUiState(
     val stage: PlotterStage = PlotterStage.STAGE_1,
-
     val searchQuery: String = "",
     val searchResults: List<SearchResult> = emptyList(),
     val isSearching: Boolean = false,

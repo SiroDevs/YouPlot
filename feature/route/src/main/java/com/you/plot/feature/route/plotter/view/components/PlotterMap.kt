@@ -1,5 +1,6 @@
 package com.you.plot.feature.route.plotter.view.components
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -19,6 +20,11 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
+private val KENYA_CENTER = GeoPoint(-0.0236, 37.9062)
+private const val COUNTRY_ZOOM = 7.0
+private const val CITY_ZOOM = 12.0
+
+@SuppressLint("MissingPermission")
 @Composable
 fun PlotterMap(
     modifier: Modifier,
@@ -36,7 +42,35 @@ fun PlotterMap(
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
-            controller.setZoom(13.0)
+            controller.setZoom(COUNTRY_ZOOM)
+            controller.setCenter(KENYA_CENTER)
+        }
+    }
+
+    // One-shot: pan to user's country / location on first composition.
+    LaunchedEffect(Unit) {
+        try {
+            val lm = context.getSystemService(android.content.Context.LOCATION_SERVICE)
+                as android.location.LocationManager
+
+            // Try GPS first, then fall back to network provider.
+            val providers = listOf(
+                android.location.LocationManager.GPS_PROVIDER,
+                android.location.LocationManager.NETWORK_PROVIDER,
+            )
+            val location = providers
+                .firstOrNull { lm.isProviderEnabled(it) }
+                ?.let { lm.getLastKnownLocation(it) }
+
+            if (location != null) {
+                mapView.controller.setZoom(CITY_ZOOM)
+                mapView.controller.animateTo(GeoPoint(location.latitude, location.longitude))
+            }
+            // else: already centred on Kenya in the `remember` block above
+        } catch (_: SecurityException) {
+            // Permission not granted — stay on Kenya fallback
+        } catch (_: Exception) {
+            // Any other failure (provider not available, etc.) — stay on Kenya fallback
         }
     }
 
@@ -44,6 +78,7 @@ fun PlotterMap(
         onDispose { mapView.onDetach() }
     }
 
+    // Re-attach the tap listener whenever the callback lambda changes (stage navigation).
     LaunchedEffect(onMapTap) {
         mapView.overlays.removeAll { it is MapEventsOverlay }
         val eventsOverlay = MapEventsOverlay(
@@ -59,12 +94,13 @@ fun PlotterMap(
         mapView.overlays.add(0, eventsOverlay)
     }
 
+    // Redraw markers / polylines whenever map data changes.
     LaunchedEffect(startPoint, endPoint, waypoints, candidates, selectedCandidateId) {
-        val eventsOverlay =
-            mapView.overlays.firstOrNull { it is MapEventsOverlay }
+        val eventsOverlay = mapView.overlays.firstOrNull { it is MapEventsOverlay }
         mapView.overlays.clear()
         eventsOverlay?.let { mapView.overlays.add(it) }
 
+        // Draw route candidates (selected on top).
         candidates.sortedBy { if (it.id == selectedCandidateId) 1 else 0 }.forEach { candidate ->
             val line = Polyline(mapView).apply {
                 setPoints(candidate.waypoints.map { GeoPoint(it.latitude, it.longitude) })
@@ -81,6 +117,7 @@ fun PlotterMap(
             mapView.overlays.add(line)
         }
 
+        // Waypoint markers.
         waypoints.forEachIndexed { i, pt ->
             val marker = Marker(mapView).apply {
                 position = GeoPoint(pt.latitude, pt.longitude)
@@ -90,6 +127,7 @@ fun PlotterMap(
             mapView.overlays.add(marker)
         }
 
+        // Start marker — also pans the camera if set.
         startPoint?.let { pt ->
             val marker = Marker(mapView).apply {
                 position = GeoPoint(pt.latitude, pt.longitude)
@@ -98,6 +136,7 @@ fun PlotterMap(
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             }
             mapView.overlays.add(marker)
+            mapView.controller.setZoom(CITY_ZOOM)
             mapView.controller.animateTo(GeoPoint(pt.latitude, pt.longitude))
         }
 

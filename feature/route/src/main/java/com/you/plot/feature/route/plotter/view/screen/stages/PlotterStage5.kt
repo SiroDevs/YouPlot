@@ -1,5 +1,6 @@
 package com.you.plot.feature.route.plotter.view.screen.stages
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.ui.components.action.NextButton
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.plotter.view.components.RouteTypeCard
 import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
@@ -21,12 +21,13 @@ fun PlotterStage5(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
     Column(
         Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
+            .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
             "How would you like to complete this route?",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
         )
 
         RouteTypeCard(
@@ -54,6 +55,6 @@ fun PlotterStage5(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
 
         Spacer(Modifier.weight(1f))
 
-        NextButton(label = "Review & Save →", enabled = true, onClick = vm::advanceStage)
+        Spacer(Modifier.padding(bottom = 56.dp))
     }
 }

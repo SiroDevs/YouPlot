@@ -43,6 +43,7 @@ fun PlotterStage6(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
     ) {
         Text("Review Route", style = MaterialTheme.typography.titleLarge)
 
+        // Small map thumbnail embedded in the review card
         PlotterMap(
             modifier = Modifier
                 .fillMaxWidth()
@@ -64,8 +65,8 @@ fun PlotterStage6(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 StatChip(label = "Distance", value = "${"%.1f".format(dist)} km")
-                StatChip(label = "↑ Gain", value = "${"%.0f".format(c.totalElevationGainMeters)} m")
-                StatChip(label = "↓ Loss", value = "${"%.0f".format(c.totalElevationLossMeters)} m")
+                StatChip(label = "↑ Gain",   value = "${"%.0f".format(c.totalElevationGainMeters)} m")
+                StatChip(label = "↓ Loss",   value = "${"%.0f".format(c.totalElevationLossMeters)} m")
             }
         }
 
@@ -76,13 +77,12 @@ fun PlotterStage6(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                 profile = c.elevationProfile,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
+                    .height(100.dp),
             )
         }
 
         HorizontalDivider()
 
-        // Route type summary
         Text(
             if (state.isRoundTrip) "Round Trip" else "One-Way",
             style = MaterialTheme.typography.bodySmall,
@@ -91,7 +91,6 @@ fun PlotterStage6(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
 
         HorizontalDivider()
 
-        // Name & description fields
         OutlinedTextField(
             value = state.name,
             onValueChange = vm::setName,
@@ -108,7 +107,6 @@ fun PlotterStage6(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
             minLines = 2,
         )
 
-        // Sport type
         Text("Sport", style = MaterialTheme.typography.labelMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SportType.entries.forEach { type ->
@@ -122,6 +120,7 @@ fun PlotterStage6(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
 
         Spacer(Modifier.height(8.dp))
 
+        // Stage 6 owns its own action button (progress indicator variant)
         Button(
             onClick = vm::advanceStage,
             modifier = Modifier.fillMaxWidth(),
