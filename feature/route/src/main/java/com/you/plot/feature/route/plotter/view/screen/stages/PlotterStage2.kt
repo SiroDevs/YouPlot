@@ -1,6 +1,7 @@
 package com.you.plot.feature.route.plotter.view.screen.stages
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,18 +10,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.DestinationMode
+import com.you.plot.core.common.utils.AppSpecs
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.plotter.view.components.LocationSearchBar
 import com.you.plot.feature.route.plotter.view.components.SelectedPointChip
@@ -31,17 +40,25 @@ import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 @Composable
 fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
     Column(Modifier.fillMaxSize()) {
-
         Column(
             Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
                 .padding(bottom = 8.dp),
         ) {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .shadow(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(8.dp),
+                        clip = false
+                    )
+                    .background(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 FilterChip(
@@ -83,7 +100,17 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                            .padding(10.dp)
+                            .shadow(
+                                elevation = 4.dp,
+                                shape = RoundedCornerShape(8.dp),
+                                clip = false
+                            )
+                            .background(
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
@@ -91,6 +118,7 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                             value = state.targetDistanceQuery,
                             onValueChange = vm::onTargetDistanceChange,
                             label = { Text("Distance (km)") },
+                            shape = AppSpecs.FULL_SHAPE,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.weight(1f),
                             singleLine = true,
@@ -125,5 +153,38 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
 
         Spacer(Modifier.weight(1f))
         Spacer(Modifier.height(72.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PlotterStage2Preview() {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(8.dp),
+                clip = false
+            )
+            .background(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        OutlinedTextField(
+            value = "",
+            onValueChange = {},
+            label = { Text("Set Target Distance") },
+            shape = AppSpecs.FULL_SHAPE,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            modifier = Modifier.weight(1f),
+            singleLine = true,
+        )
+        Button(onClick = {}) { Text("Find") }
     }
 }

@@ -14,12 +14,12 @@ import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.domain.usecase.route.DeleteRouteUseCase
 import com.you.plot.core.domain.usecase.route.SaveRouteUseCase
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
-import com.you.plot.feature.route.list.viewmodel.SearchResult
 import com.you.plot.core.data.repos.RoutePlotterRepo
 import com.you.plot.core.common.utils.buildWaypointSuggestions
 import com.you.plot.core.common.utils.destinationPoint
 import com.you.plot.core.common.utils.bearingLabel
 import com.you.plot.core.common.utils.fmt
+import com.you.plot.core.domain.entity.SearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

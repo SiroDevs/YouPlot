@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
@@ -35,12 +34,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.utils.AppSpecs
 import com.you.plot.core.domain.entity.SearchResult
-
-private val CORNER = 16.dp
-private val TOP_SHAPE = RoundedCornerShape(topStart = CORNER, topEnd = CORNER)
-private val BOTTOM_SHAPE = RoundedCornerShape(bottomStart = CORNER, bottomEnd = CORNER)
-private val FULL_SHAPE = RoundedCornerShape(CORNER)
 
 @Composable
 fun LocationSearchBar(
@@ -56,7 +51,6 @@ fun LocationSearchBar(
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
-    // Show quick actions when focused, regardless of results
     val showQuickActions = isFocused && (onChooseOnMap != null || onUseMyLocation != null)
     val hasDropdown = showQuickActions || results.isNotEmpty()
 
@@ -65,7 +59,7 @@ fun LocationSearchBar(
             .fillMaxWidth()
             .shadow(
                 elevation = if (hasDropdown) 6.dp else 3.dp,
-                shape = if (hasDropdown) TOP_SHAPE else FULL_SHAPE,
+                shape = if (hasDropdown) AppSpecs.TOP_SHAPE else AppSpecs.FULL_SHAPE,
                 clip = false,
             )
     ) {
@@ -87,7 +81,7 @@ fun LocationSearchBar(
                 }
             },
             singleLine = true,
-            shape = if (hasDropdown) TOP_SHAPE else FULL_SHAPE,
+            shape = if (hasDropdown) AppSpecs.TOP_SHAPE else AppSpecs.FULL_SHAPE,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -103,10 +97,9 @@ fun LocationSearchBar(
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .clip(BOTTOM_SHAPE)
+                    .clip(AppSpecs.BOTTOM_SHAPE)
                     .background(MaterialTheme.colorScheme.surface)
             ) {
-                // Quick actions always shown when focused (even if results exist)
                 if (showQuickActions) {
                     onChooseOnMap?.let { action ->
                         QuickActionRow(
@@ -151,9 +144,7 @@ fun LocationSearchBar(
                     }
                 }
 
-                // Nominatim search results
                 results.forEachIndexed { index, result ->
-                    // Only add separator above first result if quick actions were shown
                     if (index == 0 && showQuickActions) {
                         // Separator already added above
                     }

@@ -77,6 +77,7 @@ fun RoutePlotterScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
+            if (state.stage != PlotterStage.STAGE_5)
             PlotterMap(
                 modifier = Modifier.fillMaxSize(),
                 startPoint = state.startPoint,
@@ -145,10 +146,18 @@ data class NextButtonConfig(val label: String, val enabled: Boolean)
 
 private fun PlotterStage.nextButtonConfig(state: RoutePlotterUiState): NextButtonConfig? =
     when (this) {
-        PlotterStage.STAGE_1 -> NextButtonConfig("Confirm Start → Destination", state.startPoint != null)
+        PlotterStage.STAGE_1 -> NextButtonConfig(
+            "Confirm Start → Destination",
+            state.startPoint != null
+        )
+
         PlotterStage.STAGE_2 -> NextButtonConfig("Add Waypoints →", state.endPoint != null)
         PlotterStage.STAGE_3 -> NextButtonConfig("Compare Routes →", true)
-        PlotterStage.STAGE_4 -> NextButtonConfig("Review & Save →", state.selectedCandidateId != null)
+        PlotterStage.STAGE_4 -> NextButtonConfig(
+            "Review & Save →",
+            state.selectedCandidateId != null
+        )
+
         PlotterStage.STAGE_5 -> null
     }
 

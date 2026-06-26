@@ -29,22 +29,13 @@ import com.you.plot.feature.route.plotter.view.components.RouteTypeCard
 import com.you.plot.feature.route.plotter.view.screen.fmt
 import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 
-/**
- * Stage 3 — Waypoints + Route Type (merged from old Stage 5).
- *
- * Users can now choose one-way / round-trip at the same time they place
- * waypoints, since both decisions affect the same map view.
- */
 @Composable
 fun PlotterStage3(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
     Column(
         Modifier
             .fillMaxSize()
-            // Translucent surface so controls are legible over the map
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0f)),
     ) {
-
-        // ── Route type section (merged from old Stage 5) ─────────────────
         Column(
             Modifier
                 .fillMaxWidth()
@@ -123,10 +114,8 @@ fun PlotterStage3(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
             }
         }
 
-        // The map fills the gap between the controls above and the list below
         Spacer(Modifier.weight(1f))
 
-        // ── Manual waypoint list ─────────────────────────────────────────
         if (!state.useSuggestedWaypoints && state.manualWaypoints.isNotEmpty()) {
             LazyColumn(
                 Modifier
