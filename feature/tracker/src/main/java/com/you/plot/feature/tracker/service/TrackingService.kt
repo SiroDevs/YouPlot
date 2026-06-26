@@ -8,7 +8,7 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.you.plot.core.common.utils.NotifConstants
-import com.you.plot.core.domain.entity.LatLng
+import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.repos.LocationRepo
 import com.you.plot.core.domain.usecase.tracker.CompleteSessionUseCase
 import com.you.plot.core.domain.usecase.tracker.GetActiveSessionUseCase

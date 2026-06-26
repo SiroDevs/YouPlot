@@ -1,7 +1,7 @@
 package com.you.plot.feature.settings.utils
 
+import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.data.repos.ThemeMode
-import com.you.plot.core.domain.entity.SportType
 
 data class SettingsUiState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,

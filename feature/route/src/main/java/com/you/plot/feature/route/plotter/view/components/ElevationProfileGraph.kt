@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.domain.entity.ElevationPoint
+import com.you.plot.core.common.entity.ElevationPoint
 import kotlin.collections.forEach
 
 @Composable

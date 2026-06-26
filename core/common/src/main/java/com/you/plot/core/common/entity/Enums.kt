@@ -6,7 +6,10 @@ enum class PlotterStage {
     STAGE_3,
     STAGE_4,
     STAGE_5,
-    STAGE_6,
 }
 
 enum class DestinationMode { PICK_POINT, TARGET_DISTANCE }
+
+enum class SportType { RUNNING, CYCLING, HIKING, WALKING }
+
+enum class SessionStatus { NOT_STARTED, IN_PROGRESS, PAUSED, COMPLETED }

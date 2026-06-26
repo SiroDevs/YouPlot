@@ -1,5 +1,6 @@
 package com.you.plot.feature.route.plotter.view.screen.stages
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,51 +25,114 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
+import com.you.plot.feature.route.plotter.view.components.RouteTypeCard
 import com.you.plot.feature.route.plotter.view.screen.fmt
 import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 
+/**
+ * Stage 3 — Waypoints + Route Type (merged from old Stage 5).
+ *
+ * Users can now choose one-way / round-trip at the same time they place
+ * waypoints, since both decisions affect the same map view.
+ */
 @Composable
 fun PlotterStage3(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
-    Column(Modifier.fillMaxSize()) {
-        Row(
+    Column(
+        Modifier
+            .fillMaxSize()
+            // Translucent surface so controls are legible over the map
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0f)),
+    ) {
+
+        // ── Route type section (merged from old Stage 5) ─────────────────
+        Column(
             Modifier
                 .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("Use suggested waypoints", style = MaterialTheme.typography.bodyMedium)
-            Switch(
-                checked = state.useSuggestedWaypoints,
-                onCheckedChange = vm::toggleSuggestedWaypoints,
+            Text(
+                "Route Type",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                RouteTypeCard(
+                    title = "One-Way",
+                    description = "Start → Finish",
+                    selected = !state.isRoundTrip,
+                    onClick = { vm.setRoundTrip(false) },
+                    modifier = Modifier.weight(1f),
+                )
+                RouteTypeCard(
+                    title = "Round Trip",
+                    description = "Return to Start",
+                    selected = state.isRoundTrip,
+                    onClick = { vm.setRoundTrip(true) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+
+            state.selectedCandidate?.let { c ->
+                val dist = if (state.isRoundTrip) c.totalDistanceKm * 2 else c.totalDistanceKm
+                Text(
+                    "Est. distance: ${"%.1f".format(dist)} km",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
 
-        if (!state.useSuggestedWaypoints) {
-            Text(
-                "Tap the map to add waypoints manually",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
-        } else if (state.suggestedWaypoints.isNotEmpty()) {
-            Text(
-                "${state.suggestedWaypoints.size} waypoints auto-suggested along route",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
+        HorizontalDivider()
+
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("Use suggested waypoints", style = MaterialTheme.typography.bodyMedium)
+                Switch(
+                    checked = state.useSuggestedWaypoints,
+                    onCheckedChange = vm::toggleSuggestedWaypoints,
+                )
+            }
+
+            if (!state.useSuggestedWaypoints) {
+                Text(
+                    "Tap the map to add waypoints manually",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else if (state.suggestedWaypoints.isNotEmpty()) {
+                Text(
+                    "${state.suggestedWaypoints.size} waypoints auto-suggested along route",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
 
-        // The map fills the space between hints and the waypoint list / button.
+        // The map fills the gap between the controls above and the list below
         Spacer(Modifier.weight(1f))
 
-        // Manual waypoint list (only when user added some)
+        // ── Manual waypoint list ─────────────────────────────────────────
         if (!state.useSuggestedWaypoints && state.manualWaypoints.isNotEmpty()) {
             LazyColumn(
                 Modifier
                     .fillMaxWidth()
                     .height(120.dp)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
                     .padding(horizontal = 16.dp),
             ) {
                 itemsIndexed(state.manualWaypoints) { index, pt ->

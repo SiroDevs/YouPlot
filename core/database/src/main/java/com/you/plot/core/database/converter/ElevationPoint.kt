@@ -16,10 +16,9 @@
 
 package com.you.plot.core.database.converter
 
-import com.you.plot.core.domain.entity.ElevationPoint
+import com.you.plot.core.common.entity.ElevationPoint
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.collections.forEach
 
 @JvmName("elevationListToJson")
 fun List<ElevationPoint>.toJson(): String {

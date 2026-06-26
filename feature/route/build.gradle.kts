@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:data"))
     implementation(project(":core:domain"))
+
     implementation(libs.androidx.foundation)
     implementation(libs.osmdroid.android)
     implementation(libs.play.services.location)

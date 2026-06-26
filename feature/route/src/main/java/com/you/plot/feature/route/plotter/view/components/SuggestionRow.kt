@@ -17,7 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.you.plot.feature.route.list.viewmodel.SearchResult
+import com.you.plot.core.domain.entity.SearchResult
 
 @Composable
 fun SuggestionRow(result: SearchResult, isSelected: Boolean, onClick: () -> Unit) {

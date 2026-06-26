@@ -4,10 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.you.plot.core.common.entity.DestinationMode
 import com.you.plot.core.common.entity.PlotterStage
-import com.you.plot.core.domain.entity.ElevationPoint
-import com.you.plot.core.domain.entity.LatLng
+import com.you.plot.core.common.entity.RouteCandidate
+import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.entity.Route
-import com.you.plot.core.domain.entity.SportType
+import com.you.plot.core.common.entity.SportType
+import com.you.plot.core.domain.entity.SearchResult
 import com.you.plot.core.domain.usecase.route.GetAllRoutesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,21 +20,6 @@ import javax.inject.Inject
 data class RouteListUiState(
     val routes: List<Route> = emptyList(),
     val isLoading: Boolean = true,
-)
-
-data class RouteCandidate(
-    val id: Int,
-    val waypoints: List<LatLng>,
-    val elevationProfile: List<ElevationPoint>,
-    val totalDistanceKm: Double,
-    val totalElevationGainMeters: Double,
-    val totalElevationLossMeters: Double,
-    val colorArgb: Long,
-)
-
-data class SearchResult(
-    val displayName: String,
-    val latLng: LatLng,
 )
 
 data class RoutePlotterUiState(

@@ -35,7 +35,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.you.plot.feature.route.list.viewmodel.SearchResult
+import com.you.plot.core.domain.entity.SearchResult
 
 private val CORNER = 16.dp
 private val TOP_SHAPE = RoundedCornerShape(topStart = CORNER, topEnd = CORNER)
@@ -56,7 +56,8 @@ fun LocationSearchBar(
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
-    val showQuickActions = isFocused && results.isEmpty() && !isSearching
+    // Show quick actions when focused, regardless of results
+    val showQuickActions = isFocused && (onChooseOnMap != null || onUseMyLocation != null)
     val hasDropdown = showQuickActions || results.isNotEmpty()
 
     Column(
@@ -68,7 +69,6 @@ fun LocationSearchBar(
                 clip = false,
             )
     ) {
-        // ── Search field ──────────────────────────────────────────────────────
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
@@ -99,7 +99,6 @@ fun LocationSearchBar(
                 .onFocusChanged { isFocused = it.isFocused },
         )
 
-        // ── Dropdown ──────────────────────────────────────────────────────────
         if (hasDropdown) {
             Column(
                 Modifier
@@ -107,7 +106,7 @@ fun LocationSearchBar(
                     .clip(BOTTOM_SHAPE)
                     .background(MaterialTheme.colorScheme.surface)
             ) {
-                // Quick actions — shown immediately when focused, before any typed results
+                // Quick actions always shown when focused (even if results exist)
                 if (showQuickActions) {
                     onChooseOnMap?.let { action ->
                         QuickActionRow(
@@ -122,11 +121,14 @@ fun LocationSearchBar(
                             label = "Choose on the Map",
                             onClick = action,
                         )
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                        )
+                        if (onUseMyLocation != null || results.isNotEmpty()) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            )
+                        }
                     }
+
                     onUseMyLocation?.let { action ->
                         QuickActionRow(
                             icon = {
@@ -140,18 +142,22 @@ fun LocationSearchBar(
                             label = "Use your location",
                             onClick = action,
                         )
+                        if (results.isNotEmpty()) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            )
+                        }
                     }
                 }
 
                 // Nominatim search results
                 results.forEachIndexed { index, result ->
-                    // Separator between quick actions block and first search result
-                    if (index == 0 && (onChooseOnMap != null || onUseMyLocation != null)) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                        )
+                    // Only add separator above first result if quick actions were shown
+                    if (index == 0 && showQuickActions) {
+                        // Separator already added above
                     }
+
                     Row(
                         Modifier
                             .fillMaxWidth()

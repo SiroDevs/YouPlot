@@ -18,7 +18,7 @@ package com.you.plot.core.database.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.you.plot.core.domain.entity.SportType
+import com.you.plot.core.common.entity.SportType
 
 @Entity(tableName = "routes")
 data class RouteEntity(

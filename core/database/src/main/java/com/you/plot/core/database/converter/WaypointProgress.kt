@@ -16,7 +16,7 @@
 
 package com.you.plot.core.database.converter
 
-import com.you.plot.core.domain.entity.LatLng
+import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.domain.entity.WaypointProgress
 import org.json.JSONArray

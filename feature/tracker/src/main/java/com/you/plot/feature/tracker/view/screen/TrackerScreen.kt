@@ -49,7 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.domain.entity.SessionStatus
+import com.you.plot.core.common.entity.SessionStatus
 import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.feature.tracker.utils.vibrate
 import com.you.plot.feature.tracker.view.components.FullScreenStopReminder

@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import com.you.plot.core.domain.entity.LatLng
+import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.entity.WaypointProgress
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory

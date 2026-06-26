@@ -1,11 +1,26 @@
 package com.you.plot.core.common.utils
 
+import org.osmdroid.util.GeoPoint
+
 object AppConstants {
     const val APP_TITLE = "YouPlot"
     const val APP_TAGLINE = "Plot Your Next Adventure"
     const val APP_CREDITS = "© Siro Fits Ke"
     const val SUPPORT_EMAIL = "sirofits@gmail.com"
     const val APP_VERSION = "1.0.2"
+}
+
+object MapConstants{
+    val KENYA_CENTER = GeoPoint(-0.0236, 37.9062)
+    const val COUNTRY_ZOOM = 7.5
+    const val CITY_ZOOM = 13.0
+    const val WAYPOINT_ZOOM = 12.0
+    const val COLOR_START = 0xFF43A047.toInt()
+    const val COLOR_END = 0xFFE53935.toInt()
+    const val COLOR_WAYPOINT = 0xFF1E88E5.toInt()
+    const val COLOR_TURN = 0xFFFF8F00.toInt()
+
+    val CANDIDATE_COLORS = listOf(0xFF2196F3L, 0xFFE91E63L, 0xFF4CAF50L, 0xFFFF9800L)
 
     const val OSRM_BASE = "https://nominatim.openstreetmap.org/"
     const val OSRM_ROUTER = "https://router.project-osrm.org/route/v1/driving"

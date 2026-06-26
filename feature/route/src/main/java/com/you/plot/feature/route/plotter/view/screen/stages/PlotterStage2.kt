@@ -1,5 +1,6 @@
 package com.you.plot.feature.route.plotter.view.screen.stages
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,93 +31,99 @@ import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 @Composable
 fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
     Column(Modifier.fillMaxSize()) {
-        // Mode toggle
-        Row(
+
+        Column(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
+                .padding(bottom = 8.dp),
         ) {
-            FilterChip(
-                selected = state.destinationMode == DestinationMode.PICK_POINT,
-                onClick = { vm.setDestinationMode(DestinationMode.PICK_POINT) },
-                label = { Text("Pick on Map") },
-                modifier = Modifier.weight(1f),
-            )
-            FilterChip(
-                selected = state.destinationMode == DestinationMode.TARGET_DISTANCE,
-                onClick = { vm.setDestinationMode(DestinationMode.TARGET_DISTANCE) },
-                label = { Text("Target Distance") },
-                modifier = Modifier.weight(1f),
-            )
-        }
-
-        when (state.destinationMode) {
-            DestinationMode.PICK_POINT -> {
-                LocationSearchBar(
-                    query = state.searchQuery,
-                    onQueryChange = vm::onSearchQueryChange,
-                    results = state.searchResults,
-                    isSearching = state.isSearching,
-                    placeholder = "Search destination…",
-                    onResultSelected = vm::onSearchResultSelected,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                    onChooseOnMap = { vm.onSearchQueryChange("") },
-                    onUseMyLocation = vm::onUseMyLocation,
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FilterChip(
+                    selected = state.destinationMode == DestinationMode.PICK_POINT,
+                    onClick = { vm.setDestinationMode(DestinationMode.PICK_POINT) },
+                    label = { Text("Pick on Map") },
+                    modifier = Modifier.weight(1f),
                 )
-                state.endPoint?.let { pt ->
-                    SelectedPointChip(
-                        label = "Dest: ${pt.latitude.fmt()}, ${pt.longitude.fmt()}",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                    )
-                }
+                FilterChip(
+                    selected = state.destinationMode == DestinationMode.TARGET_DISTANCE,
+                    onClick = { vm.setDestinationMode(DestinationMode.TARGET_DISTANCE) },
+                    label = { Text("Target Distance") },
+                    modifier = Modifier.weight(1f),
+                )
             }
 
-            DestinationMode.TARGET_DISTANCE -> {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedTextField(
-                        value = state.targetDistanceQuery,
-                        onValueChange = vm::onTargetDistanceChange,
-                        label = { Text("Distance (km)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                    )
-                    Button(onClick = vm::suggestDestinationsForDistance) { Text("Find") }
-                }
-
-                if (state.distanceSuggestions.isNotEmpty()) {
-                    Text(
-                        "Suggested endpoints:",
-                        style = MaterialTheme.typography.labelMedium,
+            when (state.destinationMode) {
+                DestinationMode.PICK_POINT -> {
+                    LocationSearchBar(
+                        query = state.searchQuery,
+                        onQueryChange = vm::onSearchQueryChange,
+                        results = state.searchResults,
+                        isSearching = state.isSearching,
+                        placeholder = "Search destination…",
+                        onResultSelected = vm::onSearchResultSelected,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        onChooseOnMap = { vm.onSearchQueryChange("") },
+                        onUseMyLocation = vm::onUseMyLocation,
                     )
-                    state.distanceSuggestions.forEach { suggestion ->
-                        SuggestionRow(
-                            result = suggestion,
-                            isSelected = state.endPoint == suggestion.latLng,
-                            onClick = { vm.selectDistanceSuggestion(suggestion) },
+                    state.endPoint?.let { pt ->
+                        SelectedPointChip(
+                            label = "Dest: ${pt.latitude.fmt()}, ${pt.longitude.fmt()}",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                         )
                     }
                 }
 
-                state.endPoint?.let { pt ->
-                    SelectedPointChip(
-                        label = "Dest: ${pt.latitude.fmt()}, ${pt.longitude.fmt()}",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                    )
-                }
+                DestinationMode.TARGET_DISTANCE -> {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        OutlinedTextField(
+                            value = state.targetDistanceQuery,
+                            onValueChange = vm::onTargetDistanceChange,
+                            label = { Text("Distance (km)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                        )
+                        Button(onClick = vm::suggestDestinationsForDistance) { Text("Find") }
+                    }
 
-                Spacer(Modifier.weight(1f))
+                    if (state.distanceSuggestions.isNotEmpty()) {
+                        Text(
+                            "Suggested endpoints:",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        )
+                        state.distanceSuggestions.forEach { suggestion ->
+                            SuggestionRow(
+                                result = suggestion,
+                                isSelected = state.endPoint == suggestion.latLng,
+                                onClick = { vm.selectDistanceSuggestion(suggestion) },
+                            )
+                        }
+                    }
+
+                    state.endPoint?.let { pt ->
+                        SelectedPointChip(
+                            label = "Dest: ${pt.latitude.fmt()}, ${pt.longitude.fmt()}",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        )
+                    }
+                }
             }
         }
 
+        Spacer(Modifier.weight(1f))
         Spacer(Modifier.height(72.dp))
     }
 }

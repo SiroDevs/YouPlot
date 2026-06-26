@@ -27,7 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.you.plot.feature.route.list.viewmodel.RouteCandidate
+import com.you.plot.core.common.entity.RouteCandidate
 
 @Composable
 fun RouteCandidateCard(
@@ -92,13 +92,13 @@ fun RouteTypeCard(
     title: String,
     description: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val borderColor =
         if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .border(
                 width = if (selected) 2.dp else 1.dp,
                 color = borderColor,

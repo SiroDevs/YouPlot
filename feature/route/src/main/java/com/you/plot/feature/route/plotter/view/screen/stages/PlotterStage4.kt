@@ -1,5 +1,6 @@
 package com.you.plot.feature.route.plotter.view.screen.stages
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,13 +23,13 @@ import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 @Composable
 fun PlotterStage4(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
     Column(Modifier.fillMaxSize()) {
-        // Let the map breathe — candidates list sits in the lower portion.
         Spacer(Modifier.weight(1f))
 
         LazyColumn(
             Modifier
                 .fillMaxWidth()
-                .height(220.dp)
+                .height(if (state.selectedCandidate != null) 320.dp else 220.dp)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.97f))
                 .padding(horizontal = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {

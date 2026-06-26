@@ -1,8 +1,14 @@
 package com.you.plot.core.domain.entity
 
-enum class SportType { RUNNING, CYCLING, HIKING, WALKING }
+import com.you.plot.core.common.entity.ElevationPoint
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.SessionStatus
+import com.you.plot.core.common.entity.SportType
 
-data class LatLng(val latitude: Double, val longitude: Double)
+data class SearchResult(
+    val displayName: String,
+    val latLng: LatLng,
+)
 
 data class Waypoint(
     val id: Long = 0L,
@@ -13,8 +19,6 @@ data class Waypoint(
     val elevationMeters: Double = 0.0,
     val isStopPlanned: Boolean = false,
 )
-
-data class ElevationPoint(val distanceKm: Double, val elevationMeters: Double)
 
 data class Route(
     val id: Long = 0L,
@@ -56,8 +60,6 @@ data class ActivityPlan(
     val events: List<PlanEvent> = emptyList(),
     val createdAt: Long = System.currentTimeMillis(),
 )
-
-enum class SessionStatus { NOT_STARTED, IN_PROGRESS, PAUSED, COMPLETED }
 
 data class WaypointProgress(
     val waypoint: Waypoint,

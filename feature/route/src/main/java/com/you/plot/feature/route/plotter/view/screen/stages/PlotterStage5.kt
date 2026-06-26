@@ -1,60 +1,136 @@
 package com.you.plot.feature.route.plotter.view.screen.stages
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.entity.SportType
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
-import com.you.plot.feature.route.plotter.view.components.RouteTypeCard
+import com.you.plot.feature.route.plotter.view.components.ElevationProfileGraph
+import com.you.plot.feature.route.plotter.view.components.PlotterMap
+import com.you.plot.feature.route.plotter.view.components.StatChip
 import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 
 @Composable
 fun PlotterStage5(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
+    val scrollState = rememberScrollState()
     Column(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .verticalScroll(scrollState)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            "How would you like to complete this route?",
-            style = MaterialTheme.typography.titleMedium,
+        Text("Review Route", style = MaterialTheme.typography.titleLarge)
+
+        // Small map thumbnail embedded in the review card
+        PlotterMap(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(12.dp)),
+            startPoint = state.startPoint,
+            endPoint = state.endPoint,
+            waypoints = state.activeWaypoints,
+            candidates = state.selectedCandidate?.let { listOf(it) } ?: emptyList(),
+            selectedCandidateId = state.selectedCandidateId,
+            onMapTap = {},
         )
 
-        RouteTypeCard(
-            title = "One-Way",
-            description = "Start at the beginning, finish at the destination.",
-            selected = !state.isRoundTrip,
-            onClick = { vm.setRoundTrip(false) },
-        )
-
-        RouteTypeCard(
-            title = "Round Trip",
-            description = "Return journey follows the same route back to the start.",
-            selected = state.isRoundTrip,
-            onClick = { vm.setRoundTrip(true) },
-        )
-
+        // Stats row
         state.selectedCandidate?.let { c ->
             val dist = if (state.isRoundTrip) c.totalDistanceKm * 2 else c.totalDistanceKm
-            Text(
-                "Total distance: ${"%.1f".format(dist)} km",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                StatChip(label = "Distance", value = "${"%.1f".format(dist)} km")
+                StatChip(label = "↑ Gain",   value = "${"%.0f".format(c.totalElevationGainMeters)} m")
+                StatChip(label = "↓ Loss",   value = "${"%.0f".format(c.totalElevationLossMeters)} m")
+            }
+        }
+
+        // Elevation profile
+        state.selectedCandidate?.let { c ->
+            Text("Elevation Profile", style = MaterialTheme.typography.labelMedium)
+            ElevationProfileGraph(
+                profile = c.elevationProfile,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp),
             )
         }
 
-        Spacer(Modifier.weight(1f))
+        HorizontalDivider()
 
-        Spacer(Modifier.padding(bottom = 56.dp))
+        Text(
+            if (state.isRoundTrip) "Round Trip" else "One-Way",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        HorizontalDivider()
+
+        OutlinedTextField(
+            value = state.name,
+            onValueChange = vm::setName,
+            label = { Text("Route Name *") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+
+        OutlinedTextField(
+            value = state.description,
+            onValueChange = vm::setDescription,
+            label = { Text("Description (optional)") },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 2,
+        )
+
+        Text("Sport", style = MaterialTheme.typography.labelMedium)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SportType.entries.forEach { type ->
+                FilterChip(
+                    selected = state.sportType == type,
+                    onClick = { vm.setSportType(type) },
+                    label = { Text(type.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Stage 6 owns its own action button (progress indicator variant)
+        Button(
+            onClick = vm::advanceStage,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !state.isSaving,
+        ) {
+            if (state.isSaving) {
+                CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(if (state.isSaving) "Saving…" else "Save Route")
+        }
     }
 }

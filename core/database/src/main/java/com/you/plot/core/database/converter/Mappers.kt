@@ -16,12 +16,13 @@
 
 package com.you.plot.core.database.converter
 
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.SessionStatus
 import com.you.plot.core.database.model.PlanEntity
 import com.you.plot.core.database.model.PlanEventEntity
 import com.you.plot.core.database.model.SessionEntity
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.domain.entity.ActivitySession
-import com.you.plot.core.domain.entity.LatLng
 import com.you.plot.core.domain.entity.PlanEvent
 
 fun ActivityPlan.toEntity() = PlanEntity(
@@ -60,9 +61,12 @@ fun ActivitySession.toEntity() = SessionEntity(
 
 fun SessionEntity.toDomain() = ActivitySession(
     id = id, planId = planId, routeId = routeId,
-    status = com.you.plot.core.domain.entity.SessionStatus.valueOf(status),
+    status = SessionStatus.valueOf(status),
     startedAtMillis = startedAtMillis, elapsedTimeSeconds = elapsedTimeSeconds,
-    currentLocation = if (currentLat != null && currentLng != null) LatLng(currentLat, currentLng) else null,
+    currentLocation = if (currentLat != null && currentLng != null) LatLng(
+        currentLat,
+        currentLng
+    ) else null,
     currentSpeedKmh = currentSpeedKmh, distanceCoveredKm = distanceCoveredKm,
     waypointProgress = waypointProgressJson.toWaypointProgressList(),
     estimatedCompletionMillis = estimatedCompletionMillis,

@@ -9,4 +9,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.ktor.client.android)
+    implementation(libs.androidx.foundation)
+    implementation(libs.osmdroid.android)
+    implementation(libs.play.services.location)
 }

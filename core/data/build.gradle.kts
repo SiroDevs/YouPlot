@@ -13,10 +13,9 @@ dependencies {
 
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.core.ktx)
-
+    implementation(libs.play.services.location)
+    implementation(libs.coroutines.play.services)
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
-    implementation(libs.play.services.location)
-    implementation(libs.coroutines.play.services)
 }

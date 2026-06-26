@@ -41,7 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppConstants
 import com.you.plot.core.data.repos.ThemeRepo
-import com.you.plot.core.domain.entity.SportType
+import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.designsystem.theme.ThemeSelectorDialog
 import com.you.plot.core.designsystem.theme.themeName
 import com.you.plot.core.ui.components.action.AppTopBar

@@ -1,8 +1,8 @@
 package com.you.plot.core.domain.repos
 
+import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.entity.ActivitySession
 import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.domain.entity.LatLng
 import com.you.plot.core.domain.entity.Route
 import kotlinx.coroutines.flow.Flow
 

@@ -4,8 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.you.plot.core.domain.entity.ActivitySession
-import com.you.plot.core.domain.entity.LatLng
-import com.you.plot.core.domain.entity.SessionStatus
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.SessionStatus
 import com.you.plot.core.domain.entity.WaypointProgress
 import com.you.plot.core.domain.repos.LocationRepo
 import com.you.plot.core.domain.usecase.tracker.CompleteSessionUseCase

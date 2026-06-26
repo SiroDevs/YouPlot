@@ -32,7 +32,6 @@ import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage2
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage3
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage4
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage5
-import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage6
 import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,7 +110,6 @@ fun RoutePlotterScreen(
                     PlotterStage.STAGE_3 -> PlotterStage3(state, viewModel)
                     PlotterStage.STAGE_4 -> PlotterStage4(state, viewModel)
                     PlotterStage.STAGE_5 -> PlotterStage5(state, viewModel)
-                    PlotterStage.STAGE_6 -> PlotterStage6(state, viewModel)
                 }
             }
 
@@ -133,10 +131,9 @@ fun RoutePlotterScreen(
 val stageTitles = mapOf(
     PlotterStage.STAGE_1 to "Select Start Point",
     PlotterStage.STAGE_2 to "Select Destination",
-    PlotterStage.STAGE_3 to "Add Waypoints",
+    PlotterStage.STAGE_3 to "Waypoints & Route Type",
     PlotterStage.STAGE_4 to "Compare Routes",
-    PlotterStage.STAGE_5 to "Route Type",
-    PlotterStage.STAGE_6 to "Save Route",
+    PlotterStage.STAGE_5 to "Save Route",
 )
 
 private val PlotterStage.mapsAreTappable: Boolean
@@ -151,9 +148,8 @@ private fun PlotterStage.nextButtonConfig(state: RoutePlotterUiState): NextButto
         PlotterStage.STAGE_1 -> NextButtonConfig("Confirm Start → Destination", state.startPoint != null)
         PlotterStage.STAGE_2 -> NextButtonConfig("Add Waypoints →", state.endPoint != null)
         PlotterStage.STAGE_3 -> NextButtonConfig("Compare Routes →", true)
-        PlotterStage.STAGE_4 -> NextButtonConfig("Choose Route Type →", state.selectedCandidateId != null)
-        PlotterStage.STAGE_5 -> NextButtonConfig("Review & Save →", true)
-        PlotterStage.STAGE_6 -> null
+        PlotterStage.STAGE_4 -> NextButtonConfig("Review & Save →", state.selectedCandidateId != null)
+        PlotterStage.STAGE_5 -> null
     }
 
 fun Double.fmt() = "%.5f".format(this)
