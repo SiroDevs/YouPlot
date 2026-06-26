@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -29,6 +30,7 @@ import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 @Composable
 fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
     Column(Modifier.fillMaxSize()) {
+        // Mode toggle
         Row(
             Modifier
                 .fillMaxWidth()
@@ -59,6 +61,8 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                     placeholder = "Search destination…",
                     onResultSelected = vm::onSearchResultSelected,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    onChooseOnMap = { vm.onSearchQueryChange("") },
+                    onUseMyLocation = vm::onUseMyLocation,
                 )
                 state.endPoint?.let { pt ->
                     SelectedPointChip(
@@ -66,7 +70,6 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                     )
                 }
-                // No map here — it's rendered by RoutePlotterScreen behind this overlay.
             }
 
             DestinationMode.TARGET_DISTANCE -> {
@@ -114,6 +117,6 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
             }
         }
 
-        Spacer(Modifier.padding(bottom = 72.dp))
+        Spacer(Modifier.height(72.dp))
     }
 }

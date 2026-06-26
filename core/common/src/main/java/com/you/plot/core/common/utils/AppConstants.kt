@@ -6,6 +6,9 @@ object AppConstants {
     const val APP_CREDITS = "© Siro Fits Ke"
     const val SUPPORT_EMAIL = "sirofits@gmail.com"
     const val APP_VERSION = "1.0.2"
+
+    const val OSRM_BASE = "https://nominatim.openstreetmap.org/"
+    const val OSRM_ROUTER = "https://router.project-osrm.org/route/v1/driving"
 }
 
 object PrefConstants {

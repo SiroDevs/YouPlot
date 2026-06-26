@@ -24,9 +24,12 @@ fun PlotterStage1(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
             onQueryChange = vm::onSearchQueryChange,
             results = state.searchResults,
             isSearching = state.isSearching,
-            placeholder = "Search start location ...",
+            placeholder = "Search start location…",
             onResultSelected = vm::onSearchResultSelected,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            // "Choose on the Map" — just dismisses the keyboard; the map is already tappable
+            onChooseOnMap = { vm.onSearchQueryChange("") },
+            onUseMyLocation = vm::onUseMyLocation,
         )
 
         state.startPoint?.let { pt ->

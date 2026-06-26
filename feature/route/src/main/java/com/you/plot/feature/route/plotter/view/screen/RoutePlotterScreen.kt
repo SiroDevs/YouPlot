@@ -78,7 +78,6 @@ fun RoutePlotterScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            // Layer 0 — shared map, always behind everything
             PlotterMap(
                 modifier = Modifier.fillMaxSize(),
                 startPoint = state.startPoint,
@@ -86,10 +85,12 @@ fun RoutePlotterScreen(
                 waypoints = state.activeWaypoints,
                 candidates = state.routeCandidates,
                 selectedCandidateId = state.selectedCandidateId,
+                isRoundTrip = state.isRoundTrip,
                 onMapTap = if (state.stage.mapsAreTappable) viewModel::onMapTap else { _ -> },
+                onWaypointMoved = if (state.stage == PlotterStage.STAGE_3) viewModel::onWaypointMoved else null,
+                onWaypointDelete = if (state.stage == PlotterStage.STAGE_3) viewModel::removeManualWaypoint else null,
             )
 
-            // Layer 1 — per-stage overlay with slide animation
             AnimatedContent(
                 targetState = state.stage,
                 transitionSpec = {
@@ -114,7 +115,6 @@ fun RoutePlotterScreen(
                 }
             }
 
-            // Layer 2 — shared Next button pinned to the bottom (Stage 6 returns null)
             state.stage.nextButtonConfig(state)?.let { cfg ->
                 NextButton(
                     label = cfg.label,

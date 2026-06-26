@@ -12,6 +12,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -22,10 +24,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.feature.route.list.viewmodel.SearchResult
@@ -44,19 +51,24 @@ fun LocationSearchBar(
     placeholder: String,
     onResultSelected: (SearchResult) -> Unit,
     modifier: Modifier = Modifier,
+    onChooseOnMap: (() -> Unit)? = null,
+    onUseMyLocation: (() -> Unit)? = null,
 ) {
-    val hasResults = results.isNotEmpty()
+    var isFocused by remember { mutableStateOf(false) }
 
-    // Outer shadow wraps the whole widget so it lifts as one unit
+    val showQuickActions = isFocused && results.isEmpty() && !isSearching
+    val hasDropdown = showQuickActions || results.isNotEmpty()
+
     Column(
         modifier
             .fillMaxWidth()
             .shadow(
-                elevation = if (hasResults) 6.dp else 3.dp,
-                shape = if (hasResults) TOP_SHAPE else FULL_SHAPE,
+                elevation = if (hasDropdown) 6.dp else 3.dp,
+                shape = if (hasDropdown) TOP_SHAPE else FULL_SHAPE,
                 clip = false,
             )
     ) {
+        // ── Search field ──────────────────────────────────────────────────────
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
@@ -75,24 +87,71 @@ fun LocationSearchBar(
                 }
             },
             singleLine = true,
-            shape = if (hasResults) TOP_SHAPE else FULL_SHAPE,
+            shape = if (hasDropdown) TOP_SHAPE else FULL_SHAPE,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
             ),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { isFocused = it.isFocused },
         )
 
-        if (hasResults) {
+        // ── Dropdown ──────────────────────────────────────────────────────────
+        if (hasDropdown) {
             Column(
                 Modifier
                     .fillMaxWidth()
                     .clip(BOTTOM_SHAPE)
                     .background(MaterialTheme.colorScheme.surface)
             ) {
+                // Quick actions — shown immediately when focused, before any typed results
+                if (showQuickActions) {
+                    onChooseOnMap?.let { action ->
+                        QuickActionRow(
+                            icon = {
+                                Icon(
+                                    Icons.Default.Place,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            },
+                            label = "Choose on the Map",
+                            onClick = action,
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                        )
+                    }
+                    onUseMyLocation?.let { action ->
+                        QuickActionRow(
+                            icon = {
+                                Icon(
+                                    Icons.Default.MyLocation,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            },
+                            label = "Use your location",
+                            onClick = action,
+                        )
+                    }
+                }
+
+                // Nominatim search results
                 results.forEachIndexed { index, result ->
+                    // Separator between quick actions block and first search result
+                    if (index == 0 && (onChooseOnMap != null || onUseMyLocation != null)) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                        )
+                    }
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -123,5 +182,28 @@ fun LocationSearchBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun QuickActionRow(
+    icon: @Composable () -> Unit,
+    label: String,
+    onClick: () -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 13.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        icon()
+        Text(
+            label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
