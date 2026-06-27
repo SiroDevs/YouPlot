@@ -121,7 +121,19 @@ class PlanCreatorViewModel @Inject constructor(
                 if (!hasSelection) { setError("Select a route or template first"); return }
                 _state.update { it.copy(currentStep = 1) }
             }
-            1 -> viewModelScope.launch { generateEvents() }
+            1 -> {
+                val routeId = s.selectedRoute?.id ?: s.selectedTemplate?.routeId
+                if (routeId == null) { setError("No route associated with this plan"); return }
+                if (s.numberOfDays < 1) { setError("Number of days must be at least 1"); return }
+                if (s.avgSpeedKmh <= 0) { setError("Speed must be greater than 0"); return }
+                _state.update { it.copy(isGenerating = true) }
+                viewModelScope.launch {
+                    runCatching { generateEvents() }
+                        .onFailure { e ->
+                            _state.update { it.copy(isGenerating = false, error = "Failed to generate schedule: ${e.message}") }
+                        }
+                }
+            }
             2 -> _state.update { it.copy(currentStep = 3) }
         }
     }
@@ -139,18 +151,17 @@ class PlanCreatorViewModel @Inject constructor(
             description = s.description,
             startDateMillis = s.startTimeMillis,
             numberOfDays = s.numberOfDays,
-            avgSpeedKmh = s.avgSpeedKmh,
-            avgDistancePerDayKm = s.avgDistancePerDayKm,
+            avgSpeedKmh = s.avgSpeedKmh.coerceAtLeast(1.0),
+            avgDistancePerDayKm = s.avgDistancePerDayKm.coerceAtLeast(0.1),
         )
         val events = generateEventsUseCase(draft)
-        // If from a template, also carry over template custom events re-dated
         val templateCustom = if (s.selectedTemplate != null) {
             val offset = s.startTimeMillis - s.selectedTemplate.startDateMillis
             s.selectedTemplate.events
-                .filter { it.waypointId == null }   // custom (non-waypoint) events only
+                .filter { it.waypointId == null }
                 .map { it.copy(id = 0L, planId = 0L, plannedTimeMillis = it.plannedTimeMillis + offset) }
         } else emptyList()
-        _state.update { it.copy(generatedEvents = events, customEvents = templateCustom, currentStep = 2, selectedDay = 1) }
+        _state.update { it.copy(generatedEvents = events, customEvents = templateCustom, currentStep = 2, selectedDay = 1, isGenerating = false) }
     }
 
     fun savePlan() {

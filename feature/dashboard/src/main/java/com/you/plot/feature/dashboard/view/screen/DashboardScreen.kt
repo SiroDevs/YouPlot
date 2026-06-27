@@ -148,8 +148,8 @@ fun DashboardScreen(
             item {
                 DashboardSectionHeader(
                     title = "Plans",
-                    actionLabel = if (state.plans.isNotEmpty()) "New Plan" else null,
-                    onAction = if (state.plans.isNotEmpty()) onCreatePlan else null,
+                    actionLabel = "New Plan",
+                    onAction = onCreatePlan,
                 )
                 PlanFilterRow(
                     selected = state.planFilter,

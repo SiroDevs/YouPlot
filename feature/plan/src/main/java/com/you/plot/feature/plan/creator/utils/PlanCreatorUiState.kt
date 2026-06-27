@@ -42,6 +42,7 @@ data class PlanCreatorUiState(
     val selectedDay: Int = 1,
     val currentStep: Int = 0,
     val isSaving: Boolean = false,
+    val isGenerating: Boolean = false,
     val savedPlanId: Long? = null,
     val error: String? = null,
 ) {

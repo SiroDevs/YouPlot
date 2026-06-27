@@ -10,7 +10,7 @@ object AppConstants {
     const val APP_VERSION = "1.0.2"
 }
 
-object MapConstants{
+object MapConstants {
     val KENYA_CENTER = GeoPoint(-0.0236, 37.9062)
     const val COUNTRY_ZOOM = 7.5
     const val CITY_ZOOM = 13.0
@@ -22,6 +22,8 @@ object MapConstants{
 
     val CANDIDATE_COLORS = listOf(0xFF2196F3L, 0xFFE91E63L, 0xFF4CAF50L, 0xFFFF9800L)
 
+    const val NOMINATIM_BASE = "https://nominatim.openstreetmap.org/"
+    const val PHOTON_BASE = "https://photon.komoot.io/"
     const val OSRM_BASE = "https://nominatim.openstreetmap.org/"
     const val OSRM_ROUTER = "https://router.project-osrm.org/route/v1/driving"
 }
@@ -44,16 +46,29 @@ object NotifConstants {
 
 object Routes {
     const val DASHBOARD = "dashboard"
-    const val ROUTE_LIST = "routes"
-    const val ROUTE_PLOTTER = "routes/plot"
-    const val PLAN_LIST = "plans"
-    const val PLAN_CREATE = "plans/create"
-    const val PLAN_DETAIL = "plans/{planId}"
+
+    // Route screens
+    const val ROUTE_LIST = "route/list"
+    const val ROUTE_DETAIL = "route/detail/{routeId}"   // FIX: was "routes/{routeId}" — clashed with ROUTE_PLOTTER
+    const val ROUTE_PLOTTER = "route/plot"              // FIX: was "routes/plot" — matched as routeId = "plot"
+
+    // Plan screens
+    const val PLAN_LIST = "plan/list"
+    const val PLAN_CREATE = "plan/create"
+    const val PLAN_CREATE_FOR_ROUTE = "plan/create/{routeId}"
+    const val PLAN_DETAIL = "plan/detail/{planId}"
+
+    // Tracker
     const val TRACKER = "tracker/{planId}"
+
+    // Settings / extras
     const val SETTINGS = "settings"
     const val ABOUT = "about"
     const val HELP_FEEDBACK = "help_feedback"
 
-    fun planDetail(planId: Long) = "plans/$planId"
+    // Helpers — always use these in navController.navigate(), never build strings manually
+    fun routeDetail(routeId: Long) = "route/detail/$routeId"
+    fun planDetail(planId: Long) = "plan/detail/$planId"
+    fun planCreateForRoute(routeId: Long) = "plan/create/$routeId"
     fun tracker(planId: Long) = "tracker/$planId"
 }

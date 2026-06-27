@@ -31,7 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppSpecs
@@ -50,6 +54,8 @@ fun LocationSearchBar(
     onUseMyLocation: (() -> Unit)? = null,
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     val showQuickActions = isFocused && (onChooseOnMap != null || onUseMyLocation != null)
     val hasDropdown = showQuickActions || results.isNotEmpty()
@@ -112,7 +118,13 @@ fun LocationSearchBar(
                                 )
                             },
                             label = "Choose on the Map",
-                            onClick = action,
+                            onClick = {
+                                // Dismiss keyboard and clear focus so map is fully interactive
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                isFocused = false
+                                action()
+                            },
                         )
                         if (onUseMyLocation != null || results.isNotEmpty()) {
                             HorizontalDivider(
@@ -133,7 +145,12 @@ fun LocationSearchBar(
                                 )
                             },
                             label = "Use your location",
-                            onClick = action,
+                            onClick = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                isFocused = false
+                                action()
+                            },
                         )
                         if (results.isNotEmpty()) {
                             HorizontalDivider(
@@ -145,14 +162,16 @@ fun LocationSearchBar(
                 }
 
                 results.forEachIndexed { index, result ->
-                    if (index == 0 && showQuickActions) {
-                        // Separator already added above
-                    }
-
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .clickable { onResultSelected(result) }
+                            .clickable {
+                                // Dismiss keyboard when a search result is tapped
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                isFocused = false
+                                onResultSelected(result)
+                            }
                             .padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp),

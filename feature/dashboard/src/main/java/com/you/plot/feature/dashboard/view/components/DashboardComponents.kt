@@ -8,10 +8,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,20 +49,27 @@ fun EmptyDashboard(modifier: Modifier = Modifier, onGetStarted: () -> Unit) {
     Box(modifier, contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.padding(32.dp),
         ) {
-            Icon(
-                imageVector = Icons.Default.Map,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .then(Modifier.padding(0.dp)),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
-            )
+            Card(
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                modifier = Modifier.size(96.dp),
+            ) {
+                Box(Modifier.fillMaxWidth().height(96.dp), contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Map,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
             Text(
                 "Welcome to YouPlot!",
                 style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
             )
             Text(
                 "Plot a route to get started with planning and tracking your outdoor activities.",
@@ -67,11 +78,14 @@ fun EmptyDashboard(modifier: Modifier = Modifier, onGetStarted: () -> Unit) {
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(4.dp))
-            ExtendedFloatingActionButton(
+            Button(
                 onClick = onGetStarted,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Get Things Started") },
-            )
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.size(8.dp))
+                Text("Plot Your First Route")
+            }
         }
     }
 }

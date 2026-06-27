@@ -10,7 +10,6 @@ import com.you.plot.core.common.utils.decodePolyline6
 import com.you.plot.core.domain.entity.SearchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -29,8 +28,8 @@ class RoutePlotterRepo @Inject constructor(
         withContext(Dispatchers.IO) {
             runCatching {
                 val encoded = URLEncoder.encode(query, "UTF-8")
-                val urlString = "${MapConstants.OSRM_BASE}search" +
-                    "?q=$encoded&format=jsonv2&limit=10&addressdetails=1&extratags=1&namedetails=1"
+                // Photon API (powered by Komoot) gives far better results than Nominatim
+                val urlString = "https://photon.komoot.io/api/?q=$encoded&limit=10&lang=en"
                 val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
                     setRequestProperty("User-Agent", osmUserAgent)
                     setRequestProperty("Accept-Language", "en")
@@ -39,15 +38,58 @@ class RoutePlotterRepo @Inject constructor(
                 }
                 val json = conn.inputStream.bufferedReader().readText()
                 conn.disconnect()
-                val arr = JSONArray(json)
-                (0 until arr.length()).map { i ->
-                    val obj = arr.getJSONObject(i)
+                val root = JSONObject(json)
+                val features = root.getJSONArray("features")
+                (0 until features.length()).map { i ->
+                    val feat = features.getJSONObject(i)
+                    val props = feat.getJSONObject("properties")
+                    val coords = feat.getJSONObject("geometry").getJSONArray("coordinates")
+                    val lon = coords.getDouble(0)
+                    val lat = coords.getDouble(1)
+                    // Build a nice display name from available properties
+                    val name = props.optString("name")
+                    val street = props.optString("street")
+                    val city = props.optString("city")
+                    val state = props.optString("state")
+                    val country = props.optString("country")
+                    val parts = listOfNotNull(
+                        name.ifEmpty { null },
+                        street.ifEmpty { null },
+                        city.ifEmpty { null },
+                        state.ifEmpty { null },
+                        country.ifEmpty { null },
+                    )
+                    val displayName = parts.joinToString(", ").take(80)
                     SearchResult(
-                        displayName = obj.getString("display_name").take(80),
-                        latLng = LatLng(obj.getDouble("lat"), obj.getDouble("lon")),
+                        displayName = displayName.ifEmpty { "$lat, $lon" },
+                        latLng = LatLng(lat, lon),
                     )
                 }
-            }.getOrElse { e -> e.printStackTrace(); emptyList() }
+            }.getOrElse { e ->
+                e.printStackTrace()
+                // Fallback to Nominatim if Photon fails
+                runCatching {
+                    val encoded = URLEncoder.encode(query, "UTF-8")
+                    val urlString = "${MapConstants.NOMINATIM_BASE}search" +
+                        "?q=$encoded&format=jsonv2&limit=10&addressdetails=1"
+                    val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
+                        setRequestProperty("User-Agent", osmUserAgent)
+                        setRequestProperty("Accept-Language", "en")
+                        connectTimeout = 8_000
+                        readTimeout = 8_000
+                    }
+                    val json = conn.inputStream.bufferedReader().readText()
+                    conn.disconnect()
+                    val arr = org.json.JSONArray(json)
+                    (0 until arr.length()).map { i ->
+                        val obj = arr.getJSONObject(i)
+                        SearchResult(
+                            displayName = obj.getString("display_name").take(80),
+                            latLng = LatLng(obj.getDouble("lat"), obj.getDouble("lon")),
+                        )
+                    }
+                }.getOrElse { emptyList() }
+            }
         }
 
     suspend fun fetchRouteCandidates(

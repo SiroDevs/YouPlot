@@ -44,7 +44,9 @@ fun RoutePlotterScreen(
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(state.savedRouteId) {
-        state.savedRouteId?.let { onRouteSaved(it) }
+        state.savedRouteId?.let { id ->
+            onRouteSaved(id)  // caller should navigate to RouteDetail(id)
+        }
     }
 
     state.error?.let { error ->

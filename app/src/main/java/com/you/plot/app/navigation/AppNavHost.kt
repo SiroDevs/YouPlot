@@ -1,9 +1,6 @@
 package com.you.plot.app.navigation
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,22 +8,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.you.plot.core.common.utils.Routes
-import com.you.plot.core.data.repos.PrefsRepo
 import com.you.plot.core.data.repos.ThemeRepo
 import com.you.plot.feature.dashboard.view.screen.DashboardScreen
+import com.you.plot.feature.extra.about.AboutScreen
+import com.you.plot.feature.extra.help.HelpFeedbackScreen
 import com.you.plot.feature.plan.creator.view.screen.PlanCreatorScreen
 import com.you.plot.feature.plan.details.view.screen.PlanDetailScreen
 import com.you.plot.feature.plan.list.view.screen.PlanListScreen
+import com.you.plot.feature.route.detail.view.RouteDetailScreen
 import com.you.plot.feature.route.list.view.RouteListScreen
 import com.you.plot.feature.route.plotter.view.screen.RoutePlotterScreen
-import com.you.plot.feature.extra.about.AboutScreen
-import com.you.plot.feature.extra.help.HelpFeedbackScreen
 import com.you.plot.feature.settings.view.SettingsScreen
 import com.you.plot.feature.tracker.view.screen.TrackerScreen
 
 @Composable
 fun AppNavHost(
-    themeRepo: ThemeRepo
+    themeRepo: ThemeRepo,
 ) {
     val navController = rememberNavController()
 
@@ -34,12 +31,15 @@ fun AppNavHost(
         navController = navController,
         startDestination = Routes.DASHBOARD,
     ) {
+
         composable(Routes.DASHBOARD) {
             DashboardScreen(
                 viewModel = hiltViewModel(),
                 onPlotRoute = { navController.navigate(Routes.ROUTE_PLOTTER) },
                 onViewAllRoutes = { navController.navigate(Routes.ROUTE_LIST) },
-                onRouteClick = { navController.navigate(Routes.ROUTE_LIST) },
+                // FIX: was navigating to ROUTE_LIST instead of the tapped route detail
+                onRouteClick = { routeId -> navController.navigate(Routes.routeDetail(routeId)) },
+                // FIX: create plan with no pre-selected route
                 onCreatePlan = { navController.navigate(Routes.PLAN_CREATE) },
                 onPlanClick = { planId -> navController.navigate(Routes.planDetail(planId)) },
                 onStartTracking = { planId -> navController.navigate(Routes.tracker(planId)) },
@@ -53,7 +53,20 @@ fun AppNavHost(
             RouteListScreen(
                 viewModel = hiltViewModel(),
                 onCreateRoute = { navController.navigate(Routes.ROUTE_PLOTTER) },
-                onRouteClick = { navController.navigate(Routes.PLAN_LIST) },
+                // FIX: was navigating to PLAN_LIST instead of the tapped route detail
+                onRouteClick = { routeId -> navController.navigate(Routes.routeDetail(routeId)) },
+            )
+        }
+
+        // NEW: Route detail screen — shows stats, waypoints, elevation + "Plan this Route" button
+        composable(
+            route = Routes.ROUTE_DETAIL,
+            arguments = listOf(navArgument("routeId") { type = NavType.LongType }),
+        ) {
+            RouteDetailScreen(
+                viewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() },
+                onCreatePlan = { routeId -> navController.navigate(Routes.planCreateForRoute(routeId)) },
             )
         }
 
@@ -61,7 +74,11 @@ fun AppNavHost(
             RoutePlotterScreen(
                 viewModel = hiltViewModel(),
                 onBack = { navController.popBackStack() },
-                onRouteSaved = { navController.popBackStack() },
+                onRouteSaved = { routeId ->
+                    navController.navigate(Routes.routeDetail(routeId)) {
+                        popUpTo(Routes.ROUTE_PLOTTER) { inclusive = true }
+                    }
+                },
             )
         }
 
@@ -75,6 +92,21 @@ fun AppNavHost(
         }
 
         composable(Routes.PLAN_CREATE) {
+            PlanCreatorScreen(
+                viewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() },
+                onPlanSaved = { planId ->
+                    navController.navigate(Routes.planDetail(planId)) {
+                        popUpTo(Routes.DASHBOARD)
+                    }
+                },
+            )
+        }
+
+        composable(
+            route = Routes.PLAN_CREATE_FOR_ROUTE,
+            arguments = listOf(navArgument("routeId") { type = NavType.LongType }),
+        ) {
             PlanCreatorScreen(
                 viewModel = hiltViewModel(),
                 onBack = { navController.popBackStack() },

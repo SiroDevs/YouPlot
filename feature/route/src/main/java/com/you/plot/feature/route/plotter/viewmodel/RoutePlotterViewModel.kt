@@ -110,10 +110,10 @@ class RoutePlotterViewModel @Inject constructor(
     fun onSearchResultSelected(result: SearchResult) {
         when (_state.value.stage) {
             PlotterStage.STAGE_1 -> _state.update {
-                it.copy(startPoint = result.latLng, searchQuery = result.displayName, searchResults = emptyList())
+                it.copy(startPoint = result.latLng, startPointName = result.displayName.substringBefore(",").trim(), searchQuery = result.displayName, searchResults = emptyList())
             }
             PlotterStage.STAGE_2 -> _state.update {
-                it.copy(endPoint = result.latLng, searchQuery = result.displayName, searchResults = emptyList())
+                it.copy(endPoint = result.latLng, endPointName = result.displayName.substringBefore(",").trim(), searchQuery = result.displayName, searchResults = emptyList())
             }
             else -> {}
         }
@@ -150,19 +150,28 @@ class RoutePlotterViewModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     fun onUseMyLocation() {
+        // Check for location permission before accessing location services
+        val hasPermission = context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED ||
+            context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (!hasPermission) {
+            setError("Location permission is required. Please grant it in Settings.")
+            return
+        }
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true) }
             val latLng = withContext(Dispatchers.IO) { resolveCurrentLocation() }
             _state.update { it.copy(isSearching = false) }
             if (latLng == null) {
-                setError("Couldn't get your location. Check that location is enabled.")
+                setError("Couldn't get your location. Make sure location is enabled.")
                 return@launch
             }
             when (_state.value.stage) {
                 PlotterStage.STAGE_1 -> _state.update {
-                    it.copy(startPoint = latLng, searchQuery = "${latLng.latitude.fmt()}, ${latLng.longitude.fmt()}", searchResults = emptyList())
+                    it.copy(startPoint = latLng, startPointName = "My Location", searchQuery = "${latLng.latitude.fmt()}, ${latLng.longitude.fmt()}", searchResults = emptyList())
                 }
-                PlotterStage.STAGE_2 -> _state.update { it.copy(endPoint = latLng, searchResults = emptyList()) }
+                PlotterStage.STAGE_2 -> _state.update { it.copy(endPoint = latLng, endPointName = "My Location", searchResults = emptyList()) }
                 else -> {}
             }
         }
@@ -247,9 +256,17 @@ class RoutePlotterViewModel @Inject constructor(
                         isStopPlanned = index != 0 && index != allPoints.lastIndex,
                     )
                 }
+                // Auto-name from start and end point names if user hasn't typed anything
+                val autoName = if (s.startPointName.isNotBlank() && s.endPointName.isNotBlank()) {
+                    "${s.startPointName} → ${s.endPointName}"
+                } else if (s.startPointName.isNotBlank()) {
+                    "${s.startPointName} Route"
+                } else {
+                    "New Route"
+                }
                 saveRouteUseCase(
                     Route(
-                        name = s.name.ifBlank { "New Route" },
+                        name = s.name.ifBlank { autoName },
                         description = s.description,
                         sportType = s.sportType,
                         startPoint = start,

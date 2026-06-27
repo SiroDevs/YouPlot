@@ -104,10 +104,20 @@ fun PlotterStage5(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
             )
         }
 
+        val autoName = if (state.startPointName.isNotBlank() && state.endPointName.isNotBlank()) {
+            "${state.startPointName} → ${state.endPointName}"
+        } else if (state.startPointName.isNotBlank()) {
+            "${state.startPointName} Route"
+        } else {
+            "New Route"
+        }
+
         OutlinedTextField(
             value = state.name,
             onValueChange = vm::setName,
-            label = { Text("Route Name *") },
+            label = { Text("Route Name") },
+            placeholder = { Text(autoName, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) },
+            supportingText = { Text("Leave blank to use: $autoName") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
