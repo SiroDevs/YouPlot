@@ -133,7 +133,7 @@ fun PlotterStage3(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(
-                            "Waypoint ${index + 1}: ${pt.latitude.fmt()}, ${pt.longitude.fmt()}",
+                            "Waypoint ${index + 1}",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.weight(1f),
                         )

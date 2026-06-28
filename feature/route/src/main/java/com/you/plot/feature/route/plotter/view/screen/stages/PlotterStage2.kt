@@ -83,14 +83,17 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                         results = state.searchResults,
                         isSearching = state.isSearching,
                         placeholder = "Search destination…",
-                        onResultSelected = vm::onSearchResultSelected,
+                        onResultSelected = vm::onWaypointSearchResultSelected,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        selectedCountryCode = state.selectedCountryCode,
+                        onCountrySelected = vm::setCountryCode,
                         onChooseOnMap = { vm.onSearchQueryChange("") },
                         onUseMyLocation = vm::onUseMyLocation,
                     )
-                    state.endPoint?.let { pt ->
+                    state.endPoint?.let {
                         SelectedPointChip(
-                            label = "Dest: ${pt.latitude.fmt()}, ${pt.longitude.fmt()}",
+                            label = state.endPointName.ifBlank { "Destination set" },
+                            isLoading = state.isReverseGeocoding,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                         )
                     }
@@ -141,9 +144,9 @@ fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                         }
                     }
 
-                    state.endPoint?.let { pt ->
+                    state.endPoint?.let {
                         SelectedPointChip(
-                            label = "Dest: ${pt.latitude.fmt()}, ${pt.longitude.fmt()}",
+                            label = state.endPointName.ifBlank { "Destination set" },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                         )
                     }

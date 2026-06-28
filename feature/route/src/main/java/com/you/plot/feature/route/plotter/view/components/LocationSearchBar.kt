@@ -3,18 +3,27 @@ package com.you.plot.feature.route.plotter.view.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,34 +41,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppSpecs
-import com.you.plot.core.domain.entity.SearchResult
+import com.you.plot.core.common.utils.COUNTRY_LIST
+import com.you.plot.core.domain.entity.WaypointSearchResult
 
 @Composable
 fun LocationSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    results: List<SearchResult>,
+    results: List<WaypointSearchResult>,
     isSearching: Boolean,
     placeholder: String,
-    onResultSelected: (SearchResult) -> Unit,
+    onResultSelected: (WaypointSearchResult) -> Unit,
     modifier: Modifier = Modifier,
+    selectedCountryCode: String = "ke",
+    onCountrySelected: ((String) -> Unit)? = null,
     onChooseOnMap: (() -> Unit)? = null,
     onUseMyLocation: (() -> Unit)? = null,
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    var showCountryMenu by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
     val showQuickActions = isFocused && (onChooseOnMap != null || onUseMyLocation != null)
     val hasDropdown = showQuickActions || results.isNotEmpty()
+    val countryLabel =
+        COUNTRY_LIST.firstOrNull { it.first == selectedCountryCode }?.first?.uppercase()
+            ?.ifEmpty { "ALL" } ?: "KE"
 
     Column(
         modifier
@@ -74,15 +90,71 @@ fun LocationSearchBar(
             onValueChange = onQueryChange,
             placeholder = { Text(placeholder) },
             leadingIcon = {
-                if (isSearching)
-                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                else
-                    Icon(Icons.Default.Search, contentDescription = "Search")
+                if (isSearching) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Icon(Icons.Default.Search, contentDescription = "Search")
             },
             trailingIcon = {
-                if (query.isNotEmpty()) {
-                    IconButton(onClick = { onQueryChange("") }) {
-                        Icon(Icons.Default.Close, contentDescription = "Clear")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (query.isNotEmpty()) {
+                        IconButton(onClick = { onQueryChange("") }) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Clear",
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                    // Country selector button
+                    if (onCountrySelected != null) {
+                        Box {
+                            TextButton(
+                                onClick = { showCountryMenu = true },
+                                modifier = Modifier.padding(end = 4.dp),
+                            ) {
+                                Text(
+                                    countryLabel.ifEmpty { "🌍" },
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                                Icon(
+                                    Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Select country",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showCountryMenu,
+                                onDismissRequest = { showCountryMenu = false },
+                            ) {
+                                COUNTRY_LIST.forEach { (code, name) ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                            ) {
+                                                Text(
+                                                    code.uppercase().ifEmpty { "🌍" },
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                )
+                                                Text(
+                                                    name,
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            onCountrySelected(code)
+                                            showCountryMenu = false
+                                        },
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -112,52 +184,42 @@ fun LocationSearchBar(
                             icon = {
                                 Icon(
                                     Icons.Default.Place,
-                                    contentDescription = null,
+                                    null,
                                     tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp),
+                                    modifier = Modifier.size(18.dp)
                                 )
                             },
                             label = "Choose on the Map",
                             onClick = {
-                                // Dismiss keyboard and clear focus so map is fully interactive
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                                isFocused = false
-                                action()
+                                keyboardController?.hide(); focusManager.clearFocus(); isFocused =
+                                false; action()
                             },
                         )
-                        if (onUseMyLocation != null || results.isNotEmpty()) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                            )
-                        }
+                        HorizontalDivider(
+                            Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
                     }
-
                     onUseMyLocation?.let { action ->
                         QuickActionRow(
                             icon = {
                                 Icon(
                                     Icons.Default.MyLocation,
-                                    contentDescription = null,
+                                    null,
                                     tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp),
+                                    modifier = Modifier.size(18.dp)
                                 )
                             },
                             label = "Use your location",
                             onClick = {
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                                isFocused = false
-                                action()
+                                keyboardController?.hide(); focusManager.clearFocus(); isFocused =
+                                false; action()
                             },
                         )
-                        if (results.isNotEmpty()) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                            )
-                        }
+                        if (results.isNotEmpty()) HorizontalDivider(
+                            Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
                     }
                 }
 
@@ -166,11 +228,8 @@ fun LocationSearchBar(
                         Modifier
                             .fillMaxWidth()
                             .clickable {
-                                // Dismiss keyboard when a search result is tapped
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                                isFocused = false
-                                onResultSelected(result)
+                                keyboardController?.hide(); focusManager.clearFocus()
+                                isFocused = false; onResultSelected(result)
                             }
                             .padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -178,23 +237,22 @@ fun LocationSearchBar(
                     ) {
                         Icon(
                             Icons.Default.LocationOn,
-                            contentDescription = null,
+                            null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(18.dp),
+                            modifier = Modifier.size(18.dp)
                         )
                         Text(
                             result.displayName,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
-                    if (index < results.lastIndex) {
+                    if (index < results.lastIndex)
                         HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                         )
-                    }
                 }
             }
         }
@@ -202,11 +260,7 @@ fun LocationSearchBar(
 }
 
 @Composable
-private fun QuickActionRow(
-    icon: @Composable () -> Unit,
-    label: String,
-    onClick: () -> Unit,
-) {
+private fun QuickActionRow(icon: @Composable () -> Unit, label: String, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -219,7 +273,7 @@ private fun QuickActionRow(
         Text(
             label,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

@@ -18,8 +18,7 @@ import com.you.plot.core.data.repos.RoutePlotterRepo
 import com.you.plot.core.common.utils.buildWaypointSuggestions
 import com.you.plot.core.common.utils.destinationPoint
 import com.you.plot.core.common.utils.bearingLabel
-import com.you.plot.core.common.utils.fmt
-import com.you.plot.core.domain.entity.SearchResult
+import com.you.plot.core.domain.entity.WaypointSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +39,7 @@ import kotlin.coroutines.resume
 class RoutePlotterViewModel @Inject constructor(
     private val saveRouteUseCase: SaveRouteUseCase,
     private val deleteRouteUseCase: DeleteRouteUseCase,
-    private val repo: RoutePlotterRepo,
+    private val routePlotterRepo: RoutePlotterRepo,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -95,6 +94,8 @@ class RoutePlotterViewModel @Inject constructor(
         if (prev != null) _state.update { it.copy(stage = prev) }
     }
 
+    fun setCountryCode(code: String) = _state.update { it.copy(selectedCountryCode = code) }
+
     fun onSearchQueryChange(query: String) {
         _state.update { it.copy(searchQuery = query, searchResults = emptyList()) }
         if (query.length < 3) return
@@ -102,12 +103,14 @@ class RoutePlotterViewModel @Inject constructor(
         searchJob = viewModelScope.launch {
             delay(400)
             _state.update { it.copy(isSearching = true) }
-            val results = repo.searchLocations(query)
+            val cc = _state.value.selectedCountryCode
+            val results = if (cc.isNotBlank()) routePlotterRepo.searchLocationsWithCountry(query, cc)
+            else routePlotterRepo.searchLocations(query)
             _state.update { it.copy(isSearching = false, searchResults = results) }
         }
     }
 
-    fun onSearchResultSelected(result: SearchResult) {
+    fun onWaypointSearchResultSelected(result: WaypointSearchResult) {
         when (_state.value.stage) {
             PlotterStage.STAGE_1 -> _state.update {
                 it.copy(startPoint = result.latLng, startPointName = result.displayName.substringBefore(",").trim(), searchQuery = result.displayName, searchResults = emptyList())
@@ -121,12 +124,23 @@ class RoutePlotterViewModel @Inject constructor(
 
     fun onMapTap(latLng: LatLng) {
         when (_state.value.stage) {
-            PlotterStage.STAGE_1 -> _state.update {
-                it.copy(startPoint = latLng, searchQuery = "${latLng.latitude.fmt()}, ${latLng.longitude.fmt()}")
+            PlotterStage.STAGE_1 -> {
+                // Immediately mark the point; reverse geocode in background
+                _state.update { it.copy(startPoint = latLng, startPointName = "Locating…", isReverseGeocoding = true) }
+                viewModelScope.launch {
+                    val name = withContext(Dispatchers.IO) { routePlotterRepo.reverseGeocode(latLng) }
+                        ?: resolveAreaLabel(latLng)
+                    _state.update { it.copy(startPointName = name, searchQuery = name, isReverseGeocoding = false) }
+                }
             }
             PlotterStage.STAGE_2 -> {
                 if (_state.value.destinationMode == DestinationMode.PICK_POINT) {
-                    _state.update { it.copy(endPoint = latLng) }
+                    _state.update { it.copy(endPoint = latLng, endPointName = "Locating…", isReverseGeocoding = true) }
+                    viewModelScope.launch {
+                        val name = withContext(Dispatchers.IO) { routePlotterRepo.reverseGeocode(latLng) }
+                            ?: resolveAreaLabel(latLng)
+                        _state.update { it.copy(endPointName = name, isReverseGeocoding = false) }
+                    }
                 }
             }
             PlotterStage.STAGE_3 -> _state.update { it.copy(manualWaypoints = it.manualWaypoints + latLng) }
@@ -150,32 +164,47 @@ class RoutePlotterViewModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     fun onUseMyLocation() {
-        // Check for location permission before accessing location services
         val hasPermission = context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
             android.content.pm.PackageManager.PERMISSION_GRANTED ||
             context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
             android.content.pm.PackageManager.PERMISSION_GRANTED
         if (!hasPermission) {
-            setError("Location permission is required. Please grant it in Settings.")
+            _state.update { it.copy(needsLocationPermission = true) }
             return
         }
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true) }
             val latLng = withContext(Dispatchers.IO) { resolveCurrentLocation() }
-            _state.update { it.copy(isSearching = false) }
             if (latLng == null) {
+                _state.update { it.copy(isSearching = false) }
                 setError("Couldn't get your location. Make sure location is enabled.")
                 return@launch
             }
+            // Reverse geocode to get a real area name
+            _state.update { it.copy(isReverseGeocoding = true) }
+            val geocodedName = withContext(Dispatchers.IO) { routePlotterRepo.reverseGeocode(latLng) }
+            val name = geocodedName ?: resolveAreaLabel(latLng)
+            _state.update { it.copy(isSearching = false, isReverseGeocoding = false) }
             when (_state.value.stage) {
                 PlotterStage.STAGE_1 -> _state.update {
-                    it.copy(startPoint = latLng, startPointName = "My Location", searchQuery = "${latLng.latitude.fmt()}, ${latLng.longitude.fmt()}", searchResults = emptyList())
+                    it.copy(startPoint = latLng, startPointName = name,
+                        searchQuery = name, searchResults = emptyList())
                 }
-                PlotterStage.STAGE_2 -> _state.update { it.copy(endPoint = latLng, endPointName = "My Location", searchResults = emptyList()) }
+                PlotterStage.STAGE_2 -> _state.update {
+                    it.copy(endPoint = latLng, endPointName = name, searchResults = emptyList())
+                }
                 else -> {}
             }
         }
     }
+
+    fun onPermissionResult(granted: Boolean) {
+        _state.update { it.copy(needsLocationPermission = false) }
+        if (granted) onUseMyLocation()
+        else setError("Location permission denied. Enable it in System Settings → Apps → YouPlot.")
+    }
+
+    fun clearNeedsPermission() = _state.update { it.copy(needsLocationPermission = false) }
 
     fun setDestinationMode(mode: DestinationMode) =
         _state.update { it.copy(destinationMode = mode, endPoint = null, distanceSuggestions = emptyList()) }
@@ -193,7 +222,7 @@ class RoutePlotterViewModel @Inject constructor(
         val s = _state.value
         val start = s.startPoint ?: return
         val suggestions = listOf(0.0, 45.0, 90.0, 135.0).map { b ->
-            SearchResult(
+            WaypointSearchResult(
                 displayName = bearingLabel(b) + " (≈ ${s.targetDistanceKm.toInt()} km)",
                 latLng = destinationPoint(start, b, s.targetDistanceKm),
             )
@@ -201,7 +230,7 @@ class RoutePlotterViewModel @Inject constructor(
         _state.update { it.copy(distanceSuggestions = suggestions) }
     }
 
-    fun selectDistanceSuggestion(result: SearchResult) =
+    fun selectDistanceSuggestion(result: WaypointSearchResult) =
         _state.update { it.copy(endPoint = result.latLng, distanceSuggestions = emptyList()) }
     fun toggleSuggestedWaypoints(use: Boolean) = _state.update { it.copy(useSuggestedWaypoints = use) }
     fun selectCandidate(id: Int) = _state.update { it.copy(selectedCandidateId = id) }
@@ -214,7 +243,7 @@ class RoutePlotterViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true) }
-            val candidates = repo.fetchRouteCandidates(start, end, via)
+            val candidates = routePlotterRepo.fetchRouteCandidates(start, end, via)
             _state.update {
                 it.copy(
                     isSearching = false,
@@ -243,20 +272,35 @@ class RoutePlotterViewModel @Inject constructor(
                     add(start); addAll(s.activeWaypoints); add(end)
                     if (s.isRoundTrip) add(start)
                 }
+                val totalDist = if (s.isRoundTrip) candidate.totalDistanceKm * 2 else candidate.totalDistanceKm
+
+                // Reverse-geocode waypoints to get human names (start/end already have names)
                 val waypointEntities = allPoints.mapIndexed { index, latLng ->
+                    val humanName = when (index) {
+                        0 -> s.startPointName.ifBlank { "Start" }
+                        allPoints.lastIndex -> if (s.isRoundTrip) s.startPointName.ifBlank { "Start" }
+                        else s.endPointName.ifBlank { "Finish" }
+                        else -> {
+                            // Reverse geocode intermediate waypoints
+                            val geocoded = withContext(Dispatchers.IO) {
+                                routePlotterRepo.reverseGeocode(latLng)
+                            }
+                            geocoded ?: "Waypoint $index"
+                        }
+                    }
+                    // Cumulative distance: proportion along route
+                    val cumDist = if (allPoints.size > 1)
+                        totalDist * index.toDouble() / (allPoints.size - 1)
+                    else 0.0
                     Waypoint(
                         routeId = 0L,
-                        name = when (index) {
-                            0 -> "Start"
-                            allPoints.lastIndex -> if (s.isRoundTrip) "Return to Start" else "Finish"
-                            else -> "Waypoint $index"
-                        },
+                        name = humanName,
                         position = latLng,
                         orderIndex = index,
+                        distanceFromStartKm = cumDist,
                         isStopPlanned = index != 0 && index != allPoints.lastIndex,
                     )
                 }
-                // Auto-name from start and end point names if user hasn't typed anything
                 val autoName = if (s.startPointName.isNotBlank() && s.endPointName.isNotBlank()) {
                     "${s.startPointName} → ${s.endPointName}"
                 } else if (s.startPointName.isNotBlank()) {
@@ -273,7 +317,7 @@ class RoutePlotterViewModel @Inject constructor(
                         endPoint = end,
                         waypoints = waypointEntities,
                         elevationProfile = candidate.elevationProfile,
-                        totalDistanceKm = if (s.isRoundTrip) candidate.totalDistanceKm * 2 else candidate.totalDistanceKm,
+                        totalDistanceKm = totalDist,
                         totalElevationGainMeters = candidate.totalElevationGainMeters,
                         totalElevationLossMeters = candidate.totalElevationLossMeters,
                         isRoundTrip = s.isRoundTrip,
@@ -286,6 +330,41 @@ class RoutePlotterViewModel @Inject constructor(
 
     fun clearError() = _state.update { it.copy(error = null) }
     private fun setError(msg: String) = _state.update { it.copy(error = msg) }
+
+    /**
+     * Last-resort label when reverse geocoding returns nothing.
+     * Uses Nominatim as a second attempt, then falls back to a compass-direction
+     * description (e.g. "Northern area") — never raw coordinates.
+     */
+    private suspend fun resolveAreaLabel(latLng: LatLng): String = withContext(Dispatchers.IO) {
+        // Try Nominatim as second attempt
+        runCatching {
+            val url = "https://nominatim.openstreetmap.org/reverse?lat=${latLng.latitude}&lon=${latLng.longitude}" +
+                "&format=jsonv2&zoom=14&addressdetails=1"
+            val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+                setRequestProperty("User-Agent", "YouPlot/1.0")
+                connectTimeout = 5_000; readTimeout = 5_000
+            }
+            val json = org.json.JSONObject(conn.inputStream.bufferedReader().readText())
+            conn.disconnect()
+            val addr = json.optJSONObject("address")
+            listOfNotNull(
+                addr?.optString("suburb")?.ifEmpty { null },
+                addr?.optString("neighbourhood")?.ifEmpty { null },
+                addr?.optString("village")?.ifEmpty { null },
+                addr?.optString("town")?.ifEmpty { null },
+                addr?.optString("city")?.ifEmpty { null },
+                addr?.optString("county")?.ifEmpty { null },
+                json.optString("display_name").split(",").firstOrNull()?.trim()?.ifEmpty { null },
+            ).firstOrNull()
+        }.getOrNull()
+        // Final fallback: compass area description — still no raw numbers
+            ?: run {
+                val ns = if (latLng.latitude >= 0) "Northern" else "Southern"
+                val ew = if (latLng.longitude >= 0) "Eastern" else "Western"
+                "$ns $ew Area"
+            }
+    }
 
     @SuppressLint("MissingPermission")
     private suspend fun resolveCurrentLocation(): LatLng? = withContext(Dispatchers.IO) {

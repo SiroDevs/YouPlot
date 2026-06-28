@@ -19,8 +19,8 @@ import com.you.plot.core.common.utils.boundingBox
 import com.you.plot.core.common.utils.boundingBoxOfAll
 import com.you.plot.feature.route.plotter.utils.makeCircleMarker
 import com.you.plot.feature.route.plotter.utils.makePinMarker
-import com.you.plot.feature.route.plotter.view.screen.fmt
-import kotlinx.coroutines.Dispatchers
+import com.you.plot.core.common.entity.RouteCandidate
+import com.you.plot.core.common.utils.MapConstants
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -35,8 +35,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.math.max
 import androidx.core.graphics.drawable.toDrawable
-import com.you.plot.core.common.entity.RouteCandidate
-import com.you.plot.core.common.utils.MapConstants
+import kotlinx.coroutines.Dispatchers
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -48,6 +47,9 @@ fun PlotterMap(
     candidates: List<RouteCandidate>,
     selectedCandidateId: Int?,
     isRoundTrip: Boolean = false,
+    startPointName: String = "",
+    endPointName: String = "",
+    waypointNames: List<String> = emptyList(),
     onMapTap: (LatLng) -> Unit,
     onWaypointMoved: ((index: Int, newLatLng: LatLng) -> Unit)? = null,
     onWaypointDelete: ((index: Int) -> Unit)? = null,
@@ -177,13 +179,9 @@ fun PlotterMap(
         startPoint?.let { pt ->
             mapView.overlays.add(Marker(mapView).apply {
                 position = GeoPoint(pt.latitude, pt.longitude)
-                title = "Start"
-                snippet = "${pt.latitude.fmt()}, ${pt.longitude.fmt()}"
-                icon = makePinMarker(
-                    context,
-                    MapConstants.COLOR_START,
-                    "S"
-                ).toDrawable(context.resources)
+                title = startPointName.ifBlank { "Start" }
+                snippet = null   // no coordinates — name is the title
+                icon = makePinMarker(context, MapConstants.COLOR_START, "S").toDrawable(context.resources)
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             })
         }
@@ -191,8 +189,8 @@ fun PlotterMap(
         endPoint?.let { pt ->
             mapView.overlays.add(Marker(mapView).apply {
                 position = GeoPoint(pt.latitude, pt.longitude)
-                title = if (isRoundTrip) "Turning Point" else "Destination"
-                snippet = "${pt.latitude.fmt()}, ${pt.longitude.fmt()}"
+                title = endPointName.ifBlank { if (isRoundTrip) "Turning Point" else "Destination" }
+                snippet = null   // no coordinates
                 icon = makePinMarker(
                     context,
                     if (isRoundTrip) MapConstants.COLOR_TURN else MapConstants.COLOR_END,

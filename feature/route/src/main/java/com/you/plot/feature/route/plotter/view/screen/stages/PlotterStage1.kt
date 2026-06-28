@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.domain.entity.SearchResult
+import com.you.plot.core.domain.entity.WaypointSearchResult
 import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.plotter.view.components.LocationSearchBar
 import com.you.plot.feature.route.plotter.view.components.SelectedPointChip
@@ -35,15 +35,18 @@ fun PlotterStage1(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
                 results = state.searchResults,
                 isSearching = state.isSearching,
                 placeholder = "Search start location…",
-                onResultSelected = vm::onSearchResultSelected,
+                onResultSelected = vm::onWaypointSearchResultSelected,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                selectedCountryCode = state.selectedCountryCode,
+                onCountrySelected = vm::setCountryCode,
                 onChooseOnMap = { vm.onSearchQueryChange("") },
                 onUseMyLocation = vm::onUseMyLocation,
             )
 
-            state.startPoint?.let { pt ->
+            state.startPoint?.let {
                 SelectedPointChip(
-                    label = "Start: ${pt.latitude.fmt()}, ${pt.longitude.fmt()}",
+                    label = state.startPointName.ifBlank { "Start point set" },
+                    isLoading = state.isReverseGeocoding,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                 )
             }
@@ -55,7 +58,7 @@ fun PlotterStage1(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
 @Composable
 fun PlotterStage1Preview() {
     val result =
-        SearchResult(displayName = "Shell GPO", latLng = LatLng(latitude = 0.0, longitude = 0.0))
+        WaypointSearchResult(displayName = "Shell GPO", latLng = LatLng(latitude = 0.0, longitude = 0.0))
     Column(
         Modifier
             .fillMaxSize()

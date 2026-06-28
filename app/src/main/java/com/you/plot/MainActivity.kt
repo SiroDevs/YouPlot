@@ -10,7 +10,7 @@ import com.you.plot.core.designsystem.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.you.plot.core.data.repos.ThemeRepo
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.you.plot.core.data.repos.PrefsRepo
+import com.you.plot.core.data.repos.PreferencesRepo
 import com.you.plot.core.data.repos.ThemeMode
 import javax.inject.Inject
 
@@ -18,7 +18,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var prefsRepo: PrefsRepo
+    lateinit var preferencesRepo: PreferencesRepo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()

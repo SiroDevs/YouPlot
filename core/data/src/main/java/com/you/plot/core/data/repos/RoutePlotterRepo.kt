@@ -7,7 +7,7 @@ import com.you.plot.core.common.utils.MapConstants
 import com.you.plot.core.common.utils.buildElevationStats
 import com.you.plot.core.common.utils.buildFallbackCandidates
 import com.you.plot.core.common.utils.decodePolyline6
-import com.you.plot.core.domain.entity.SearchResult
+import com.you.plot.core.domain.entity.WaypointSearchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -24,12 +24,11 @@ import kotlin.math.sin
 class RoutePlotterRepo @Inject constructor(
     @Named("osm_user_agent") private val osmUserAgent: String,
 ) {
-    suspend fun searchLocations(query: String): List<SearchResult> =
+    suspend fun searchLocations(query: String): List<WaypointSearchResult> =
         withContext(Dispatchers.IO) {
             runCatching {
                 val encoded = URLEncoder.encode(query, "UTF-8")
-                // Photon API (powered by Komoot) gives far better results than Nominatim
-                val urlString = "https://photon.komoot.io/api/?q=$encoded&limit=10&lang=en"
+                val urlString = "${MapConstants.PHOTON_BASE}/api/?q=$encoded&limit=10&lang=en"
                 val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
                     setRequestProperty("User-Agent", osmUserAgent)
                     setRequestProperty("Accept-Language", "en")
@@ -60,7 +59,7 @@ class RoutePlotterRepo @Inject constructor(
                         country.ifEmpty { null },
                     )
                     val displayName = parts.joinToString(", ").take(80)
-                    SearchResult(
+                    WaypointSearchResult(
                         displayName = displayName.ifEmpty { "$lat, $lon" },
                         latLng = LatLng(lat, lon),
                     )
@@ -83,7 +82,7 @@ class RoutePlotterRepo @Inject constructor(
                     val arr = org.json.JSONArray(json)
                     (0 until arr.length()).map { i ->
                         val obj = arr.getJSONObject(i)
-                        SearchResult(
+                        WaypointSearchResult(
                             displayName = obj.getString("display_name").take(80),
                             latLng = LatLng(obj.getDouble("lat"), obj.getDouble("lon")),
                         )
@@ -142,4 +141,57 @@ class RoutePlotterRepo @Inject constructor(
             buildFallbackCandidates(start, end, via)
         }
     }
+
+
+    suspend fun reverseGeocode(latLng: LatLng): String? = withContext(Dispatchers.IO) {
+        runCatching {
+            val url = "${MapConstants.PHOTON_BASE}/reverse?lon=${latLng.longitude}&lat=${latLng.latitude}&limit=1"
+            val conn = (URL(url).openConnection() as HttpURLConnection).apply {
+                setRequestProperty("User-Agent", osmUserAgent)
+                connectTimeout = 6_000; readTimeout = 6_000
+            }
+            val json = conn.inputStream.bufferedReader().readText()
+            conn.disconnect()
+            val feat = JSONObject(json).getJSONArray("features").optJSONObject(0) ?: return@runCatching null
+            val props = feat.getJSONObject("properties")
+            val name = props.optString("name")
+            val street = props.optString("street")
+            val city = props.optString("city")
+            listOfNotNull(name.ifEmpty { null }, street.ifEmpty { null }, city.ifEmpty { null })
+                .joinToString(", ").ifEmpty { null }
+        }.getOrNull()
+    }
+
+    suspend fun searchLocationsWithCountry(query: String, countryCode: String): List<WaypointSearchResult> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val encoded = URLEncoder.encode(query, "UTF-8")
+                val urlString = "${MapConstants.PHOTON_BASE}/api/?q=$encoded&limit=10&lang=en&osm_tag=:&bbox=&countrycodes=$countryCode"
+                val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
+                    setRequestProperty("User-Agent", osmUserAgent)
+                    connectTimeout = 8_000; readTimeout = 8_000
+                }
+                val json = conn.inputStream.bufferedReader().readText()
+                conn.disconnect()
+                val features = JSONObject(json).getJSONArray("features")
+                (0 until features.length()).mapNotNull { i ->
+                    val feat = features.getJSONObject(i)
+                    val props = feat.getJSONObject("properties")
+                    val cc = props.optString("countrycode").lowercase()
+                    if (countryCode.isNotBlank() && cc != countryCode.lowercase()) return@mapNotNull null
+                    val coords = feat.getJSONObject("geometry").getJSONArray("coordinates")
+                    val lon = coords.getDouble(0); val lat = coords.getDouble(1)
+                    val parts = listOfNotNull(
+                        props.optString("name").ifEmpty { null },
+                        props.optString("street").ifEmpty { null },
+                        props.optString("city").ifEmpty { null },
+                        props.optString("state").ifEmpty { null },
+                    )
+                    WaypointSearchResult(
+                        displayName = parts.joinToString(", ").take(80).ifEmpty { "$lat, $lon" },
+                        latLng = LatLng(lat, lon),
+                    )
+                }
+            }.getOrElse { searchLocations(query) }
+        }
 }

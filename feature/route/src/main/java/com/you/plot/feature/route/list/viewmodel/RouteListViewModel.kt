@@ -8,7 +8,7 @@ import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.common.entity.SportType
-import com.you.plot.core.domain.entity.SearchResult
+import com.you.plot.core.domain.entity.WaypointSearchResult
 import com.you.plot.core.domain.usecase.route.GetAllRoutesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,8 +25,10 @@ data class RouteListUiState(
 data class RoutePlotterUiState(
     val stage: PlotterStage = PlotterStage.STAGE_1,
     val searchQuery: String = "",
-    val searchResults: List<SearchResult> = emptyList(),
+    val searchResults: List<WaypointSearchResult> = emptyList(),
     val isSearching: Boolean = false,
+    val isReverseGeocoding: Boolean = false,
+    val selectedCountryCode: String = "ke",
     val startPoint: LatLng? = null,
     val startPointName: String = "",
     val destinationMode: DestinationMode = DestinationMode.PICK_POINT,
@@ -34,7 +36,7 @@ data class RoutePlotterUiState(
     val endPointName: String = "",
     val targetDistanceKm: Double = 10.0,
     val targetDistanceQuery: String = "10",
-    val distanceSuggestions: List<SearchResult> = emptyList(),
+    val distanceSuggestions: List<WaypointSearchResult> = emptyList(),
     val manualWaypoints: List<LatLng> = emptyList(),
     val suggestedWaypoints: List<LatLng> = emptyList(),
     val useSuggestedWaypoints: Boolean = false,
@@ -46,6 +48,7 @@ data class RoutePlotterUiState(
     val sportType: SportType = SportType.RUNNING,
     val isSaving: Boolean = false,
     val savedRouteId: Long? = null,
+    val needsLocationPermission: Boolean = false,
     val error: String? = null,
 ) {
     val activeWaypoints: List<LatLng>

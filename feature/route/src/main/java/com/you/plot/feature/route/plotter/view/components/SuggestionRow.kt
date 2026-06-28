@@ -17,10 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.domain.entity.SearchResult
+import com.you.plot.core.domain.entity.WaypointSearchResult
 
 @Composable
-fun SuggestionRow(result: SearchResult, isSelected: Boolean, onClick: () -> Unit) {
+fun SuggestionRow(result: WaypointSearchResult, isSelected: Boolean, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()

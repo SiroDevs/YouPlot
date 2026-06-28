@@ -42,25 +42,32 @@ fun PlanCreatorScreen(
         )
     }
 
-    val stepTitles = listOf("Choose Source", "Setup", "Schedule", "Save")
+    val stepTitles = if (state.selectedRoute != null && state.currentStep >= 1)
+        listOf("Setup", "Schedule", "Save")   // Step 0 already done
+    else
+        listOf("Choose Source", "Setup", "Schedule", "Save")
+
+    // When route is pre-selected, the displayed step index is currentStep - 1
+    val displayStep = if (state.selectedRoute != null && state.currentStep >= 1)
+        state.currentStep - 1 else state.currentStep
 
     Scaffold(
         topBar = {
             AppTopBar(
-                title = stepTitles.getOrElse(state.currentStep) { "New Plan" },
+                title = stepTitles.getOrElse(displayStep) { "New Plan" },
                 tagline = "New Plan",
                 showGoBack = true,
-                onNavIconClick = {
-                    if (state.currentStep > 0) viewModel.prevStep() else onBack()
-                },
-                stepCurrent = state.currentStep,
+                onNavIconClick = { if (state.currentStep > 0) viewModel.prevStep() else onBack() },
+                stepCurrent = displayStep,
                 stepTotal = stepTitles.size,
             )
         },
     ) { padding ->
-        Box(Modifier
-            .fillMaxSize()
-            .padding(padding)) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             when (state.currentStep) {
                 0 -> PlanCreatorStep0(state, viewModel)
                 1 -> PlanCreatorStep1(state, viewModel)

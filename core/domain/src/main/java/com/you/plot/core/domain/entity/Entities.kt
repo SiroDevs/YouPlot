@@ -5,7 +5,7 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.SessionStatus
 import com.you.plot.core.common.entity.SportType
 
-data class SearchResult(
+data class WaypointSearchResult(
     val displayName: String,
     val latLng: LatLng,
 )
@@ -17,6 +17,7 @@ data class Waypoint(
     val position: LatLng,
     val orderIndex: Int,
     val elevationMeters: Double = 0.0,
+    val distanceFromStartKm: Double = 0.0,
     val isStopPlanned: Boolean = false,
 )
 

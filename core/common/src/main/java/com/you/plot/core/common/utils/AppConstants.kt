@@ -23,8 +23,7 @@ object MapConstants {
     val CANDIDATE_COLORS = listOf(0xFF2196F3L, 0xFFE91E63L, 0xFF4CAF50L, 0xFFFF9800L)
 
     const val NOMINATIM_BASE = "https://nominatim.openstreetmap.org/"
-    const val PHOTON_BASE = "https://photon.komoot.io/"
-    const val OSRM_BASE = "https://nominatim.openstreetmap.org/"
+    const val PHOTON_BASE = "https://photon.komoot.io"
     const val OSRM_ROUTER = "https://router.project-osrm.org/route/v1/driving"
 }
 
@@ -36,6 +35,7 @@ object PrefConstants {
     const val NOTIFICATIONS_ENABLED = "notifications_enabled"
     const val DISTANCE_UNIT_METRIC = "distance_unit_metric"
     const val DEFAULT_SPORT = "default_sport"
+    const val USE_PACE_FOR_RUN_WALK = "use_pace_for_run_walk"
 }
 
 object NotifConstants {
@@ -49,8 +49,8 @@ object Routes {
 
     // Route screens
     const val ROUTE_LIST = "route/list"
-    const val ROUTE_DETAIL = "route/detail/{routeId}"   // FIX: was "routes/{routeId}" — clashed with ROUTE_PLOTTER
-    const val ROUTE_PLOTTER = "route/plot"              // FIX: was "routes/plot" — matched as routeId = "plot"
+    const val ROUTE_DETAIL = "route/detail/{routeId}"
+    const val ROUTE_PLOTTER = "route/plot"
 
     // Plan screens
     const val PLAN_LIST = "plan/list"

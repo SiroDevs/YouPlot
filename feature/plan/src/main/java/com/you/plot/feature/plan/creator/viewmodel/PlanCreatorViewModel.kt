@@ -22,17 +22,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PlanCreatorViewModel @Inject constructor(
+    savedStateHandle: androidx.lifecycle.SavedStateHandle,
     private val getAllRoutesUseCase: GetAllRoutesUseCase,
     private val getAllPlansUseCase: GetAllPlansUseCase,
     private val savePlanUseCase: SavePlanUseCase,
     private val deletePlanUseCase: DeletePlanUseCase,
     private val generateEventsUseCase: GeneratePlanEventsUseCase,
+    private val getRouteByIdUseCase: com.you.plot.core.domain.usecase.route.GetRouteByIdUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PlanCreatorUiState())
     val state: StateFlow<PlanCreatorUiState> = _state.asStateFlow()
 
     init {
+        val preselectedRouteId = savedStateHandle.get<Long>("routeId")
+
         viewModelScope.launch {
             getAllRoutesUseCase().collect { routes ->
                 _state.update { it.copy(routes = routes) }
@@ -43,9 +47,30 @@ class PlanCreatorViewModel @Inject constructor(
                 _state.update { it.copy(templatePlans = plans) }
             }
         }
+        if (preselectedRouteId != null && preselectedRouteId > 0L) {
+            viewModelScope.launch {
+                val route = getRouteByIdUseCase(preselectedRouteId)
+                if (route != null) {
+                    _state.update {
+                        it.copy(
+                            selectedRoute = route,
+                            planName = "${route.name} Plan",
+                            currentStep = 1,   // skip Step 0 – route already chosen
+                        )
+                    }
+                }
+            }
+        }
     }
+
     fun setPlanSource(source: PlanSource) {
-        _state.update { it.copy(planSource = source, selectedRoute = null, selectedTemplate = null) }
+        _state.update {
+            it.copy(
+                planSource = source,
+                selectedRoute = null,
+                selectedTemplate = null
+            )
+        }
     }
 
     fun selectRoute(route: Route) {
@@ -76,12 +101,18 @@ class PlanCreatorViewModel @Inject constructor(
     fun setPlanName(name: String) = _state.update { it.copy(planName = name) }
     fun setDescription(desc: String) = _state.update { it.copy(description = desc) }
     fun setStartDate(millis: Long) = _state.update { it.copy(startDateMillis = millis) }
-    fun setStartTime(hour: Int, minute: Int) = _state.update { it.copy(startHour = hour, startMinute = minute) }
+    fun setStartTime(hour: Int, minute: Int) =
+        _state.update { it.copy(startHour = hour, startMinute = minute) }
+
     fun setNumberOfDays(days: Int) = _state.update {
         it.copy(numberOfDays = days.coerceAtLeast(1), avgDistancePerDayKmOverride = null)
     }
-    fun setAvgSpeed(speed: Double) = _state.update { it.copy(avgSpeedKmh = speed.coerceAtLeast(1.0)) }
-    fun setAvgDistancePerDay(km: Double) = _state.update { it.copy(avgDistancePerDayKmOverride = km.coerceAtLeast(0.1)) }
+
+    fun setAvgSpeed(speed: Double) =
+        _state.update { it.copy(avgSpeedKmh = speed.coerceAtLeast(1.0)) }
+
+    fun setAvgDistancePerDay(km: Double) =
+        _state.update { it.copy(avgDistancePerDayKmOverride = km.coerceAtLeast(0.1)) }
 
     fun selectDay(day: Int) = _state.update { it.copy(selectedDay = day) }
 
@@ -118,22 +149,37 @@ class PlanCreatorViewModel @Inject constructor(
         when (s.currentStep) {
             0 -> {
                 val hasSelection = s.selectedRoute != null || s.selectedTemplate != null
-                if (!hasSelection) { setError("Select a route or template first"); return }
+                if (!hasSelection) {
+                    setError("Select a route or template first"); return
+                }
                 _state.update { it.copy(currentStep = 1) }
             }
+
             1 -> {
                 val routeId = s.selectedRoute?.id ?: s.selectedTemplate?.routeId
-                if (routeId == null) { setError("No route associated with this plan"); return }
-                if (s.numberOfDays < 1) { setError("Number of days must be at least 1"); return }
-                if (s.avgSpeedKmh <= 0) { setError("Speed must be greater than 0"); return }
+                if (routeId == null) {
+                    setError("No route associated with this plan"); return
+                }
+                if (s.numberOfDays < 1) {
+                    setError("Number of days must be at least 1"); return
+                }
+                if (s.avgSpeedKmh <= 0) {
+                    setError("Speed must be greater than 0"); return
+                }
                 _state.update { it.copy(isGenerating = true) }
                 viewModelScope.launch {
                     runCatching { generateEvents() }
                         .onFailure { e ->
-                            _state.update { it.copy(isGenerating = false, error = "Failed to generate schedule: ${e.message}") }
+                            _state.update {
+                                it.copy(
+                                    isGenerating = false,
+                                    error = "Failed to generate schedule: ${e.message}"
+                                )
+                            }
                         }
                 }
             }
+
             2 -> _state.update { it.copy(currentStep = 3) }
         }
     }
@@ -159,9 +205,23 @@ class PlanCreatorViewModel @Inject constructor(
             val offset = s.startTimeMillis - s.selectedTemplate.startDateMillis
             s.selectedTemplate.events
                 .filter { it.waypointId == null }
-                .map { it.copy(id = 0L, planId = 0L, plannedTimeMillis = it.plannedTimeMillis + offset) }
+                .map {
+                    it.copy(
+                        id = 0L,
+                        planId = 0L,
+                        plannedTimeMillis = it.plannedTimeMillis + offset
+                    )
+                }
         } else emptyList()
-        _state.update { it.copy(generatedEvents = events, customEvents = templateCustom, currentStep = 2, selectedDay = 1, isGenerating = false) }
+        _state.update {
+            it.copy(
+                generatedEvents = events,
+                customEvents = templateCustom,
+                currentStep = 2,
+                selectedDay = 1,
+                isGenerating = false
+            )
+        }
     }
 
     fun savePlan() {
