@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,9 +69,12 @@ fun LocationSearchBar(
     var showCountryMenu by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    var typed by remember { mutableStateOf(query) }
+    LaunchedEffect(query) { if (query != typed) typed = query }
 
     val showQuickActions = isFocused && (onChooseOnMap != null || onUseMyLocation != null)
     val hasDropdown = showQuickActions || results.isNotEmpty()
+    val showClearButton = typed.isNotEmpty()
     val countryLabel =
         COUNTRY_LIST.firstOrNull { it.first == selectedCountryCode }?.first?.uppercase()
             ?.ifEmpty { "ALL" } ?: "KE"
@@ -85,8 +89,8 @@ fun LocationSearchBar(
             )
     ) {
         OutlinedTextField(
-            value = query,
-            onValueChange = {},
+            value = typed,
+            onValueChange = { typed = it },
             placeholder = { Text(placeholder) },
             leadingIcon = {
                 if (isSearching) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -94,8 +98,11 @@ fun LocationSearchBar(
             },
             trailingIcon = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (query.isNotEmpty()) {
-                        IconButton(onClick = onQryChange) {
+                    if (showClearButton) {
+                        IconButton(onClick = {
+                            typed = ""
+                            onQryChange()
+                        }) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "Clear",
@@ -166,7 +173,7 @@ fun LocationSearchBar(
                     focusManager.clearFocus()
                     isFocused = false
 
-                    onSearch(query)
+                    onSearch(typed)
                 }
             ),
             shape = if (hasDropdown) AppSpecs.TOP_SHAPE else AppSpecs.FULL_SHAPE,
