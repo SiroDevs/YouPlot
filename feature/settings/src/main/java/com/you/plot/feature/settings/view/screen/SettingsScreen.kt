@@ -45,10 +45,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.AppConstants
+import com.you.plot.core.data.repos.ThemeMode
 import com.you.plot.core.data.repos.ThemeRepo
+import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.designsystem.theme.ThemeSelectorDialog
 import com.you.plot.core.designsystem.theme.themeName
 import com.you.plot.core.ui.components.action.AppTopBar
@@ -58,10 +61,11 @@ import com.you.plot.core.ui.components.general.InfoDivider
 import com.you.plot.core.ui.components.general.InfoItem
 import com.you.plot.core.ui.components.general.InfoSection
 import com.you.plot.core.ui.components.general.ValueItem
+import com.you.plot.feature.settings.utils.DEFAULT_SPEED_LIMITS
+import com.you.plot.feature.settings.utils.SettingsUiState
 import com.you.plot.feature.settings.view.components.SpeedLimitDialog
 import com.you.plot.feature.settings.viewmodel.SettingsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -69,13 +73,46 @@ fun SettingsScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    val theme = themeRepo.selectedTheme
+    SettingsScreenContent(
+        state = state,
+        theme = themeRepo.selectedTheme,
+        onSetTheme = themeRepo::setTheme,
+        onBack = onBack,
+        onShowDefaultSportDialog = viewModel::showDefaultSportDialog,
+        onDismissDefaultSportDialog = viewModel::dismissDefaultSportDialog,
+        onSetDefaultSport = viewModel::setDefaultSport,
+        onSetDistanceUnitMetric = viewModel::setDistanceUnitMetric,
+        onSetUsePaceForRunWalk = viewModel::setUsePaceForRunWalk,
+        onShowSpeedEditor = viewModel::showSpeedEditor,
+        onDismissSpeedEditor = viewModel::dismissSpeedEditor,
+        onSetSpeedLimit = viewModel::setSpeedLimit,
+        onSetNotificationsEnabled = viewModel::setNotificationsEnabled,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SettingsScreenContent(
+    state: SettingsUiState,
+    theme: ThemeMode,
+    onSetTheme: (ThemeMode) -> Unit,
+    onBack: () -> Unit,
+    onShowDefaultSportDialog: () -> Unit,
+    onDismissDefaultSportDialog: () -> Unit,
+    onSetDefaultSport: (SportType) -> Unit,
+    onSetDistanceUnitMetric: (Boolean) -> Unit,
+    onSetUsePaceForRunWalk: (Boolean) -> Unit,
+    onShowSpeedEditor: (SportType) -> Unit,
+    onDismissSpeedEditor: () -> Unit,
+    onSetSpeedLimit: (SportType, Float, Float) -> Unit,
+    onSetNotificationsEnabled: (Boolean) -> Unit,
+) {
     var showThemeDialog by remember { mutableStateOf(false) }
 
     if (showThemeDialog) {
         ThemeSelectorDialog(
             current = theme, onDismiss = { showThemeDialog = false },
-            onThemeSelected = { themeRepo.setTheme(it); showThemeDialog = false })
+            onThemeSelected = { onSetTheme(it); showThemeDialog = false })
     }
     if (state.showDefaultSportDialog) {
         PickerDialog(
@@ -84,8 +121,8 @@ fun SettingsScreen(
                 it to it.name.lowercase().replaceFirstChar { c -> c.uppercase() }
             },
             selected = state.defaultSport,
-            onDismiss = viewModel::dismissDefaultSportDialog,
-            onConfirm = viewModel::setDefaultSport,
+            onDismiss = onDismissDefaultSportDialog,
+            onConfirm = onSetDefaultSport,
         )
     }
     state.editingSpeedSport?.let { sport ->
@@ -94,13 +131,10 @@ fun SettingsScreen(
             sport = sport,
             limits = limits,
             usePace = state.usePaceForRunWalk && (sport == SportType.RUNNING || sport == SportType.WALKING),
-            onDismiss = viewModel::dismissSpeedEditor,
+            onDismiss = onDismissSpeedEditor,
             onSave = { min, max ->
-                viewModel.setSpeedLimit(
-                    sport,
-                    min,
-                    max
-                ); viewModel.dismissSpeedEditor()
+                onSetSpeedLimit(sport, min, max)
+                onDismissSpeedEditor()
             },
         )
     }
@@ -123,7 +157,7 @@ fun SettingsScreen(
                 ValueItem(
                     icon = Icons.Default.DirectionsRun, title = "Default Sport",
                     value = state.defaultSport.name.lowercase().replaceFirstChar { it.uppercase() },
-                    onClick = viewModel::showDefaultSportDialog
+                    onClick = onShowDefaultSportDialog,
                 )
                 InfoDivider()
                 ToggleItem(
@@ -131,7 +165,7 @@ fun SettingsScreen(
                     title = "Distance Unit",
                     subtitle = if (state.distanceUnitMetric) "Kilometres (km)" else "Miles (mi)",
                     checked = state.distanceUnitMetric,
-                    onCheckedChange = viewModel::setDistanceUnitMetric
+                    onCheckedChange = onSetDistanceUnitMetric,
                 )
                 InfoDivider()
                 ToggleItem(
@@ -139,7 +173,7 @@ fun SettingsScreen(
                     title = "Use Pace for Running/Walking",
                     subtitle = if (state.usePaceForRunWalk) "Displaying min/km" else "Displaying km/h",
                     checked = state.usePaceForRunWalk,
-                    onCheckedChange = viewModel::setUsePaceForRunWalk
+                    onCheckedChange = onSetUsePaceForRunWalk,
                 )
             }
 
@@ -163,7 +197,7 @@ fun SettingsScreen(
                             else
                                 "${limits.minKmh.toInt()} – ${limits.maxKmh.toInt()} km/h"
                         } else "Default",
-                        onClick = { viewModel.showSpeedEditor(sport) },
+                        onClick = { onShowSpeedEditor(sport) },
                     )
                     if (index < SportType.entries.lastIndex) InfoDivider()
                 }
@@ -174,7 +208,7 @@ fun SettingsScreen(
                     icon = Icons.Default.Notifications, title = "Plan Reminders",
                     subtitle = "Receive reminders for upcoming plans",
                     checked = state.notificationsEnabled,
-                    onCheckedChange = viewModel::setNotificationsEnabled
+                    onCheckedChange = onSetNotificationsEnabled,
                 )
             }
 
@@ -214,3 +248,32 @@ private val SportType.settingsIcon: ImageVector
         SportType.HIKING -> Icons.Default.TrendingUp
         SportType.WALKING -> Icons.Default.DirectionsWalk
     }
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsScreenPreview() {
+    AppTheme {
+        SettingsScreenContent(
+            state = SettingsUiState(
+                themeMode = ThemeMode.SYSTEM,
+                notificationsEnabled = true,
+                distanceUnitMetric = true,
+                defaultSport = SportType.RUNNING,
+                usePaceForRunWalk = true,
+                sportSpeedLimits = DEFAULT_SPEED_LIMITS,
+            ),
+            theme = ThemeMode.SYSTEM,
+            onSetTheme = {},
+            onBack = {},
+            onShowDefaultSportDialog = {},
+            onDismissDefaultSportDialog = {},
+            onSetDefaultSport = {},
+            onSetDistanceUnitMetric = {},
+            onSetUsePaceForRunWalk = {},
+            onShowSpeedEditor = {},
+            onDismissSpeedEditor = {},
+            onSetSpeedLimit = { _, _, _ -> },
+            onSetNotificationsEnabled = {},
+        )
+    }
+}

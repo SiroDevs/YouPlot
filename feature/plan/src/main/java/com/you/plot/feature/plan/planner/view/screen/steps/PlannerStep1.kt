@@ -37,9 +37,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.dateFmt
+import com.you.plot.core.designsystem.theme.AppTheme
+import com.you.plot.core.domain.entity.Route
 import com.you.plot.feature.plan.planner.utils.PlannerUiState
 import com.you.plot.feature.plan.planner.view.components.PlanDaysStepper
 import com.you.plot.feature.plan.planner.view.components.PlanSliderCard
@@ -47,9 +52,32 @@ import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 import java.util.Date
 import kotlin.math.roundToInt
 
+@Composable
+internal fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
+    PlannerStep1Content(
+        state = state,
+        onPlanNameChange = vm::setPlanName,
+        onDescriptionChange = vm::setDescription,
+        onStartDateChange = vm::setStartDate,
+        onStartTimeChange = vm::setStartTime,
+        onNumberOfDaysChange = vm::setNumberOfDays,
+        onAvgDistancePerDayChange = vm::setAvgDistancePerDay,
+        onAvgSpeedChange = vm::setAvgSpeed,
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
+private fun PlannerStep1Content(
+    state: PlannerUiState,
+    onPlanNameChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onStartDateChange: (Long) -> Unit,
+    onStartTimeChange: (Int, Int) -> Unit,
+    onNumberOfDaysChange: (Int) -> Unit,
+    onAvgDistancePerDayChange: (Double) -> Unit,
+    onAvgSpeedChange: (Double) -> Unit,
+) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
@@ -61,7 +89,7 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { vm.setStartDate(it) }
+                    datePickerState.selectedDateMillis?.let { onStartDateChange(it) }
                     showDatePicker = false
                 }) { Text("OK") }
             },
@@ -80,7 +108,7 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
                         TextButton(onClick = {
-                            vm.setStartTime(timePickerState.hour, timePickerState.minute)
+                            onStartTimeChange(timePickerState.hour, timePickerState.minute)
                             showTimePicker = false
                         }) { Text("OK") }
                     }
@@ -113,12 +141,12 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
     ) {
 
         OutlinedTextField(
-            value = state.planName, onValueChange = vm::setPlanName,
+            value = state.planName, onValueChange = onPlanNameChange,
             label = { Text("Plan Name *") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
         )
 
         OutlinedTextField(
-            value = state.description, onValueChange = vm::setDescription,
+            value = state.description, onValueChange = onDescriptionChange,
             label = { Text("Description (optional)") }, modifier = Modifier.fillMaxWidth(), minLines = 2,
         )
 
@@ -151,8 +179,8 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
 
             PlanDaysStepper(
                 days = state.numberOfDays,
-                onDecrement = { if (state.numberOfDays > 1) vm.setNumberOfDays(state.numberOfDays - 1) },
-                onIncrement = { vm.setNumberOfDays(state.numberOfDays + 1) },
+                onDecrement = { if (state.numberOfDays > 1) onNumberOfDaysChange(state.numberOfDays - 1) },
+                onIncrement = { onNumberOfDaysChange(state.numberOfDays + 1) },
                 modifier = Modifier.weight(0.8f),
             )
         }
@@ -162,7 +190,7 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
             label = "Distance per Day",
             valueLabel = "%.1f km".format(state.avgDistancePerDayKm),
             value = state.avgDistancePerDayKm.toFloat(),
-            onValueChange = { vm.setAvgDistancePerDay(it.toDouble()) },
+            onValueChange = { onAvgDistancePerDayChange(it.toDouble()) },
             valueRange = 1f..100f,
             steps = 98,
             supportingText = if (state.selectedRoute != null) "Auto from route — drag to override" else null,
@@ -173,7 +201,7 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
             label = "Average Speed",
             valueLabel = "%.1f km/h".format(state.avgSpeedKmh),
             value = state.avgSpeedKmh.toFloat(),
-            onValueChange = { vm.setAvgSpeed(it.toDouble()) },
+            onValueChange = { onAvgSpeedChange(it.toDouble()) },
             valueRange = 1f..40f,
             steps = 38,
         )
@@ -205,5 +233,36 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
         }
 
         Spacer(Modifier.height(88.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PlannerStep1Preview() {
+    val sampleRoute = Route(
+        id = 1L,
+        name = "Coast Tour",
+        sportType = SportType.CYCLING,
+        startPoint = LatLng(-1.286, 36.817),
+        endPoint = LatLng(-4.04, 39.67),
+        totalDistanceKm = 480.0,
+    )
+    AppTheme {
+        PlannerStep1Content(
+            state = PlannerUiState(
+                selectedRoute = sampleRoute,
+                planName = "Coast Tour Plan",
+                description = "Five days along the Indian Ocean coast.",
+                numberOfDays = 5,
+                avgSpeedKmh = 18.0,
+            ),
+            onPlanNameChange = {},
+            onDescriptionChange = {},
+            onStartDateChange = {},
+            onStartTimeChange = { _, _ -> },
+            onNumberOfDaysChange = {},
+            onAvgDistancePerDayChange = {},
+            onAvgSpeedChange = {},
+        )
     }
 }

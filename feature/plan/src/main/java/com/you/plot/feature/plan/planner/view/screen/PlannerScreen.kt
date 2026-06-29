@@ -22,15 +22,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.SportType
+import com.you.plot.core.designsystem.theme.AppTheme
+import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.feature.plan.planner.utils.PlannerUiState
 import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep0
 import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep1
 import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep2
 import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep3
 import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlannerScreen(
     viewModel: PlannerViewModel,
@@ -43,12 +48,41 @@ fun PlannerScreen(
         state.savedPlanId?.let { onPlanSaved(it) }
     }
 
+    PlannerScreenContent(
+        state = state,
+        onBack = onBack,
+        onClearError = viewModel::clearError,
+        onPrevStep = viewModel::prevStep,
+        onNextStep = viewModel::nextStep,
+        onSavePlan = viewModel::savePlan,
+        renderStep = { s ->
+            when (s.currentStep) {
+                0 -> PlannerStep0(s, viewModel)
+                1 -> PlannerStep1(s, viewModel)
+                2 -> PlannerStep2(s, viewModel)
+                3 -> PlannerStep3(s, viewModel)
+            }
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlannerScreenContent(
+    state: PlannerUiState,
+    onBack: () -> Unit,
+    onClearError: () -> Unit,
+    onPrevStep: () -> Unit,
+    onNextStep: () -> Unit,
+    onSavePlan: () -> Unit,
+    renderStep: @Composable (PlannerUiState) -> Unit,
+) {
     state.error?.let { error ->
         AlertDialog(
-            onDismissRequest = { viewModel.clearError() },
+            onDismissRequest = onClearError,
             title = { Text("Notice") },
             text = { Text(error) },
-            confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text("OK") } },
+            confirmButton = { TextButton(onClick = onClearError) { Text("OK") } },
         )
     }
 
@@ -72,21 +106,21 @@ fun PlannerScreen(
         0 -> FabConfig(
             label = "Next: Setup",
             enabled = state.selectedRoute != null || state.selectedTemplate != null,
-            onClick = viewModel::nextStep,
+            onClick = onNextStep,
         )
         1 -> FabConfig(
             label = if (state.isGenerating) "Generating…" else "Generate Schedule",
             isLoading = state.isGenerating,
-            onClick = { if (!state.isGenerating) viewModel.nextStep() },
+            onClick = { if (!state.isGenerating) onNextStep() },
         )
         2 -> FabConfig(
             label = "Review",
-            onClick = viewModel::nextStep,
+            onClick = onNextStep,
         )
         3 -> FabConfig(
             label = if (state.isSaving) "Saving…" else "Save Plan",
             isLoading = state.isSaving,
-            onClick = { if (!state.isSaving) viewModel.savePlan() },
+            onClick = { if (!state.isSaving) onSavePlan() },
         )
         else -> FabConfig(label = "", onClick = {})
     }
@@ -111,7 +145,7 @@ fun PlannerScreen(
                 title = stepTitles.getOrElse(displayStep) { "New Plan" },
                 tagline = "New Plan",
                 showGoBack = true,
-                onNavIconClick = { if (state.currentStep > 0) viewModel.prevStep() else onBack() },
+                onNavIconClick = { if (state.currentStep > 0) onPrevStep() else onBack() },
                 stepCurrent = displayStep,
                 stepTotal = stepTitles.size,
             )
@@ -142,12 +176,37 @@ fun PlannerScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when (state.currentStep) {
-                0 -> PlannerStep0(state, viewModel)
-                1 -> PlannerStep1(state, viewModel)
-                2 -> PlannerStep2(state, viewModel)
-                3 -> PlannerStep3(state, viewModel)
-            }
+            renderStep(state)
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PlannerScreenPreview() {
+    val sampleRoute = Route(
+        id = 1L,
+        name = "Coast Tour",
+        sportType = SportType.CYCLING,
+        startPoint = LatLng(-1.286, 36.817),
+        endPoint = LatLng(-4.04, 39.67),
+        totalDistanceKm = 480.0,
+    )
+    AppTheme {
+        PlannerScreenContent(
+            state = PlannerUiState(
+                routes = listOf(sampleRoute),
+                selectedRoute = sampleRoute,
+                planName = "Coast Tour Plan",
+                numberOfDays = 5,
+                currentStep = 1,
+            ),
+            onBack = {},
+            onClearError = {},
+            onPrevStep = {},
+            onNextStep = {},
+            onSavePlan = {},
+            renderStep = {},
+        )
     }
 }

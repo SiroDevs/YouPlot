@@ -222,9 +222,11 @@ class PlotterViewModel @Inject constructor(
 
     fun removeManualWaypoint(index: Int) {
         _state.update {
-            it.copy(
+            if (index !in it.manualWaypoints.indices) it
+            else it.copy(
                 manualWaypoints = it.manualWaypoints.toMutableList()
-                    .also { l -> l.removeAt(index) })
+                    .also { l -> l.removeAt(index) },
+            )
         }
     }
 

@@ -14,7 +14,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.entity.ElevationPoint
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.RouteCandidate
+import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.feature.route.plotter.view.components.ElevationProfileGraph
 import com.you.plot.feature.route.plotter.view.components.RouteCandidateCard
@@ -22,6 +27,17 @@ import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable
 fun PlotterStage4(state: PlotterUiState, vm: PlotterViewModel) {
+    PlotterStage4Content(
+        state = state,
+        onSelectCandidate = vm::selectCandidate,
+    )
+}
+
+@Composable
+private fun PlotterStage4Content(
+    state: PlotterUiState,
+    onSelectCandidate: (Int) -> Unit,
+) {
     Column(Modifier.fillMaxSize()) {
         Spacer(Modifier.weight(1f))
 
@@ -39,7 +55,7 @@ fun PlotterStage4(state: PlotterUiState, vm: PlotterViewModel) {
                 RouteCandidateCard(
                     candidate = candidate,
                     isSelected = candidate.id == state.selectedCandidateId,
-                    onClick = { vm.selectCandidate(candidate.id) },
+                    onClick = { onSelectCandidate(candidate.id) },
                 )
             }
 
@@ -61,5 +77,47 @@ fun PlotterStage4(state: PlotterUiState, vm: PlotterViewModel) {
 
             item(key = "bottom_spacer") { Spacer(Modifier.height(72.dp)) }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PlotterStage4Preview() {
+    val sampleProfile = listOf(
+        ElevationPoint(0.0, 1700.0),
+        ElevationPoint(1.0, 1720.0),
+        ElevationPoint(2.0, 1750.0),
+        ElevationPoint(3.0, 1735.0),
+        ElevationPoint(4.0, 1760.0),
+        ElevationPoint(5.0, 1745.0),
+    )
+    val candidates = listOf(
+        RouteCandidate(
+            id = 0,
+            waypoints = listOf(LatLng(-1.286, 36.817), LatLng(-1.300, 36.830)),
+            elevationProfile = sampleProfile,
+            totalDistanceKm = 5.4,
+            totalElevationGainMeters = 80.0,
+            totalElevationLossMeters = 55.0,
+            colorArgb = 0xFF1976D2L,
+        ),
+        RouteCandidate(
+            id = 1,
+            waypoints = listOf(LatLng(-1.286, 36.817), LatLng(-1.305, 36.835)),
+            elevationProfile = sampleProfile,
+            totalDistanceKm = 6.2,
+            totalElevationGainMeters = 110.0,
+            totalElevationLossMeters = 70.0,
+            colorArgb = 0xFFD32F2FL,
+        ),
+    )
+    AppTheme {
+        PlotterStage4Content(
+            state = PlotterUiState(
+                routeCandidates = candidates,
+                selectedCandidateId = 0,
+            ),
+            onSelectCandidate = {},
+        )
     }
 }

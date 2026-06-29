@@ -26,7 +26,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.SportType
+import com.you.plot.core.designsystem.theme.AppTheme
+import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.ui.components.general.DayTimeline
 import com.you.plot.feature.plan.planner.utils.PlannerUiState
 import com.you.plot.feature.plan.planner.view.components.AddEventDialog
@@ -35,7 +41,26 @@ import com.you.plot.feature.plan.planner.view.components.EventRow
 import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 
 @Composable
-fun PlannerStep2(state: PlannerUiState, vm: PlannerViewModel) {
+internal fun PlannerStep2(state: PlannerUiState, vm: PlannerViewModel) {
+    PlannerStep2Content(
+        state = state,
+        onDaySelected = vm::selectDay,
+        onAddCustomEvent = { name, hour, minute, duration ->
+            vm.addCustomEvent(name, hour, minute, duration, state.selectedDay)
+        },
+        onRemoveCustomEvent = vm::removeCustomEvent,
+        onRemoveGeneratedEvent = vm::removeGeneratedEvent,
+    )
+}
+
+@Composable
+private fun PlannerStep2Content(
+    state: PlannerUiState,
+    onDaySelected: (Int) -> Unit,
+    onAddCustomEvent: (name: String, hour: Int, minute: Int, duration: Int) -> Unit,
+    onRemoveCustomEvent: (Long) -> Unit,
+    onRemoveGeneratedEvent: (Long) -> Unit,
+) {
     var showAddEventDialog by remember { mutableStateOf(false) }
 
     if (showAddEventDialog) {
@@ -43,7 +68,7 @@ fun PlannerStep2(state: PlannerUiState, vm: PlannerViewModel) {
             day = state.selectedDay,
             onDismiss = { showAddEventDialog = false },
             onConfirm = { name, hour, minute, duration ->
-                vm.addCustomEvent(name, hour, minute, duration, state.selectedDay)
+                onAddCustomEvent(name, hour, minute, duration)
                 showAddEventDialog = false
             },
         )
@@ -60,7 +85,7 @@ fun PlannerStep2(state: PlannerUiState, vm: PlannerViewModel) {
                 val day = i + 1
                 FilterChip(
                     selected = state.selectedDay == day,
-                    onClick = { vm.selectDay(day) },
+                    onClick = { onDaySelected(day) },
                     label = { Text("Day $day") },
                 )
             }
@@ -81,14 +106,17 @@ fun PlannerStep2(state: PlannerUiState, vm: PlannerViewModel) {
         ) {
             item(key = "top_spacer") { Spacer(Modifier.height(4.dp)) }
 
-            items(state.eventsForSelectedDay, key = { it.id }) { event ->
+            items(
+                state.eventsForSelectedDay,
+                key = { "${it.id}-${it.orderIndex}-${it.plannedTimeMillis}" },
+            ) { event ->
                 val isCustom = state.customEvents.any { it.id == event.id }
                 EventRow(
                     event = event,
                     isCustom = isCustom,
                     onRemove = {
-                        if (isCustom) vm.removeCustomEvent(event.id)
-                        else vm.removeGeneratedEvent(event.id)
+                        if (isCustom) onRemoveCustomEvent(event.id)
+                        else onRemoveGeneratedEvent(event.id)
                     },
                 )
             }
@@ -121,5 +149,54 @@ fun PlannerStep2(state: PlannerUiState, vm: PlannerViewModel) {
                 Text("Add Event")
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PlannerStep2Preview() {
+    val sampleRoute = Route(
+        id = 1L,
+        name = "Coast Tour",
+        sportType = SportType.CYCLING,
+        startPoint = LatLng(-1.286, 36.817),
+        endPoint = LatLng(-4.04, 39.67),
+        totalDistanceKm = 480.0,
+    )
+    // Generated PlanEvents use distinct negative synthetic ids (see PlannerStep2's
+    // composite LazyColumn key on id+orderIndex+plannedTimeMillis).
+    val dayStart = 0L
+    val generated = listOf(
+        PlanEvent(
+            id = -1L, planId = 0L, dayNumber = 1, name = "Start",
+            plannedTimeMillis = dayStart + 6L * 3_600_000L,
+            durationMinutes = 0, distanceCoveredKm = 0.0, orderIndex = 0,
+        ),
+        PlanEvent(
+            id = -2L, planId = 0L, dayNumber = 1, name = "Checkpoint",
+            plannedTimeMillis = dayStart + 9L * 3_600_000L,
+            durationMinutes = 15, distanceCoveredKm = 45.0, orderIndex = 1,
+        ),
+        PlanEvent(
+            id = -3L, planId = 0L, dayNumber = 1, name = "End of Day",
+            plannedTimeMillis = dayStart + 14L * 3_600_000L,
+            durationMinutes = 0, distanceCoveredKm = 96.0, orderIndex = 2,
+        ),
+    )
+    AppTheme {
+        PlannerStep2Content(
+            state = PlannerUiState(
+                selectedRoute = sampleRoute,
+                numberOfDays = 5,
+                avgSpeedKmh = 18.0,
+                selectedDay = 1,
+                generatedEvents = generated,
+                startDateMillis = 0L,
+            ),
+            onDaySelected = {},
+            onAddCustomEvent = { _, _, _, _ -> },
+            onRemoveCustomEvent = {},
+            onRemoveGeneratedEvent = {},
+        )
     }
 }

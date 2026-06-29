@@ -35,12 +35,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.entity.ElevationPoint
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.dateFmt
+import com.you.plot.core.designsystem.theme.AppTheme
+import com.you.plot.core.domain.entity.Route
+import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
-import com.you.plot.feature.route.detail.viewmodel.RouteDetailViewModel
 import com.you.plot.core.ui.components.maps.PlotterMap
+import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
+import com.you.plot.feature.route.detail.viewmodel.RouteDetailUiState
+import com.you.plot.feature.route.detail.viewmodel.RouteDetailViewModel
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,10 +59,29 @@ fun RouteDetailScreen(
     onCreatePlan: (Long) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var showMoreMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.isDeleted) { if (state.isDeleted) onBack() }
+
+    RouteDetailContent(
+        state = state,
+        onBack = onBack,
+        onCreatePlan = onCreatePlan,
+        onDeleteRoute = viewModel::deleteRoute,
+        showMap = true,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RouteDetailContent(
+    state: RouteDetailUiState,
+    onBack: () -> Unit,
+    onCreatePlan: (Long) -> Unit,
+    onDeleteRoute: () -> Unit,
+    showMap: Boolean,
+) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showMoreMenu by remember { mutableStateOf(false) }
 
     // ── Delete confirmation ───────────────────────────────────────────────────
     if (showDeleteDialog) {
@@ -63,7 +90,7 @@ fun RouteDetailScreen(
             title = { Text("Delete Route?") },
             text = { Text("This permanently deletes the route and all associated plans.") },
             confirmButton = {
-                TextButton(onClick = { showDeleteDialog = false; viewModel.deleteRoute() }) {
+                TextButton(onClick = { showDeleteDialog = false; onDeleteRoute() }) {
                     Text("Delete", color = MaterialTheme.colorScheme.error)
                 }
             },
@@ -173,21 +200,23 @@ fun RouteDetailScreen(
             .fillMaxSize()
             .padding(padding)) {
 
-            PlotterMap(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(240.dp),
-                startPoint = route.startPoint,
-                endPoint = route.endPoint,
-                waypoints = emptyList(),     // shown via routePolyline instead
-                candidates = emptyList(),
-                selectedCandidateId = null,
-                isRoundTrip = route.isRoundTrip,
-                startPointName = route.waypoints.minByOrNull { it.orderIndex }?.name ?: "Start",
-                endPointName = route.waypoints.maxByOrNull { it.orderIndex }?.name ?: "Finish",
-                routePolyline = route.waypoints.sortedBy { it.orderIndex }.map { it.position },
-                onMapTap = {},
-            )
+            if (showMap) {
+                PlotterMap(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp),
+                    startPoint = route.startPoint,
+                    endPoint = route.endPoint,
+                    waypoints = emptyList(),     // shown via routePolyline instead
+                    candidates = emptyList(),
+                    selectedCandidateId = null,
+                    isRoundTrip = route.isRoundTrip,
+                    startPointName = route.waypoints.minByOrNull { it.orderIndex }?.name ?: "Start",
+                    endPointName = route.waypoints.maxByOrNull { it.orderIndex }?.name ?: "Finish",
+                    routePolyline = route.waypoints.sortedBy { it.orderIndex }.map { it.position },
+                    onMapTap = {},
+                )
+            }
 
             RouteInfoPanel(
                 distanceKm = route.totalDistanceKm,
@@ -203,5 +232,92 @@ fun RouteDetailScreen(
                 modifier = Modifier.fillMaxSize(),
             )
         }
+    }
+}
+
+private fun sampleRoute(): Route {
+    val createdAt = 1_700_000_000_000L
+    val profile = listOf(
+        ElevationPoint(0.0, 1700.0),
+        ElevationPoint(1.0, 1720.0),
+        ElevationPoint(2.0, 1755.0),
+        ElevationPoint(3.0, 1742.0),
+        ElevationPoint(4.0, 1768.0),
+        ElevationPoint(5.0, 1750.0),
+    )
+    val waypoints = listOf(
+        Waypoint(
+            id = 1, routeId = 1L, name = "Nairobi CBD",
+            position = LatLng(-1.286, 36.817), orderIndex = 0,
+            elevationMeters = 1700.0, distanceFromStartKm = 0.0,
+        ),
+        Waypoint(
+            id = 2, routeId = 1L, name = "Uhuru Park",
+            position = LatLng(-1.291, 36.819), orderIndex = 1,
+            elevationMeters = 1720.0, distanceFromStartKm = 2.1,
+            isStopPlanned = true,
+        ),
+        Waypoint(
+            id = 3, routeId = 1L, name = "Lavington",
+            position = LatLng(-1.300, 36.830), orderIndex = 2,
+            elevationMeters = 1750.0, distanceFromStartKm = 8.4,
+        ),
+    )
+    return Route(
+        id = 1L,
+        name = "Morning Loop",
+        description = "Easy paced run through the city.",
+        sportType = SportType.RUNNING,
+        startPoint = LatLng(-1.286, 36.817),
+        endPoint = LatLng(-1.300, 36.830),
+        waypoints = waypoints,
+        elevationProfile = profile,
+        totalDistanceKm = 8.4,
+        totalElevationGainMeters = 120.0,
+        totalElevationLossMeters = 95.0,
+        isRoundTrip = false,
+        createdAt = createdAt,
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RouteDetailScreenLoadingPreview() {
+    AppTheme {
+        RouteDetailContent(
+            state = RouteDetailUiState(isLoading = true),
+            onBack = {},
+            onCreatePlan = {},
+            onDeleteRoute = {},
+            showMap = false,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RouteDetailScreenNotFoundPreview() {
+    AppTheme {
+        RouteDetailContent(
+            state = RouteDetailUiState(isLoading = false, route = null),
+            onBack = {},
+            onCreatePlan = {},
+            onDeleteRoute = {},
+            showMap = false,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RouteDetailScreenLoadedPreview() {
+    AppTheme {
+        RouteDetailContent(
+            state = RouteDetailUiState(isLoading = false, route = sampleRoute()),
+            onBack = {},
+            onCreatePlan = {},
+            onDeleteRoute = {},
+            showMap = false,
+        )
     }
 }

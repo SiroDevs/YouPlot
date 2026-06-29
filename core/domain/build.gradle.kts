@@ -10,4 +10,6 @@ android {
 dependencies {
     api(project(":core:common"))
     implementation(libs.androidx.core.ktx)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

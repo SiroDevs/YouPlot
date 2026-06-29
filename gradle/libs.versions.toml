@@ -25,6 +25,8 @@ playServicesLocation = "21.3.0"
 coroutinesPlayServices = "1.8.1"
 osmdroid = "6.1.20"
 ktor = "3.5.0"
+coroutinesTest = "1.8.1"
+turbine = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +62,8 @@ androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscree
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

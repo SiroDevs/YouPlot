@@ -123,8 +123,13 @@ class PlannerViewModel @Inject constructor(
         val prevDist = s.eventsForSelectedDay
             .filter { it.plannedTimeMillis <= eventMillis }
             .maxOfOrNull { it.distanceCoveredKm } ?: 0.0
+        // Ensure a unique temp id even when two events are added in the same ms;
+        // generated events use negative ids, so positive ms-based ids never collide.
+        val existingIds = s.customEvents.map { it.id }.toSet()
+        var tempId = System.currentTimeMillis()
+        while (tempId in existingIds) tempId++
         val event = PlanEvent(
-            id = System.currentTimeMillis(),          // temp local id
+            id = tempId,
             planId = 0L,
             dayNumber = day,
             name = name,

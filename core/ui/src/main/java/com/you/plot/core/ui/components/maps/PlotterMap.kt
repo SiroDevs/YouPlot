@@ -32,11 +32,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.utils.LatLngBounds
 import com.you.plot.core.common.utils.boundingBox
 import com.you.plot.core.common.utils.boundingBoxOfAll
 import com.you.plot.core.common.entity.RouteCandidate
@@ -78,6 +80,11 @@ fun PlotterMap(
     onWaypointDelete: ((index: Int) -> Unit)? = null,
 ) {
     val context = LocalContext.current
+
+    // Hold the latest callbacks so listeners installed once stay in sync without
+    // re-running effects on every recomposition (which would thrash overlays).
+    val currentOnMapTap by rememberUpdatedState(onMapTap)
+    val currentOnWaypointMoved by rememberUpdatedState(onWaypointMoved)
 
     var menuWaypointIndex by remember { mutableIntStateOf(-1) }
     var menuAnchorPoint by remember { mutableStateOf<GeoPoint?>(null) }
@@ -137,12 +144,14 @@ fun PlotterMap(
         onDispose { myLocationOverlay.disableMyLocation(); mapView.onDetach() }
     }
 
-    LaunchedEffect(onMapTap) {
+    // Install the tap overlay exactly once; delegate to the latest callback via
+    // rememberUpdatedState so a new lambda each recomposition doesn't reinstall it.
+    LaunchedEffect(Unit) {
         mapView.overlays.removeAll { it is MapEventsOverlay }
         val tap = MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                 menuWaypointIndex = -1
-                p?.let { onMapTap(LatLng(it.latitude, it.longitude)) }
+                p?.let { currentOnMapTap(LatLng(it.latitude, it.longitude)) }
                 return true
             }
 
@@ -198,7 +207,7 @@ fun PlotterMap(
                     override fun onMarkerDragStart(marker: Marker) {}
                     override fun onMarkerDrag(marker: Marker) {}
                     override fun onMarkerDragEnd(marker: Marker) {
-                        onWaypointMoved?.invoke(
+                        currentOnWaypointMoved?.invoke(
                             i, LatLng(marker.position.latitude, marker.position.longitude)
                         )
                     }
@@ -237,19 +246,31 @@ fun PlotterMap(
 
         val selectedCandidate = candidates.firstOrNull { it.id == selectedCandidateId }
 
+        // OSMDroid's zoomToBoundingBox crashes on zero-span boxes; nudge points
+        // that collapse to a single coordinate into a tiny visible window.
+        fun safeZoom(bbox: LatLngBounds, padding: Int, durationMs: Long) {
+            val pad = 0.002
+            val safeBox = if (bbox.latSpan < 1e-6 || bbox.lngSpan < 1e-6) {
+                BoundingBox(
+                    bbox.maxLat + pad, bbox.maxLng + pad,
+                    bbox.minLat - pad, bbox.minLng - pad,
+                )
+            } else {
+                BoundingBox(bbox.maxLat, bbox.maxLng, bbox.minLat, bbox.minLng)
+            }
+            mapView.post {
+                runCatching {
+                    mapView.zoomToBoundingBox(
+                        safeBox, true, padding, MapConstants.WAYPOINT_ZOOM, durationMs,
+                    )
+                }
+            }
+        }
+
         when {
             selectedCandidate != null && selectedCandidate.waypoints.isNotEmpty() -> {
                 val bbox = boundingBoxOfAll(selectedCandidate.waypoints)
-                if (bbox != null) {
-                    mapView.post {
-                        mapView.zoomToBoundingBox(
-                            BoundingBox(bbox.maxLat, bbox.maxLng, bbox.minLat, bbox.minLng),
-                            true, 120,
-                            MapConstants.WAYPOINT_ZOOM,
-                            500L,
-                        )
-                    }
-                }
+                if (bbox != null) safeZoom(bbox, 120, 500L)
             }
 
             startPoint != null && endPoint != null -> {
@@ -260,38 +281,25 @@ fun PlotterMap(
                         120,
                         if (bbox.latSpan < 0.05 && bbox.lngSpan < 0.05) 200 else 120,
                     )
-                    mapView.post {
-                        mapView.zoomToBoundingBox(
-                            BoundingBox(bbox.maxLat, bbox.maxLng, bbox.minLat, bbox.minLng),
-                            true,
-                            padding,
-                            MapConstants.WAYPOINT_ZOOM,
-                            500L,
-                        )
-                    }
+                    safeZoom(bbox, padding, 500L)
                 }
             }
 
             startPoint != null && waypoints.isNotEmpty() -> {
                 val allPts = listOf(startPoint) + waypoints
                 val bbox = boundingBox(*allPts.toTypedArray())
-                if (bbox != null) {
-                    mapView.post {
-                        mapView.zoomToBoundingBox(
-                            BoundingBox(bbox.maxLat, bbox.maxLng, bbox.minLat, bbox.minLng),
-                            true, 160, MapConstants.WAYPOINT_ZOOM, 400L,
-                        )
-                    }
-                }
+                if (bbox != null) safeZoom(bbox, 160, 400L)
             }
 
             startPoint != null -> {
                 mapView.post {
-                    mapView.controller.animateTo(
-                        GeoPoint(startPoint.latitude, startPoint.longitude),
-                        MapConstants.CITY_ZOOM,
-                        500L,
-                    )
+                    runCatching {
+                        mapView.controller.animateTo(
+                            GeoPoint(startPoint.latitude, startPoint.longitude),
+                            MapConstants.CITY_ZOOM,
+                            500L,
+                        )
+                    }
                 }
             }
         }

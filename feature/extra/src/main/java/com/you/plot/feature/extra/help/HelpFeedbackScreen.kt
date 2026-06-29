@@ -18,9 +18,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppConstants
 import androidx.core.net.toUri
+import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.core.ui.components.general.InfoDivider
 import com.you.plot.core.ui.components.general.InfoNavItem
@@ -39,6 +41,18 @@ fun HelpFeedbackScreen(onBack: () -> Unit) {
         context.startActivity(Intent.createChooser(intent, "Send email"))
     }
 
+    HelpFeedbackContent(
+        onBack = onBack,
+        onSendEmail = ::sendEmail,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HelpFeedbackContent(
+    onBack: () -> Unit,
+    onSendEmail: (String) -> Unit,
+) {
     Scaffold(
         topBar = {
             AppTopBar(
@@ -60,7 +74,7 @@ fun HelpFeedbackScreen(onBack: () -> Unit) {
                     title    = "How to Plot a Route",
                     subtitle = "Step-by-step guide to creating your first route",
                     onClick  = {
-                        sendEmail("YouPlot — How to Plot a Route")
+                        onSendEmail("YouPlot — How to Plot a Route")
                     },
                 )
                 InfoDivider()
@@ -69,7 +83,7 @@ fun HelpFeedbackScreen(onBack: () -> Unit) {
                     title    = "How to Create a Plan",
                     subtitle = "Learn how to plan multi-day activities",
                     onClick  = {
-                        sendEmail("YouPlot — How to Create a Plan")
+                        onSendEmail("YouPlot — How to Create a Plan")
                     },
                 )
                 InfoDivider()
@@ -78,7 +92,7 @@ fun HelpFeedbackScreen(onBack: () -> Unit) {
                     title    = "Activity Tracking Guide",
                     subtitle = "Understand how live tracking works",
                     onClick  = {
-                        sendEmail("YouPlot — Activity Tracking Guide")
+                        onSendEmail("YouPlot — Activity Tracking Guide")
                     },
                 )
             }
@@ -88,25 +102,36 @@ fun HelpFeedbackScreen(onBack: () -> Unit) {
                     icon     = Icons.Default.BugReport,
                     title    = "Report a Bug",
                     subtitle = "Tell us about something that isn't working",
-                    onClick  = { sendEmail("YouPlot Bug Report") },
+                    onClick  = { onSendEmail("YouPlot Bug Report") },
                 )
                 InfoDivider()
                 InfoNavItem(
                     icon     = Icons.Default.RateReview,
                     title    = "Send Feedback",
                     subtitle = "Share ideas or suggestions",
-                    onClick  = { sendEmail("YouPlot Feedback") },
+                    onClick  = { onSendEmail("YouPlot Feedback") },
                 )
                 InfoDivider()
                 InfoNavItem(
                     icon     = Icons.Default.Email,
                     title    = "Contact Support",
                     subtitle = AppConstants.SUPPORT_EMAIL,
-                    onClick  = { sendEmail("YouPlot Support") },
+                    onClick  = { onSendEmail("YouPlot Support") },
                 )
             }
 
             Spacer(Modifier.height(24.dp))
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HelpFeedbackScreenPreview() {
+    AppTheme {
+        HelpFeedbackContent(
+            onBack = {},
+            onSendEmail = {},
+        )
     }
 }
