@@ -1,8 +1,30 @@
-package com.you.plot.feature.route.plotter.view.components
+/*
+ * Copyright 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.you.plot.core.ui.components.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.location.LocationManager
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -17,8 +39,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.utils.boundingBox
 import com.you.plot.core.common.utils.boundingBoxOfAll
-import com.you.plot.feature.route.plotter.utils.makeCircleMarker
-import com.you.plot.feature.route.plotter.utils.makePinMarker
 import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.utils.MapConstants
 import kotlinx.coroutines.withContext
@@ -35,6 +55,8 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.math.max
 import androidx.core.graphics.drawable.toDrawable
+import com.you.plot.core.ui.utils.makeCircleMarker
+import com.you.plot.core.ui.utils.makePinMarker
 import kotlinx.coroutines.Dispatchers
 
 @SuppressLint("MissingPermission")
@@ -59,6 +81,7 @@ fun PlotterMap(
 
     var menuWaypointIndex by remember { mutableIntStateOf(-1) }
     var menuAnchorPoint by remember { mutableStateOf<GeoPoint?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
 
     val mapView = remember {
         Configuration.getInstance().userAgentValue = context.packageName
@@ -137,7 +160,7 @@ fun PlotterMap(
         if (hasMyLoc) mapView.overlays.add(myLocationOverlay)
 
         if (routePolyline.size >= 2) {
-            val primaryColor = android.graphics.Color.argb(220, 33, 150, 243) // blue
+            val primaryColor = Color.argb(220, 33, 150, 243) // blue
             mapView.overlays.add(
                 Polyline(mapView).apply {
                     setPoints(routePolyline.map { GeoPoint(it.latitude, it.longitude) })
@@ -152,7 +175,7 @@ fun PlotterMap(
             val raw = c.colorArgb
             mapView.overlays.add(Polyline(mapView).apply {
                 setPoints(c.waypoints.map { GeoPoint(it.latitude, it.longitude) })
-                outlinePaint.color = android.graphics.Color.argb(
+                outlinePaint.color = Color.argb(
                     if (selected) 220 else 90,
                     ((raw shr 16) and 0xFF).toInt(),
                     ((raw shr 8) and 0xFF).toInt(),
@@ -273,9 +296,20 @@ fun PlotterMap(
             }
         }
         mapView.invalidate()
+        isLoading = false
     }
 
-    AndroidView(factory = { mapView }, modifier = modifier)
+    Box(modifier = modifier) {
+        AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
+
+        AnimatedVisibility(
+            visible = isLoading,
+            modifier = Modifier.matchParentSize(),
+            exit = fadeOut(animationSpec = tween(durationMillis = 250)),
+        ) {
+            MapShimmer(modifier = Modifier.fillMaxSize())
+        }
+    }
 
     if (menuWaypointIndex >= 0) {
         WaypointPopup(

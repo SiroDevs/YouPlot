@@ -33,9 +33,9 @@ fun PlotterStage4(state: PlotterUiState, vm: PlotterViewModel) {
                 .padding(horizontal = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item { Spacer(Modifier.height(4.dp)) }
+            item(key = "top_spacer") { Spacer(Modifier.height(4.dp)) }
 
-            itemsIndexed(state.routeCandidates) { _, candidate ->
+            itemsIndexed(state.routeCandidates, key = { _, c -> "candidate_${c.id}" }) { _, candidate ->
                 RouteCandidateCard(
                     candidate = candidate,
                     isSelected = candidate.id == state.selectedCandidateId,
@@ -44,7 +44,7 @@ fun PlotterStage4(state: PlotterUiState, vm: PlotterViewModel) {
             }
 
             state.selectedCandidate?.let { c ->
-                item {
+                item(key = "elevation_profile") {
                     Text(
                         "Elevation Profile – Route ${c.id + 1}",
                         style = MaterialTheme.typography.labelMedium,
@@ -59,7 +59,7 @@ fun PlotterStage4(state: PlotterUiState, vm: PlotterViewModel) {
                 }
             }
 
-            item { Spacer(Modifier.height(72.dp)) }
+            item(key = "bottom_spacer") { Spacer(Modifier.height(72.dp)) }
         }
     }
 }

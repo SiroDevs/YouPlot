@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
+import com.you.plot.core.ui.components.maps.PlotterMap
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
-import com.you.plot.feature.route.plotter.view.components.PlotterMap
 import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable

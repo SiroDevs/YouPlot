@@ -166,15 +166,13 @@ class PlannerViewModel @Inject constructor(
                 if (s.avgSpeedKmh <= 0) {
                     setError("Speed must be greater than 0"); return
                 }
-                _state.update { it.copy(isGenerating = true) }
+
                 viewModelScope.launch {
+                    _state.update { it.copy(isGenerating = true) }
                     runCatching { generateEvents() }
                         .onFailure { e ->
                             _state.update {
-                                it.copy(
-                                    isGenerating = false,
-                                    error = "Failed to generate schedule: ${e.message}"
-                                )
+                                it.copy(isGenerating = false, error = "Failed to generate schedule: ${e.message}")
                             }
                         }
                 }

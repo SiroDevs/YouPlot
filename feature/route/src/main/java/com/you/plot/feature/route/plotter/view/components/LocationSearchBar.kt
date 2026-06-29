@@ -7,13 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -45,16 +42,18 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppSpecs
 import com.you.plot.core.common.utils.COUNTRY_LIST
-import com.you.plot.core.domain.entity.WaypointSearchResult
+import com.you.plot.core.common.entity.WaypointSearchResult
 
 @Composable
 fun LocationSearchBar(
     query: String,
-    onQueryChange: (String) -> Unit,
+    onQryChange: () -> Unit,
+    onSearch: (String) -> Unit,
     results: List<WaypointSearchResult>,
     isSearching: Boolean,
     placeholder: String,
@@ -87,7 +86,7 @@ fun LocationSearchBar(
     ) {
         OutlinedTextField(
             value = query,
-            onValueChange = onQueryChange,
+            onValueChange = {},
             placeholder = { Text(placeholder) },
             leadingIcon = {
                 if (isSearching) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -96,7 +95,7 @@ fun LocationSearchBar(
             trailingIcon = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (query.isNotEmpty()) {
-                        IconButton(onClick = { onQueryChange("") }) {
+                        IconButton(onClick = onQryChange) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "Clear",
@@ -104,7 +103,6 @@ fun LocationSearchBar(
                             )
                         }
                     }
-                    // Country selector button
                     if (onCountrySelected != null) {
                         Box {
                             TextButton(
@@ -159,6 +157,18 @@ fun LocationSearchBar(
                 }
             },
             singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    isFocused = false
+
+                    onSearch(query)
+                }
+            ),
             shape = if (hasDropdown) AppSpecs.TOP_SHAPE else AppSpecs.FULL_SHAPE,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
@@ -256,24 +266,5 @@ fun LocationSearchBar(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun QuickActionRow(icon: @Composable () -> Unit, label: String, onClick: () -> Unit) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 13.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        icon()
-        Text(
-            label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }

@@ -67,11 +67,9 @@ kotlin {
 }
 
 sentry {
-    debug.set(true)
-    includeSourceContext.set(true)
     org.set("futuristicken")
     projectName.set("youplot-android")
-    authToken.set(localProperties.getProperty("SENTRY_AUTH_TOKEN"))
+    includeSourceContext.set(true)
 }
 
 dependencies {

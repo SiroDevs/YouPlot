@@ -8,7 +8,7 @@ import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.common.entity.SportType
-import com.you.plot.core.domain.entity.WaypointSearchResult
+import com.you.plot.core.common.entity.WaypointSearchResult
 import com.you.plot.core.domain.usecase.route.GetAllRoutesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted

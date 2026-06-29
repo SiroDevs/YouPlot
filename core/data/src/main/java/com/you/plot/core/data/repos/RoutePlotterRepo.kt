@@ -7,7 +7,7 @@ import com.you.plot.core.common.utils.MapConstants
 import com.you.plot.core.common.utils.buildElevationStats
 import com.you.plot.core.common.utils.buildFallbackCandidates
 import com.you.plot.core.common.utils.decodePolyline6
-import com.you.plot.core.domain.entity.WaypointSearchResult
+import com.you.plot.core.common.entity.WaypointSearchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -95,11 +95,12 @@ class RoutePlotterRepo @Inject constructor(
         start: LatLng,
         end: LatLng,
         via: List<LatLng>,
+        profile: String,
     ): List<RouteCandidate> = withContext(Dispatchers.IO) {
         runCatching {
             val allPoints = listOf(start) + via + listOf(end)
             val coordStr = allPoints.joinToString(";") { "${it.longitude},${it.latitude}" }
-            val url = "${MapConstants.OSRM_ROUTER}/$coordStr" +
+            val url = "${MapConstants.OSRM_ROUTER}$profile/$coordStr" +
                 "?overview=full&geometries=polyline6&alternatives=true&steps=false"
 
             val conn = (URL(url).openConnection() as HttpURLConnection).apply {
@@ -162,11 +163,11 @@ class RoutePlotterRepo @Inject constructor(
         }.getOrNull()
     }
 
-    suspend fun searchLocationsWithCountry(query: String, countryCode: String): List<WaypointSearchResult> =
+    suspend fun searchLocationsWithCountry(query: String, ctryCode: String): List<WaypointSearchResult> =
         withContext(Dispatchers.IO) {
             runCatching {
                 val encoded = URLEncoder.encode(query, "UTF-8")
-                val urlString = "${MapConstants.PHOTON_BASE}/api/?q=$encoded&limit=10&lang=en&osm_tag=:&bbox=&countrycodes=$countryCode"
+                val urlString = "${MapConstants.PHOTON_BASE}/api/?q=$encoded&limit=10&lang=en&osm_tag=:&bbox=&countrycodes=$ctryCode"
                 val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
                     setRequestProperty("User-Agent", osmUserAgent)
                     connectTimeout = 8_000; readTimeout = 8_000
@@ -178,7 +179,7 @@ class RoutePlotterRepo @Inject constructor(
                     val feat = features.getJSONObject(i)
                     val props = feat.getJSONObject("properties")
                     val cc = props.optString("countrycode").lowercase()
-                    if (countryCode.isNotBlank() && cc != countryCode.lowercase()) return@mapNotNull null
+                    if (ctryCode.isNotBlank() && cc != ctryCode.lowercase()) return@mapNotNull null
                     val coords = feat.getJSONObject("geometry").getJSONArray("coordinates")
                     val lon = coords.getDouble(0); val lat = coords.getDouble(1)
                     val parts = listOfNotNull(

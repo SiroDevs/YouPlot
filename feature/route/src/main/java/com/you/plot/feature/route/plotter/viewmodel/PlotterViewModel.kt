@@ -10,6 +10,7 @@ import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.common.entity.SportType
+import com.you.plot.core.common.entity.WaypointSearchResult
 import com.you.plot.core.common.utils.MapConstants
 import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.domain.usecase.route.DeleteRouteUseCase
@@ -18,7 +19,6 @@ import com.you.plot.core.data.repos.RoutePlotterRepo
 import com.you.plot.core.common.utils.buildWaypointSuggestions
 import com.you.plot.core.common.utils.destinationPoint
 import com.you.plot.core.common.utils.bearingLabel
-import com.you.plot.core.domain.entity.WaypointSearchResult
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -77,7 +77,7 @@ class PlotterViewModel @Inject constructor(
                         }
                 }
                 val start = s.startPoint!!
-                val end = s.endPoint!!
+                val end = s.endPoint
                 val suggested = buildWaypointSuggestions(start, end)
                 _state.update {
                     it.copy(
@@ -123,7 +123,12 @@ class PlotterViewModel @Inject constructor(
 
     fun setCountryCode(code: String) = _state.update { it.copy(selectedCountryCode = code) }
 
-    fun onSearchQueryChange(query: String) {
+    fun onQryClear() {
+        _state.update { it.copy(searchQuery = "", searchResults = emptyList()) }
+        searchJob?.cancel()
+    }
+
+    fun onSearch(query: String) {
         _state.update { it.copy(searchQuery = query, searchResults = emptyList()) }
         if (query.length < 3) return
         searchJob?.cancel()
@@ -164,11 +169,10 @@ class PlotterViewModel @Inject constructor(
     fun onMapTap(latLng: LatLng) {
         when (_state.value.stage) {
             PlotterStage.STAGE_1 -> {
-                // Immediately mark the point; reverse geocode in background
                 _state.update {
                     it.copy(
                         startPoint = latLng,
-                        startPointName = "Locating…",
+                        startPointName = "Locating ...",
                         isReverseGeocoding = true
                     )
                 }
@@ -190,7 +194,7 @@ class PlotterViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             endPoint = latLng,
-                            endPointName = "Locating…",
+                            endPointName = "Locating ...",
                             isReverseGeocoding = true
                         )
                     }
@@ -318,7 +322,7 @@ class PlotterViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true) }
-            val candidates = plotterRepo.fetchRouteCandidates(start, end, via)
+            val candidates = plotterRepo.fetchRouteCandidates(start, end, via, "driving")
             _state.update {
                 it.copy(
                     isSearching = false,

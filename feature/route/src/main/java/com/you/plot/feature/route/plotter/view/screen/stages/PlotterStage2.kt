@@ -73,7 +73,8 @@ fun PlotterStage2(state: PlotterUiState, vm: PlotterViewModel) {
                 DestinationMode.PICK_POINT -> {
                     LocationSearchBar(
                         query = state.searchQuery,
-                        onQueryChange = vm::onSearchQueryChange,
+                        onQryChange = vm::onQryClear,
+                        onSearch = vm::onSearch,
                         results = state.searchResults,
                         isSearching = state.isSearching,
                         placeholder = "Search destination…",
@@ -81,7 +82,7 @@ fun PlotterStage2(state: PlotterUiState, vm: PlotterViewModel) {
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                         selectedCountryCode = state.selectedCountryCode,
                         onCountrySelected = vm::setCountryCode,
-                        onChooseOnMap = { vm.onSearchQueryChange("") },
+                        onChooseOnMap = vm::onQryClear,
                         onUseMyLocation = vm::onUseMyLocation,
                     )
                     state.endPoint?.let {
@@ -148,40 +149,6 @@ fun PlotterStage2(state: PlotterUiState, vm: PlotterViewModel) {
             }
         }
 
-        Spacer(Modifier.weight(1f))
         Spacer(Modifier.height(72.dp))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PlotterStage2Preview() {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(5.dp)
-            .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(8.dp),
-                clip = false
-            )
-            .background(
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                shape = RoundedCornerShape(8.dp)
-            )
-            .padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            label = { Text("Set Target Distance") },
-            shape = AppSpecs.FULL_SHAPE,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.weight(1f),
-            singleLine = true,
-        )
-        Button(onClick = {}) { Text("Find") }
     }
 }

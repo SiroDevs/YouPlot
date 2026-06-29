@@ -123,7 +123,7 @@ fun PlotterStage3(state: PlotterUiState, vm: PlotterViewModel) {
                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
                     .padding(horizontal = 16.dp),
             ) {
-                itemsIndexed(state.manualWaypoints) { index, pt ->
+                itemsIndexed(state.manualWaypoints, key = { index, _ -> "waypoint_$index" }) { index, pt ->
                     Row(
                         Modifier
                             .fillMaxWidth()

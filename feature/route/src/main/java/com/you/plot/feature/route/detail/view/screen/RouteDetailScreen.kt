@@ -2,7 +2,6 @@ package com.you.plot.feature.route.detail.view.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,7 +40,7 @@ import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
 import com.you.plot.feature.route.detail.viewmodel.RouteDetailViewModel
-import com.you.plot.feature.route.plotter.view.components.PlotterMap
+import com.you.plot.core.ui.components.maps.PlotterMap
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +52,7 @@ fun RouteDetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var showMoreMenu    by remember { mutableStateOf(false) }
+    var showMoreMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.isDeleted) { if (state.isDeleted) onBack() }
 
@@ -62,7 +61,7 @@ fun RouteDetailScreen(
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text("Delete Route?") },
-            text  = { Text("This permanently deletes the route and all associated plans.") },
+            text = { Text("This permanently deletes the route and all associated plans.") },
             confirmButton = {
                 TextButton(onClick = { showDeleteDialog = false; viewModel.deleteRoute() }) {
                     Text("Delete", color = MaterialTheme.colorScheme.error)
@@ -77,7 +76,7 @@ fun RouteDetailScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title      = state.route?.name ?: "Route",
+                title = state.route?.name ?: "Route",
                 showGoBack = true,
                 onNavIconClick = onBack,
                 actions = {
@@ -97,8 +96,10 @@ fun RouteDetailScreen(
                             DropdownMenuItem(
                                 text = { Text("Export Route") },
                                 leadingIcon = {
-                                    Icon(Icons.Outlined.IosShare, null,
-                                        modifier = Modifier.size(18.dp))
+                                    Icon(
+                                        Icons.Outlined.IosShare, null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
                                 },
                                 onClick = {
                                     showMoreMenu = false
@@ -106,20 +107,28 @@ fun RouteDetailScreen(
                                 },
                                 enabled = false,   // clearly WIP
                                 trailingIcon = {
-                                    Text("Soon",
+                                    Text(
+                                        "Soon",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 },
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
-                                text = { Text("Delete Route",
-                                    color = MaterialTheme.colorScheme.error) },
+                                text = {
+                                    Text(
+                                        "Delete Route",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                },
                                 leadingIcon = {
-                                    Icon(Icons.Default.Delete,
+                                    Icon(
+                                        Icons.Default.Delete,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(18.dp))
+                                        modifier = Modifier.size(18.dp)
+                                    )
                                 },
                                 onClick = {
                                     showMoreMenu = false
@@ -135,56 +144,63 @@ fun RouteDetailScreen(
             state.route?.let { route ->
                 ExtendedFloatingActionButton(
                     onClick = { onCreatePlan(route.id) },
-                    icon    = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text    = { Text("Plan this Route") },
+                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                    text = { Text("Plan this Route") },
                 )
             }
         },
     ) { padding ->
 
         if (state.isLoading) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            Box(Modifier
+                .fillMaxSize()
+                .padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
             return@Scaffold
         }
 
         val route = state.route ?: run {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            Box(Modifier
+                .fillMaxSize()
+                .padding(padding), contentAlignment = Alignment.Center) {
                 Text("Route not found")
             }
             return@Scaffold
         }
 
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        Column(Modifier
+            .fillMaxSize()
+            .padding(padding)) {
 
-            // ── Interactive map showing the route drawing ─────────────────────
             PlotterMap(
-                modifier = Modifier.fillMaxWidth().height(240.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp),
                 startPoint = route.startPoint,
-                endPoint   = route.endPoint,
-                waypoints  = emptyList(),     // shown via routePolyline instead
-                candidates        = emptyList(),
+                endPoint = route.endPoint,
+                waypoints = emptyList(),     // shown via routePolyline instead
+                candidates = emptyList(),
                 selectedCandidateId = null,
-                isRoundTrip  = route.isRoundTrip,
+                isRoundTrip = route.isRoundTrip,
                 startPointName = route.waypoints.minByOrNull { it.orderIndex }?.name ?: "Start",
-                endPointName   = route.waypoints.maxByOrNull { it.orderIndex }?.name ?: "Finish",
-                routePolyline  = route.waypoints.sortedBy { it.orderIndex }.map { it.position },
-                onMapTap       = {},
+                endPointName = route.waypoints.maxByOrNull { it.orderIndex }?.name ?: "Finish",
+                routePolyline = route.waypoints.sortedBy { it.orderIndex }.map { it.position },
+                onMapTap = {},
             )
 
-            // ── Shared tabbed panel ───────────────────────────────────────────
             RouteInfoPanel(
-                distanceKm       = route.totalDistanceKm,
-                elevGainM        = route.totalElevationGainMeters,
-                elevLossM        = route.totalElevationLossMeters,
+                distanceKm = route.totalDistanceKm,
+                elevGainM = route.totalElevationGainMeters,
+                elevLossM = route.totalElevationLossMeters,
                 elevationProfile = route.elevationProfile,
-                sportType        = route.sportType,
-                isRoundTrip      = route.isRoundTrip,
-                waypoints        = route.waypoints,
-                createdAt        = dateFmt.format(Date(route.createdAt)),
-                description      = route.description,
-                editable         = false,   // read-only in detail view
+                sportType = route.sportType,
+                isRoundTrip = route.isRoundTrip,
+                waypoints = route.waypoints,
+                createdAt = dateFmt.format(Date(route.createdAt)),
+                description = route.description,
+                editable = false,
+                modifier = Modifier.fillMaxSize(),
             )
         }
     }

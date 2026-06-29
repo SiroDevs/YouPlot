@@ -20,6 +20,11 @@ data class ElevationPoint(val distanceKm: Double, val elevationMeters: Double)
 
 data class LatLng(val latitude: Double, val longitude: Double)
 
+data class WaypointSearchResult(
+    val displayName: String,
+    val latLng: LatLng,
+)
+
 data class RouteCandidate(
     val id: Int,
     val waypoints: List<LatLng>,
