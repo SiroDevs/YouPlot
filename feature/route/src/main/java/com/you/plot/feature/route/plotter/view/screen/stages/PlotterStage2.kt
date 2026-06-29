@@ -1,7 +1,6 @@
 package com.you.plot.feature.route.plotter.view.screen.stages
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,14 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,15 +25,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.DestinationMode
 import com.you.plot.core.common.utils.AppSpecs
-import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
+import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.feature.route.plotter.view.components.LocationSearchBar
 import com.you.plot.feature.route.plotter.view.components.SelectedPointChip
 import com.you.plot.feature.route.plotter.view.components.SuggestionRow
-import com.you.plot.feature.route.plotter.view.screen.fmt
-import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
+import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable
-fun PlotterStage2(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
+fun PlotterStage2(state: PlotterUiState, vm: PlotterViewModel) {
     Column(Modifier.fillMaxSize()) {
         Column(
             Modifier

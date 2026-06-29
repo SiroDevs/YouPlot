@@ -1,7 +1,7 @@
 package com.you.plot.core.common.utils
 
 val COUNTRY_LIST = listOf(
-    "" to "🌍 All countries",
+    "" to "All countries",
     "af" to "Afghanistan",
     "al" to "Albania",
     "dz" to "Algeria",

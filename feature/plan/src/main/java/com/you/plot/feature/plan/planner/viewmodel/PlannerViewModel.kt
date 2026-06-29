@@ -1,4 +1,4 @@
-package com.you.plot.feature.plan.creator.viewmodel
+package com.you.plot.feature.plan.planner.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,8 +10,8 @@ import com.you.plot.core.domain.usecase.plan.GeneratePlanEventsUseCase
 import com.you.plot.core.domain.usecase.plan.GetAllPlansUseCase
 import com.you.plot.core.domain.usecase.plan.SavePlanUseCase
 import com.you.plot.core.domain.usecase.route.GetAllRoutesUseCase
-import com.you.plot.feature.plan.creator.utils.PlanCreatorUiState
-import com.you.plot.feature.plan.creator.utils.PlanSource
+import com.you.plot.feature.plan.planner.utils.PlannerUiState
+import com.you.plot.feature.plan.planner.utils.PlanSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PlanCreatorViewModel @Inject constructor(
+class PlannerViewModel @Inject constructor(
     savedStateHandle: androidx.lifecycle.SavedStateHandle,
     private val getAllRoutesUseCase: GetAllRoutesUseCase,
     private val getAllPlansUseCase: GetAllPlansUseCase,
@@ -31,8 +31,8 @@ class PlanCreatorViewModel @Inject constructor(
     private val getRouteByIdUseCase: com.you.plot.core.domain.usecase.route.GetRouteByIdUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(PlanCreatorUiState())
-    val state: StateFlow<PlanCreatorUiState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(PlannerUiState())
+    val state: StateFlow<PlannerUiState> = _state.asStateFlow()
 
     init {
         val preselectedRouteId = savedStateHandle.get<Long>("routeId")

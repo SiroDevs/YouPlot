@@ -88,7 +88,6 @@ fun SettingsScreen(
             onConfirm = viewModel::setDefaultSport,
         )
     }
-    // Speed limit editor dialog
     state.editingSpeedSport?.let { sport ->
         val limits = state.sportSpeedLimits[sport] ?: return@let
         SpeedLimitDialog(
@@ -137,7 +136,7 @@ fun SettingsScreen(
                 InfoDivider()
                 ToggleItem(
                     icon = Icons.Default.Speed,
-                    title = "Show Pace for Running & Walking",
+                    title = "Use Pace for Running/Walking",
                     subtitle = if (state.usePaceForRunWalk) "Displaying min/km" else "Displaying km/h",
                     checked = state.usePaceForRunWalk,
                     onCheckedChange = viewModel::setUsePaceForRunWalk
@@ -146,7 +145,7 @@ fun SettingsScreen(
 
             InfoSection("Speed Limits") {
                 Text(
-                    "Set the min/max speed range shown in sliders for each sport.",
+                    "Set speed range shown in sliders for each sport.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -160,9 +159,9 @@ fun SettingsScreen(
                         title = sport.name.lowercase().replaceFirstChar { it.uppercase() },
                         value = if (limits != null) {
                             if (usePace)
-                                "${kmhToPaceStr(limits.maxKmh)} – ${kmhToPaceStr(limits.minKmh)}"
+                                "${kmhToPace(limits.minKmh)} – ${kmhToPace(limits.maxKmh)} min/km"
                             else
-                                "${limits.minKmh.toInt()}–${limits.maxKmh.toInt()} km/h"
+                                "${limits.minKmh.toInt()} – ${limits.maxKmh.toInt()} km/h"
                         } else "Default",
                         onClick = { viewModel.showSpeedEditor(sport) },
                     )
@@ -192,7 +191,14 @@ fun SettingsScreen(
     }
 }
 
-/** km/h → "mm:ss min/km" pace string */
+fun kmhToPace(kmh: Float): String {
+    if (kmh <= 0f) return "–"
+    val secPerKm = 3600f / kmh
+    val min = (secPerKm / 60).toInt()
+    val sec = (secPerKm % 60).toInt()
+    return "%d:%02d".format(min, sec)
+}
+
 fun kmhToPaceStr(kmh: Float): String {
     if (kmh <= 0f) return "–"
     val secPerKm = 3600f / kmh

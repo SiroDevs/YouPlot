@@ -1,4 +1,4 @@
-package com.you.plot.feature.plan.creator.view.screen.steps
+package com.you.plot.feature.plan.planner.view.screen.steps
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,14 +28,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.ui.components.general.DayTimeline
-import com.you.plot.feature.plan.creator.utils.PlanCreatorUiState
-import com.you.plot.feature.plan.creator.view.components.AddEventDialog
-import com.you.plot.feature.plan.creator.view.components.DaySummaryCard
-import com.you.plot.feature.plan.creator.view.components.EventRow
-import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
+import com.you.plot.feature.plan.planner.utils.PlannerUiState
+import com.you.plot.feature.plan.planner.view.components.AddEventDialog
+import com.you.plot.feature.plan.planner.view.components.DaySummaryCard
+import com.you.plot.feature.plan.planner.view.components.EventRow
+import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 
 @Composable
-fun PlanCreatorStep2(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
+fun PlannerStep2(state: PlannerUiState, vm: PlannerViewModel) {
     var showAddEventDialog by remember { mutableStateOf(false) }
 
     if (showAddEventDialog) {
@@ -56,7 +56,7 @@ fun PlanCreatorStep2(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
             Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            items(state.numberOfDays) { i ->
+            items(state.numberOfDays, key = { i -> "day_tab_$i" }) { i ->
                 val day = i + 1
                 FilterChip(
                     selected = state.selectedDay == day,
@@ -79,7 +79,7 @@ fun PlanCreatorStep2(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
             Modifier.weight(1f).padding(horizontal = 12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            item { Spacer(Modifier.height(4.dp)) }
+            item(key = "top_spacer") { Spacer(Modifier.height(4.dp)) }
 
             items(state.eventsForSelectedDay, key = { it.id }) { event ->
                 val isCustom = state.customEvents.any { it.id == event.id }
@@ -93,10 +93,10 @@ fun PlanCreatorStep2(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
                 )
             }
 
-            item { Spacer(Modifier.height(4.dp)) }
+            item(key = "bottom_spacer") { Spacer(Modifier.height(4.dp)) }
 
             // End-of-day summary
-            item {
+            item(key = "day_summary") {
                 DaySummaryCard(
                     dayTotalKm = state.dayTotalDistanceKm,
                     remainingKm = state.remainingDistanceKm,
@@ -105,26 +105,21 @@ fun PlanCreatorStep2(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
                 )
             }
 
-            item { Spacer(Modifier.height(80.dp)) }
+            item(key = "fab_spacer") { Spacer(Modifier.height(80.dp)) }
         }
 
-        // Floating add event button area
+        // Add event button — Review is handled by the FAB
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Button(
                 onClick = { showAddEventDialog = true },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(Icons.Default.Add, null, Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
                 Text("Add Event")
             }
-            Button(
-                onClick = vm::nextStep,
-                modifier = Modifier.weight(1f),
-            ) { Text("Review →") }
         }
     }
 }

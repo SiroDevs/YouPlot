@@ -50,6 +50,7 @@ fun PlotterMap(
     startPointName: String = "",
     endPointName: String = "",
     waypointNames: List<String> = emptyList(),
+    routePolyline: List<LatLng> = emptyList(),
     onMapTap: (LatLng) -> Unit,
     onWaypointMoved: ((index: Int, newLatLng: LatLng) -> Unit)? = null,
     onWaypointDelete: ((index: Int) -> Unit)? = null,
@@ -128,12 +129,23 @@ fun PlotterMap(
         if (locIdx >= 0) mapView.overlays.add(locIdx, tap) else mapView.overlays.add(0, tap)
     }
 
-    LaunchedEffect(startPoint, endPoint, waypoints, candidates, selectedCandidateId, isRoundTrip) {
+    LaunchedEffect(startPoint, endPoint, waypoints, candidates, selectedCandidateId, isRoundTrip, routePolyline) {
         val tapOverlay = mapView.overlays.firstOrNull { it is MapEventsOverlay }
         val hasMyLoc = mapView.overlays.contains(myLocationOverlay)
         mapView.overlays.clear()
         tapOverlay?.let { mapView.overlays.add(it) }
         if (hasMyLoc) mapView.overlays.add(myLocationOverlay)
+
+        if (routePolyline.size >= 2) {
+            val primaryColor = android.graphics.Color.argb(220, 33, 150, 243) // blue
+            mapView.overlays.add(
+                Polyline(mapView).apply {
+                    setPoints(routePolyline.map { GeoPoint(it.latitude, it.longitude) })
+                    outlinePaint.color = primaryColor
+                    outlinePaint.strokeWidth = 10f
+                }
+            )
+        }
 
         candidates.sortedBy { if (it.id == selectedCandidateId) 1 else 0 }.forEach { c ->
             val selected = c.id == selectedCandidateId

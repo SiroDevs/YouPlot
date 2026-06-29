@@ -12,12 +12,12 @@ import com.you.plot.core.data.repos.ThemeRepo
 import com.you.plot.feature.dashboard.view.screen.DashboardScreen
 import com.you.plot.feature.extra.about.AboutScreen
 import com.you.plot.feature.extra.help.HelpFeedbackScreen
-import com.you.plot.feature.plan.creator.view.screen.PlanCreatorScreen
+import com.you.plot.feature.plan.planner.view.screen.PlannerScreen
 import com.you.plot.feature.plan.details.view.screen.PlanDetailScreen
 import com.you.plot.feature.plan.list.view.screen.PlanListScreen
 import com.you.plot.feature.route.detail.view.screen.RouteDetailScreen
 import com.you.plot.feature.route.list.view.RouteListScreen
-import com.you.plot.feature.route.plotter.view.screen.RoutePlotterScreen
+import com.you.plot.feature.route.plotter.view.screen.PlotterScreen
 import com.you.plot.feature.settings.view.screen.SettingsScreen
 import com.you.plot.feature.tracker.view.screen.TrackerScreen
 
@@ -71,7 +71,7 @@ fun AppNavHost(
         }
 
         composable(Routes.ROUTE_PLOTTER) {
-            RoutePlotterScreen(
+            PlotterScreen(
                 viewModel = hiltViewModel(),
                 onBack = { navController.popBackStack() },
                 onRouteSaved = { routeId ->
@@ -92,7 +92,7 @@ fun AppNavHost(
         }
 
         composable(Routes.PLAN_CREATE) {
-            PlanCreatorScreen(
+            PlannerScreen(
                 viewModel = hiltViewModel(),
                 onBack = { navController.popBackStack() },
                 onPlanSaved = { planId ->
@@ -107,7 +107,7 @@ fun AppNavHost(
             route = Routes.PLAN_CREATE_FOR_ROUTE,
             arguments = listOf(navArgument("routeId") { type = NavType.LongType }),
         ) {
-            PlanCreatorScreen(
+            PlannerScreen(
                 viewModel = hiltViewModel(),
                 onBack = { navController.popBackStack() },
                 onPlanSaved = { planId ->

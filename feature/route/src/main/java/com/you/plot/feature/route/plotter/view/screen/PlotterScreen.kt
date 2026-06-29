@@ -2,16 +2,11 @@ package com.you.plot.feature.route.plotter.view.screen
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -23,33 +18,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.plotter.view.components.PlotterMap
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage1
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage2
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage3
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage4
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage5
-import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
+import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.ui.unit.dp
+import com.you.plot.feature.route.plotter.utils.PlotterUiState
+import com.you.plot.feature.route.plotter.view.components.SaveRouteDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoutePlotterScreen(
-    viewModel: RoutePlotterViewModel,
+fun PlotterScreen(
+    viewModel: PlotterViewModel,
     onBack: () -> Unit,
     onRouteSaved: (Long) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+
+    var showSaveDialog by remember { mutableStateOf(false) }
 
     // System permission launcher
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -60,7 +59,6 @@ fun RoutePlotterScreen(
         viewModel.onPermissionResult(granted)
     }
 
-    // First launch: request permission proactively on Stage 1
     LaunchedEffect(Unit) {
         permissionLauncher.launch(
             arrayOf(
@@ -87,6 +85,11 @@ fun RoutePlotterScreen(
         state.savedRouteId?.let { onRouteSaved(it) }
     }
 
+    // Don't leave the save dialog open underneath an error alert
+    LaunchedEffect(state.error) {
+        if (state.error != null) showSaveDialog = false
+    }
+
     state.error?.let { error ->
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
@@ -94,6 +97,35 @@ fun RoutePlotterScreen(
             text = { Text(error) },
             confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text("OK") } },
         )
+    }
+
+    if (showSaveDialog) {
+        SaveRouteDialog(
+            state = state,
+            vm = viewModel,
+            onDismiss = { showSaveDialog = false },
+            onConfirm = { viewModel.advanceStage() },
+        )
+    }
+
+    val pagerState = rememberPagerState(pageCount = { PlotterStage.entries.size })
+
+    LaunchedEffect(state.stage) {
+        if (pagerState.currentPage != state.stage.ordinal) {
+            pagerState.animateScrollToPage(state.stage.ordinal)
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        val target = PlotterStage.entries[pagerState.currentPage]
+        when {
+            target.ordinal > state.stage.ordinal -> {
+                val canAdvance = state.stage.nextButtonConfig(state)?.enabled == true
+                if (canAdvance) viewModel.advanceStage()
+                else pagerState.animateScrollToPage(state.stage.ordinal)
+            }
+            target.ordinal < state.stage.ordinal -> viewModel.goBack()
+        }
     }
 
     Scaffold(
@@ -112,7 +144,10 @@ fun RoutePlotterScreen(
         floatingActionButton = {
             state.stage.nextButtonConfig(state)?.let { cfg ->
                 ExtendedFloatingActionButton(
-                    onClick = viewModel::advanceStage,
+                    onClick = {
+                        if (state.stage == PlotterStage.STAGE_5) showSaveDialog = true
+                        else viewModel.advanceStage()
+                    },
                     icon = {
                         if (state.isSaving)
                             CircularProgressIndicator(
@@ -121,7 +156,7 @@ fun RoutePlotterScreen(
                             )
                         else
                             Icon(
-                                if (state.stage == PlotterStage.STAGE_5) Icons.Default.Save
+                                if (state.stage == PlotterStage.STAGE_5) Icons.Default.Check
                                 else Icons.Default.ArrowForward,
                                 contentDescription = null,
                             )
@@ -151,17 +186,11 @@ fun RoutePlotterScreen(
                     onWaypointDelete = if (state.stage == PlotterStage.STAGE_3) viewModel::removeManualWaypoint else null,
                 )
 
-            AnimatedContent(
-                targetState = state.stage,
-                transitionSpec = {
-                    val forward = targetState.ordinal > initialState.ordinal
-                    if (forward) slideInHorizontally { it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
-                    else slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { it } + fadeOut()
-                },
-                label = "stage_transition",
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-            ) { stage ->
-                when (stage) {
+            ) { page ->
+                when (PlotterStage.entries[page]) {
                     PlotterStage.STAGE_1 -> PlotterStage1(state, viewModel)
                     PlotterStage.STAGE_2 -> PlotterStage2(state, viewModel)
                     PlotterStage.STAGE_3 -> PlotterStage3(state, viewModel)
@@ -186,20 +215,18 @@ private val PlotterStage.mapsAreTappable: Boolean
 
 data class NextButtonConfig(val label: String, val enabled: Boolean)
 
-private fun PlotterStage.nextButtonConfig(state: RoutePlotterUiState): NextButtonConfig? =
+private fun PlotterStage.nextButtonConfig(state: PlotterUiState): NextButtonConfig? =
     when (this) {
-        PlotterStage.STAGE_1 -> NextButtonConfig("Set Destination →", state.startPoint != null)
-        PlotterStage.STAGE_2 -> NextButtonConfig("Add Waypoints →", state.endPoint != null)
-        PlotterStage.STAGE_3 -> NextButtonConfig("Compare Routes →", true)
+        PlotterStage.STAGE_1 -> NextButtonConfig("Set Destination", state.startPoint != null)
+        PlotterStage.STAGE_2 -> NextButtonConfig("Add Waypoints", state.endPoint != null)
+        PlotterStage.STAGE_3 -> NextButtonConfig("Compare Routes", true)
         PlotterStage.STAGE_4 -> NextButtonConfig(
-            "Review & Save →",
+            "Review & Save",
             state.selectedCandidateId != null
         )
 
         PlotterStage.STAGE_5 -> NextButtonConfig(
-            if (state.isSaving) "Saving…" else "Save Route",
+            if (state.isSaving) "Saving ..." else "Save Route",
             !state.isSaving
         )
     }
-
-fun Double.fmt() = "%.5f".format(this)
