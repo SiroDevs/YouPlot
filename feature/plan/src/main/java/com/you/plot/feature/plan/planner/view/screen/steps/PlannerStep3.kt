@@ -1,4 +1,4 @@
-package com.you.plot.feature.plan.creator.view.screen.steps
+package com.you.plot.feature.plan.planner.view.screen.steps
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,12 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.ui.components.general.SummaryRow
-import com.you.plot.feature.plan.creator.utils.PlanCreatorUiState
-import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
+import com.you.plot.feature.plan.planner.utils.PlannerUiState
+import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 import java.util.Date
 
 @Composable
-fun PlanCreatorStep3(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
+fun PlannerStep3(state: PlannerUiState, vm: PlannerViewModel) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),

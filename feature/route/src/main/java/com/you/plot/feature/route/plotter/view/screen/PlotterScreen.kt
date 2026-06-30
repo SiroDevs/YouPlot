@@ -26,24 +26,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
+import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.feature.route.plotter.view.components.PlotterMap
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage1
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage2
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage3
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage4
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage5
-import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
+import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoutePlotterScreen(
-    viewModel: RoutePlotterViewModel,
+fun PlotterScreen(
+    viewModel: PlotterViewModel,
     onBack: () -> Unit,
     onRouteSaved: (Long) -> Unit,
 ) {
@@ -184,7 +183,7 @@ private val PlotterStage.mapsAreTappable: Boolean
 
 data class NextButtonConfig(val label: String, val enabled: Boolean)
 
-private fun PlotterStage.nextButtonConfig(state: RoutePlotterUiState): NextButtonConfig? =
+private fun PlotterStage.nextButtonConfig(state: PlotterUiState): NextButtonConfig? =
     when (this) {
         PlotterStage.STAGE_1 -> NextButtonConfig("Set Destination →", state.startPoint != null)
         PlotterStage.STAGE_2 -> NextButtonConfig("Add Waypoints →", state.endPoint != null)

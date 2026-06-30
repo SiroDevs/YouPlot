@@ -24,13 +24,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
+import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.feature.route.plotter.view.components.RouteTypeCard
-import com.you.plot.feature.route.plotter.view.screen.fmt
-import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
+import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable
-fun PlotterStage3(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
+fun PlotterStage3(state: PlotterUiState, vm: PlotterViewModel) {
     Column(
         Modifier
             .fillMaxSize()

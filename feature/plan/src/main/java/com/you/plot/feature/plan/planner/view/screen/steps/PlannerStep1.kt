@@ -1,6 +1,5 @@
-package com.you.plot.feature.plan.creator.view.screen.steps
+package com.you.plot.feature.plan.planner.view.screen.steps
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,16 +45,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.foundation.shape.CircleShape
 import com.you.plot.core.common.utils.dateFmt
-import com.you.plot.feature.plan.creator.utils.PlanCreatorUiState
-import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
+import com.you.plot.feature.plan.planner.utils.PlannerUiState
+import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 import java.util.Date
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlanCreatorStep1(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
+fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 

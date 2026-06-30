@@ -4,21 +4,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.entity.WaypointSearchResult
-import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
+import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.feature.route.plotter.view.components.LocationSearchBar
 import com.you.plot.feature.route.plotter.view.components.SelectedPointChip
-import com.you.plot.feature.route.plotter.view.screen.fmt
-import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
+import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable
-fun PlotterStage1(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
+fun PlotterStage1(state: PlotterUiState, vm: PlotterViewModel) {
     Column(
         Modifier
             .fillMaxSize()

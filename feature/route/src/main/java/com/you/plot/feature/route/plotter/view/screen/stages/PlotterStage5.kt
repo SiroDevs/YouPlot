@@ -30,14 +30,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.ui.components.dialog.PickerDialog
-import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
+import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.feature.route.plotter.view.components.ElevationProfileGraph
 import com.you.plot.feature.route.plotter.view.components.PlotterMap
 import com.you.plot.feature.route.plotter.view.components.StatChip
-import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
+import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable
-fun PlotterStage5(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
+fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
     val scrollState = rememberScrollState()
     var showSportTypeDialog by remember { mutableStateOf(false) }
 

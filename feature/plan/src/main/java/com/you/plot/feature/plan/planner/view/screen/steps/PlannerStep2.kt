@@ -1,4 +1,4 @@
-package com.you.plot.feature.plan.creator.view.screen.steps
+package com.you.plot.feature.plan.planner.view.screen.steps
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,14 +28,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.ui.components.general.DayTimeline
-import com.you.plot.feature.plan.creator.utils.PlanCreatorUiState
-import com.you.plot.feature.plan.creator.view.components.AddEventDialog
-import com.you.plot.feature.plan.creator.view.components.DaySummaryCard
-import com.you.plot.feature.plan.creator.view.components.EventRow
-import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
+import com.you.plot.feature.plan.planner.utils.PlannerUiState
+import com.you.plot.feature.plan.planner.view.components.AddEventDialog
+import com.you.plot.feature.plan.planner.view.components.DaySummaryCard
+import com.you.plot.feature.plan.planner.view.components.EventRow
+import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 
 @Composable
-fun PlanCreatorStep2(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
+fun PlannerStep2(state: PlannerUiState, vm: PlannerViewModel) {
     var showAddEventDialog by remember { mutableStateOf(false) }
 
     if (showAddEventDialog) {

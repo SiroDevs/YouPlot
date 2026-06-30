@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.you.plot.feature.plan.creator.view.components
+package com.you.plot.feature.plan.planner.view.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

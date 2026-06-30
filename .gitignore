@@ -17,6 +17,7 @@ out/
 build/
 generated/
 .wakatime-project
+.claude/
 CLAUDE.md
 
 # Ignore all build directories at any level

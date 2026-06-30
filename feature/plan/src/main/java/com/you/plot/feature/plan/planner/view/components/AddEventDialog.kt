@@ -1,4 +1,4 @@
-package com.you.plot.feature.plan.creator.view.components
+package com.you.plot.feature.plan.planner.view.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.you.plot.feature.plan.creator.view.screen
+package com.you.plot.feature.plan.planner.view.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,16 +14,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep0
-import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep1
-import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep2
-import com.you.plot.feature.plan.creator.view.screen.steps.PlanCreatorStep3
-import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
+import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep0
+import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep1
+import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep2
+import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep3
+import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlanCreatorScreen(
-    viewModel: PlanCreatorViewModel,
+fun PlannerScreen(
+    viewModel: PlannerViewModel,
     onBack: () -> Unit,
     onPlanSaved: (Long) -> Unit,
 ) {
@@ -69,10 +69,10 @@ fun PlanCreatorScreen(
                 .padding(padding)
         ) {
             when (state.currentStep) {
-                0 -> PlanCreatorStep0(state, viewModel)
-                1 -> PlanCreatorStep1(state, viewModel)
-                2 -> PlanCreatorStep2(state, viewModel)
-                3 -> PlanCreatorStep3(state, viewModel)
+                0 -> PlannerStep0(state, viewModel)
+                1 -> PlannerStep1(state, viewModel)
+                2 -> PlannerStep2(state, viewModel)
+                3 -> PlannerStep3(state, viewModel)
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.you.plot.feature.plan.creator.view.screen.steps
+package com.you.plot.feature.plan.planner.view.screen.steps
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,13 +17,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.you.plot.feature.plan.creator.utils.PlanCreatorUiState
-import com.you.plot.feature.plan.creator.utils.PlanSource
-import com.you.plot.feature.plan.creator.view.components.SourceCard
-import com.you.plot.feature.plan.creator.viewmodel.PlanCreatorViewModel
+import com.you.plot.feature.plan.planner.utils.PlannerUiState
+import com.you.plot.feature.plan.planner.utils.PlanSource
+import com.you.plot.feature.plan.planner.view.components.SourceCard
+import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 
 @Composable
-fun PlanCreatorStep0(state: PlanCreatorUiState, vm: PlanCreatorViewModel) {
+fun PlannerStep0(state: PlannerUiState, vm: PlannerViewModel) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Row(
             Modifier.fillMaxWidth(),

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.you.plot.feature.plan.creator.utils
+package com.you.plot.feature.plan.planner.utils
 
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.domain.entity.PlanEvent
@@ -23,7 +23,7 @@ import java.util.Calendar
 
 enum class PlanSource { ROUTE, TEMPLATE }
 
-data class PlanCreatorUiState(
+data class PlannerUiState(
     val planSource: PlanSource = PlanSource.ROUTE,
     val routes: List<Route> = emptyList(),
     val templatePlans: List<ActivityPlan> = emptyList(),

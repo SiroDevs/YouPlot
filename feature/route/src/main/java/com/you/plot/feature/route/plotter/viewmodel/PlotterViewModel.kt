@@ -13,12 +13,12 @@ import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.domain.usecase.route.DeleteRouteUseCase
 import com.you.plot.core.domain.usecase.route.SaveRouteUseCase
-import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
-import com.you.plot.core.data.repos.RoutePlotterRepo
+import com.you.plot.core.data.repos.PlotterRepo
 import com.you.plot.core.common.utils.buildWaypointSuggestions
 import com.you.plot.core.common.utils.destinationPoint
 import com.you.plot.core.common.utils.bearingLabel
 import com.you.plot.core.domain.entity.WaypointSearchResult
+import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -36,15 +36,15 @@ import kotlin.collections.firstOrNull
 import kotlin.coroutines.resume
 
 @HiltViewModel
-class RoutePlotterViewModel @Inject constructor(
+class PlotterViewModel @Inject constructor(
     private val saveRouteUseCase: SaveRouteUseCase,
     private val deleteRouteUseCase: DeleteRouteUseCase,
-    private val routePlotterRepo: RoutePlotterRepo,
+    private val routePlotterRepo: PlotterRepo,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(RoutePlotterUiState())
-    val state: StateFlow<RoutePlotterUiState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(PlotterUiState())
+    val state: StateFlow<PlotterUiState> = _state.asStateFlow()
     private var searchJob: Job? = null
 
     fun advanceStage() {

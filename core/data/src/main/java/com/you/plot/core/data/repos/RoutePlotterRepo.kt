@@ -21,7 +21,7 @@ import kotlin.math.PI
 import kotlin.math.sin
 
 @Singleton
-class RoutePlotterRepo @Inject constructor(
+class PlotterRepo @Inject constructor(
     @Named("osm_user_agent") private val osmUserAgent: String,
 ) {
     suspend fun searchLocations(query: String): List<WaypointSearchResult> =
