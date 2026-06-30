@@ -103,7 +103,7 @@ fun PlanDetailScreen(
             item {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDistancePerDayKm)} km/day · ${"%.0f".format(plan.avgSpeedKmh)} km/h",
+                    "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDistPerDay)} km/day · ${"%.0f".format(plan.avgSpeed)} km/h",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
@@ -176,7 +176,7 @@ private fun buildCalendarIntent(plan: ActivityPlan): Intent {
         data = CalendarContract.Events.CONTENT_URI
         putExtra(CalendarContract.Events.TITLE, plan.name)
         putExtra(CalendarContract.Events.DESCRIPTION,
-            plan.description.ifBlank { "${"%.1f".format(plan.avgDistancePerDayKm)} km/day · ${"%.0f".format(plan.avgSpeedKmh)} km/h" })
+            plan.description.ifBlank { "${"%.1f".format(plan.avgDistPerDay)} km/day · ${"%.0f".format(plan.avgSpeed)} km/h" })
         putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, plan.startDateMillis)
         putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis)
         putExtra(CalendarContract.Events.ALL_DAY, plan.numberOfDays > 1)

@@ -18,7 +18,7 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.designsystem.theme.AppTheme
-import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Event
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.ui.components.general.SummaryRow
 import com.you.plot.feature.plan.planner.utils.PlannerUiState
@@ -42,8 +42,8 @@ private fun PlannerStep3Content(state: PlannerUiState) {
         SummaryRow("Route", state.selectedRoute?.name ?: state.selectedTemplate?.name ?: "—")
         SummaryRow("Start", "${dateFmt.format(Date(state.startDateMillis))} at %02d:%02d".format(state.startHour, state.startMinute))
         SummaryRow("Days", state.numberOfDays.toString())
-        SummaryRow("Avg speed", "${"%.1f".format(state.avgSpeedKmh)} km/h")
-        SummaryRow("Avg distance / day", "${"%.1f".format(state.avgDistancePerDayKm)} km")
+        SummaryRow("Avg speed", "${"%.1f".format(state.avgSpeed)} km/h")
+        SummaryRow("Avg distance / day", "${"%.1f".format(state.avgDistPerDay)} km")
         val totalEvents = state.generatedEvents.size + state.customEvents.size
         SummaryRow("Total events", "$totalEvents across ${state.numberOfDays} day(s)")
 
@@ -61,12 +61,12 @@ private fun PlannerStep3Preview() {
         sportType = SportType.CYCLING,
         startPoint = LatLng(-1.286, 36.817),
         endPoint = LatLng(-4.04, 39.67),
-        totalDistanceKm = 480.0,
+        totalDist = 480.0,
     )
     val generated = listOf(
-        PlanEvent(id = -1L, planId = 0L, dayNumber = 1, name = "Start", plannedTimeMillis = 0L, orderIndex = 0),
-        PlanEvent(id = -2L, planId = 0L, dayNumber = 1, name = "Mid", plannedTimeMillis = 1L, orderIndex = 1),
-        PlanEvent(id = -3L, planId = 0L, dayNumber = 1, name = "End", plannedTimeMillis = 2L, orderIndex = 2),
+        Event(id = -1L, planId = 0L, dayNumber = 1, name = "Start", plannedTime = 0L, orderIndex = 0),
+        Event(id = -2L, planId = 0L, dayNumber = 1, name = "Mid", plannedTime = 1L, orderIndex = 1),
+        Event(id = -3L, planId = 0L, dayNumber = 1, name = "End", plannedTime = 2L, orderIndex = 2),
     )
     AppTheme {
         PlannerStep3Content(
@@ -74,7 +74,7 @@ private fun PlannerStep3Preview() {
                 selectedRoute = sampleRoute,
                 planName = "Coast Tour Plan",
                 numberOfDays = 5,
-                avgSpeedKmh = 18.0,
+                avgSpeed = 18.0,
                 generatedEvents = generated,
                 startDateMillis = 0L,
             ),

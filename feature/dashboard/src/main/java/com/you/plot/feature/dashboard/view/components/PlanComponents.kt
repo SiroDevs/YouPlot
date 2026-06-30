@@ -89,7 +89,7 @@ fun DashboardPlanItem(
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    "${plan.numberOfDays} day${if (plan.numberOfDays > 1) "s" else ""} · ${"%.1f".format(plan.avgDistancePerDayKm)} km/day",
+                    "${plan.numberOfDays} day${if (plan.numberOfDays > 1) "s" else ""} · ${"%.1f".format(plan.avgDistPerDay)} km/day",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

@@ -23,16 +23,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.timeFmt
-import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Event
 import java.util.Date
 
 @Composable
-fun DayTimeline(events: List<PlanEvent>, modifier: Modifier = Modifier) {
+fun DayTimeline(events: List<Event>, modifier: Modifier = Modifier) {
     if (events.isEmpty()) return
 
     val scrollState = rememberScrollState()
-    val minTime = events.minOf { it.plannedTimeMillis }
-    val maxTime = events.maxOf { it.plannedTimeMillis }.coerceAtLeast(minTime + 1)
+    val minTime = events.minOf { it.plannedTime }
+    val maxTime = events.maxOf { it.plannedTime }.coerceAtLeast(minTime + 1)
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val onSurface = MaterialTheme.colorScheme.onSurface
@@ -51,7 +51,7 @@ fun DayTimeline(events: List<PlanEvent>, modifier: Modifier = Modifier) {
                     modifier = Modifier.widthIn(min = 64.dp, max = 96.dp),
                 ) {
                     Text(
-                        timeFmt.format(Date(event.plannedTimeMillis)),
+                        timeFmt.format(Date(event.plannedTime)),
                         style = MaterialTheme.typography.labelSmall,
                         color = onSurface.copy(alpha = 0.65f),
                     )
@@ -67,9 +67,9 @@ fun DayTimeline(events: List<PlanEvent>, modifier: Modifier = Modifier) {
                         textAlign = TextAlign.Center,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    if (event.distanceCoveredKm > 0) {
+                    if (event.distCovered > 0) {
                         Text(
-                            "${"%.1f".format(event.distanceCoveredKm)} km",
+                            "${"%.1f".format(event.distCovered)} km",
                             style = MaterialTheme.typography.labelSmall,
                             color = onSurface.copy(alpha = 0.5f),
                         )

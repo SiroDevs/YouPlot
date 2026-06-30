@@ -71,7 +71,7 @@ private fun RouteCard(route: Route, onClick: () -> Unit) {
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
                     Text(
-                        "%.1f km".format(route.totalDistanceKm),
+                        "%.1f km".format(route.totalDist),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,

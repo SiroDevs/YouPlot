@@ -23,7 +23,7 @@ import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
     val candidate = state.selectedCandidate
     val dist = candidate?.let {
-        if (state.isRoundTrip) it.totalDistanceKm * 2 else it.totalDistanceKm
+        if (state.isRoundTrip) it.totalDist * 2 else it.totalDist
     } ?: 0.0
 
     Column(Modifier.fillMaxSize()) {
@@ -65,8 +65,8 @@ private fun PlotterStage5Panel(
     RouteInfoPanel(
         modifier = Modifier.fillMaxSize(),
         distanceKm = distanceKm,
-        elevGainM = candidate?.totalElevationGainMeters ?: 0.0,
-        elevLossM = candidate?.totalElevationLossMeters ?: 0.0,
+        elevGainM = candidate?.elevationGain ?: 0.0,
+        elevLossM = candidate?.elevationLoss ?: 0.0,
         elevationProfile = candidate?.elevationProfile ?: emptyList(),
         sportType = state.sportType,
         isRoundTrip = state.isRoundTrip,
@@ -88,9 +88,9 @@ private fun PlotterStage5PanelPreview() {
         id = 0,
         waypoints = listOf(LatLng(-1.286, 36.817), LatLng(-1.300, 36.830)),
         elevationProfile = sampleProfile,
-        totalDistanceKm = 8.4,
-        totalElevationGainMeters = 120.0,
-        totalElevationLossMeters = 95.0,
+        totalDist = 8.4,
+        elevationGain = 120.0,
+        elevationLoss = 95.0,
         colorArgb = 0xFF1976D2L,
     )
     AppTheme {
@@ -105,7 +105,7 @@ private fun PlotterStage5PanelPreview() {
                 routeCandidates = listOf(candidate),
                 selectedCandidateId = 0,
             ),
-            distanceKm = candidate.totalDistanceKm,
+            distanceKm = candidate.totalDist,
             candidate = candidate,
             onSportTypeChange = {},
             onRoundTripChange = {},

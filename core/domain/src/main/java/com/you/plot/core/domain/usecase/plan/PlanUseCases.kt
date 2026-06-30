@@ -1,7 +1,7 @@
 package com.you.plot.core.domain.usecase.plan
 
 import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Event
 import com.you.plot.core.domain.repos.PlanRepo
 import com.you.plot.core.domain.repos.RouteRepo
 import kotlinx.coroutines.flow.Flow
@@ -46,27 +46,27 @@ class DeletePlanUseCase @Inject constructor(
 }
 
 /** Generates a default daily schedule from route + speed parameters */
-class GeneratePlanEventsUseCase @Inject constructor(
+class GenerateEventsUseCase @Inject constructor(
     private val routeRepo: RouteRepo,
 ) {
-    suspend operator fun invoke(plan: ActivityPlan): List<PlanEvent> {
+    suspend operator fun invoke(plan: ActivityPlan): List<Event> {
         val route = routeRepo.getRouteById(plan.routeId) ?: return emptyList()
-        val events = mutableListOf<PlanEvent>()
-        val distancePerDay = if (plan.avgDistancePerDayKm > 0)
-            plan.avgDistancePerDayKm else route.totalDistanceKm / plan.numberOfDays
+        val events = mutableListOf<Event>()
+        val distancePerDay = if (plan.avgDistPerDay > 0)
+            plan.avgDistPerDay else route.totalDist / plan.numberOfDays
 
         var dayStart = plan.startDateMillis
         var cumulativeDistance = 0.0
         var orderIndex = 0
 
         for (day in 1..plan.numberOfDays) {
-            events += PlanEvent(
+            events += Event(
                 planId = plan.id,
                 dayNumber = day,
                 name = "Begin activity",
-                plannedTimeMillis = dayStart,
-                durationMinutes = 0,
-                distanceCoveredKm = cumulativeDistance,
+                plannedTime = dayStart,
+                duration = 0,
+                distCovered = cumulativeDistance,
                 orderIndex = orderIndex++,
             )
 
@@ -75,32 +75,32 @@ class GeneratePlanEventsUseCase @Inject constructor(
                 .filter { it.orderIndex > 0 }
                 .forEach { waypoint ->
                     val waypointDistance = waypoint.orderIndex.toDouble() /
-                            route.waypoints.size * route.totalDistanceKm
+                            route.waypoints.size * route.totalDist
                     if (waypointDistance in cumulativeDistance..dayEndDistance) {
-                        val hoursFromStart = (waypointDistance - cumulativeDistance) / plan.avgSpeedKmh
-                        events += PlanEvent(
+                        val hoursFromStart = (waypointDistance - cumulativeDistance) / plan.avgSpeed
+                        events += Event(
                             planId = plan.id,
                             dayNumber = day,
                             name = waypoint.name,
                             waypointId = waypoint.id,
-                            plannedTimeMillis = dayStart + (hoursFromStart * 3_600_000).toLong(),
-                            durationMinutes = if (waypoint.isStopPlanned) 15 else 0,
-                            distanceCoveredKm = waypointDistance,
+                            plannedTime = dayStart + (hoursFromStart * 3_600_000).toLong(),
+                            duration = if (waypoint.isStopPlanned) 15 else 0,
+                            distCovered = waypointDistance,
                             orderIndex = orderIndex++,
                         )
                     }
                 }
 
-            val hoursForDay = distancePerDay / plan.avgSpeedKmh
+            val hoursForDay = distancePerDay / plan.avgSpeed
             val dayEndMillis = dayStart + (hoursForDay * 3_600_000).toLong()
 
-            events += PlanEvent(
+            events += Event(
                 planId = plan.id,
                 dayNumber = day,
                 name = "End of activity — Day $day",
-                plannedTimeMillis = dayEndMillis,
-                durationMinutes = 0,
-                distanceCoveredKm = dayEndDistance.coerceAtMost(route.totalDistanceKm),
+                plannedTime = dayEndMillis,
+                duration = 0,
+                distCovered = dayEndDistance.coerceAtMost(route.totalDist),
                 orderIndex = orderIndex++,
             )
 

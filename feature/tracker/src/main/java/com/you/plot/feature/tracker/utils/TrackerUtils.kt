@@ -21,11 +21,11 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import com.you.plot.core.domain.entity.ActivitySession
+import com.you.plot.core.domain.entity.ActivityActivity
 import com.you.plot.core.domain.entity.WaypointProgress
 
 data class TrackerUiState(
-    val session: ActivitySession? = null,
+    val activity: ActivityActivity? = null,
     val isLoading: Boolean = true,
     // Permission flow (spec §3.1)
     val locationPermissionGranted: Boolean = false,
@@ -44,10 +44,10 @@ data class TrackerUiState(
 
     // Convenience shorthands for the UI
     val nextUnreachedWaypoint: WaypointProgress?
-        get() = session?.waypointProgress?.firstOrNull { !it.isReached && !it.wasSkipped }
+        get() = activity?.waypointProgress?.firstOrNull { !it.isReached && !it.wasSkipped }
 
-    val estimatedCompletionMillis: Long?
-        get() = session?.estimatedCompletionMillis
+    val estimatedCompletion: Long?
+        get() = activity?.estimatedCompletion
 }
 
 fun vibrate(context: Context) {

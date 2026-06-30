@@ -95,7 +95,7 @@ fun buildElevationStats(elevProfile: List<ElevationPoint>): Pair<Double, Double>
     var gain = 0.0;
     var loss = 0.0
     elevProfile.zipWithNext().forEach { (a, b) ->
-        val diff = b.elevationMeters - a.elevationMeters
+        val diff = b.elevation - a.elevation
         if (diff > 0) gain += diff else loss += abs(diff)
     }
     return gain to loss

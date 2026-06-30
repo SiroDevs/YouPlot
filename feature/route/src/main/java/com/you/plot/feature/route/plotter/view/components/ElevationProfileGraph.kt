@@ -57,7 +57,7 @@ fun ElevationProfileGraph(
         val elevUnit = if (useMetric) "m" else "ft"
         val distUnit = if (useMetric) "km" else "mi"
 
-        val elevations = profile.map { it.elevationMeters * elevFactor }
+        val elevations = profile.map { it.elevation * elevFactor }
         val distances = profile.map { it.distanceKm * distFactor }
 
         val minElev = elevations.min()

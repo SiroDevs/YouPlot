@@ -25,6 +25,6 @@ object DatabaseModule {
     @Provides fun provideRouteDao(db: AppDatabase): RouteDao = db.routeDao()
     @Provides fun provideWaypointDao(db: AppDatabase): WaypointDao = db.waypointDao()
     @Provides fun providePlanDao(db: AppDatabase): PlanDao = db.planDao()
-    @Provides fun providePlanEventDao(db: AppDatabase): PlanEventDao = db.planEventDao()
-    @Provides fun provideSessionDao(db: AppDatabase): SessionDao = db.sessionDao()
+    @Provides fun provideEventDao(db: AppDatabase): EventDao = db.eventDao()
+    @Provides fun provideActivityDao(db: AppDatabase): ActivityDao = db.activityDao()
 }

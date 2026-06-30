@@ -190,7 +190,7 @@ private fun PlannerScreenPreview() {
         sportType = SportType.CYCLING,
         startPoint = LatLng(-1.286, 36.817),
         endPoint = LatLng(-4.04, 39.67),
-        totalDistanceKm = 480.0,
+        totalDist = 480.0,
     )
     AppTheme {
         PlannerScreenContent(

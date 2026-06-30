@@ -43,9 +43,9 @@ import com.you.plot.core.ui.components.general.SummaryRow
 
 @Composable
 fun DaySummaryCard(
-    dayTotalKm: Double,
-    remainingKm: Double,
-    adjustedDailyKm: Double,
+    dayTotalDist: Double,
+    remainingDist: Double,
+    adjustedDailyDist: Double,
     daysLeft: Int,
 ) {
     Card(
@@ -56,10 +56,10 @@ fun DaySummaryCard(
             Text("Day Summary", style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold)
             HorizontalDivider(Modifier.padding(vertical = 4.dp))
-            SummaryRow("Distance this day", "${"%.1f".format(dayTotalKm)} km")
-            SummaryRow("Remaining distance", "${"%.1f".format(remainingKm)} km")
+            SummaryRow("Distance this day", "${"%.1f".format(dayTotalDist)} km")
+            SummaryRow("Remaining distance", "${"%.1f".format(remainingDist)} km")
             if (daysLeft > 0)
-                SummaryRow("Adjusted daily target", "${"%.1f".format(adjustedDailyKm)} km/day ($daysLeft day(s) left)")
+                SummaryRow("Adjusted daily target", "${"%.1f".format(adjustedDailyDist)} km/day ($daysLeft day(s) left)")
         }
     }
 }

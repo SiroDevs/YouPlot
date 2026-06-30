@@ -22,7 +22,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "plan_events",
+    tableName = "events",
     foreignKeys = [
         ForeignKey(
             entity = PlanEntity::class,
@@ -33,14 +33,14 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("planId")],
 )
-data class PlanEventEntity(
+data class EventEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val planId: Long,
     val dayNumber: Int,
     val name: String,
     val waypointId: Long?,
-    val plannedTimeMillis: Long,
-    val durationMinutes: Int,
-    val distanceCoveredKm: Double,
+    val plannedTime: Long,
+    val duration: Int,
+    val distCovered: Double,
     val orderIndex: Int,
 )

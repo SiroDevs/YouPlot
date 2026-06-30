@@ -3,10 +3,10 @@ package com.you.plot.feature.plan.planner.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Event
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.domain.usecase.plan.DeletePlanUseCase
-import com.you.plot.core.domain.usecase.plan.GeneratePlanEventsUseCase
+import com.you.plot.core.domain.usecase.plan.GenerateEventsUseCase
 import com.you.plot.core.domain.usecase.plan.GetAllPlansUseCase
 import com.you.plot.core.domain.usecase.plan.SavePlanUseCase
 import com.you.plot.core.domain.usecase.route.GetAllRoutesUseCase
@@ -27,7 +27,7 @@ class PlannerViewModel @Inject constructor(
     private val getAllPlansUseCase: GetAllPlansUseCase,
     private val savePlanUseCase: SavePlanUseCase,
     private val deletePlanUseCase: DeletePlanUseCase,
-    private val generateEventsUseCase: GeneratePlanEventsUseCase,
+    private val generateEventsUseCase: GenerateEventsUseCase,
     private val getRouteByIdUseCase: com.you.plot.core.domain.usecase.route.GetRouteByIdUseCase,
 ) : ViewModel() {
 
@@ -92,8 +92,8 @@ class PlannerViewModel @Inject constructor(
                 planName = "${plan.name} (Copy)",
                 description = plan.description,
                 numberOfDays = plan.numberOfDays,
-                avgSpeedKmh = plan.avgSpeedKmh,
-                avgDistancePerDayKmOverride = plan.avgDistancePerDayKm,
+                avgSpeed = plan.avgSpeed,
+                avgDistancePerDayKmOverride = plan.avgDistPerDay,
             )
         }
     }
@@ -109,28 +109,28 @@ class PlannerViewModel @Inject constructor(
     }
 
     fun setAvgSpeed(speed: Double) =
-        _state.update { it.copy(avgSpeedKmh = speed.coerceAtLeast(1.0)) }
+        _state.update { it.copy(avgSpeed = speed.coerceAtLeast(1.0)) }
 
     fun setAvgDistancePerDay(km: Double) =
         _state.update { it.copy(avgDistancePerDayKmOverride = km.coerceAtLeast(0.1)) }
 
     fun selectDay(day: Int) = _state.update { it.copy(selectedDay = day) }
 
-    fun addCustomEvent(name: String, hour: Int, minute: Int, durationMinutes: Int, day: Int) {
+    fun addCustomEvent(name: String, hour: Int, minute: Int, duration: Int, day: Int) {
         val s = _state.value
         val dayStartMillis = s.startTimeMillis + (day - 1) * 86_400_000L
         val eventMillis = dayStartMillis + hour * 3_600_000L + minute * 60_000L
         val prevDist = s.eventsForSelectedDay
-            .filter { it.plannedTimeMillis <= eventMillis }
-            .maxOfOrNull { it.distanceCoveredKm } ?: 0.0
-        val event = PlanEvent(
+            .filter { it.plannedTime <= eventMillis }
+            .maxOfOrNull { it.distCovered } ?: 0.0
+        val event = Event(
             id = System.currentTimeMillis(),
             planId = 0L,
             dayNumber = day,
             name = name,
-            plannedTimeMillis = eventMillis,
-            durationMinutes = durationMinutes,
-            distanceCoveredKm = prevDist,
+            plannedTime = eventMillis,
+            duration = duration,
+            distCovered = prevDist,
             orderIndex = s.customEvents.size,
         )
         _state.update { it.copy(customEvents = it.customEvents + event) }
@@ -163,7 +163,7 @@ class PlannerViewModel @Inject constructor(
                 if (s.numberOfDays < 1) {
                     setError("Number of days must be at least 1"); return
                 }
-                if (s.avgSpeedKmh <= 0) {
+                if (s.avgSpeed <= 0) {
                     setError("Speed must be greater than 0"); return
                 }
                 _state.update { it.copy(isGenerating = true) }
@@ -198,8 +198,8 @@ class PlannerViewModel @Inject constructor(
             description = s.description,
             startDateMillis = s.startTimeMillis,
             numberOfDays = s.numberOfDays,
-            avgSpeedKmh = s.avgSpeedKmh.coerceAtLeast(1.0),
-            avgDistancePerDayKm = s.avgDistancePerDayKm.coerceAtLeast(0.1),
+            avgSpeed = s.avgSpeed.coerceAtLeast(1.0),
+            avgDistPerDay = s.avgDistPerDay.coerceAtLeast(0.1),
         )
         val events = generateEventsUseCase(draft)
         val templateCustom = if (s.selectedTemplate != null) {
@@ -210,7 +210,7 @@ class PlannerViewModel @Inject constructor(
                     it.copy(
                         id = 0L,
                         planId = 0L,
-                        plannedTimeMillis = it.plannedTimeMillis + offset
+                        plannedTime = it.plannedTime + offset
                     )
                 }
         } else emptyList()
@@ -234,7 +234,7 @@ class PlannerViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 val allEvents = (s.generatedEvents + s.customEvents)
-                    .sortedWith(compareBy({ it.dayNumber }, { it.plannedTimeMillis }))
+                    .sortedWith(compareBy({ it.dayNumber }, { it.plannedTime }))
                     .mapIndexed { i, e -> e.copy(orderIndex = i) }
                 val plan = ActivityPlan(
                     routeId = routeId,
@@ -242,8 +242,8 @@ class PlannerViewModel @Inject constructor(
                     description = s.description,
                     startDateMillis = s.startTimeMillis,
                     numberOfDays = s.numberOfDays,
-                    avgSpeedKmh = s.avgSpeedKmh,
-                    avgDistancePerDayKm = s.avgDistancePerDayKm,
+                    avgSpeed = s.avgSpeed,
+                    avgDistPerDay = s.avgDistPerDay,
                     events = allEvents,
                 )
                 savePlanUseCase(plan)

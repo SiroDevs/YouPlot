@@ -24,7 +24,7 @@ data class WaypointEntity(
     val latitude: Double,
     val longitude: Double,
     val orderIndex: Int,
-    val elevationMeters: Double,
-    val distanceFromStartKm: Double = 0.0,
+    val elevation: Double,
+    val distFromStart: Double = 0.0,
     val isStopPlanned: Boolean,
 )

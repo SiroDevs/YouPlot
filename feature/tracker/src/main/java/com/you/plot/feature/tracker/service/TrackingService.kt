@@ -10,11 +10,11 @@ import androidx.core.app.NotificationCompat
 import com.you.plot.core.common.utils.NotifConstants
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.repos.LocationRepo
-import com.you.plot.core.domain.usecase.tracker.CompleteSessionUseCase
-import com.you.plot.core.domain.usecase.tracker.GetActiveSessionUseCase
-import com.you.plot.core.domain.usecase.tracker.PauseSessionUseCase
-import com.you.plot.core.domain.usecase.tracker.ResumeSessionUseCase
-import com.you.plot.core.domain.usecase.tracker.UpdateSessionLocationUseCase
+import com.you.plot.core.domain.usecase.tracker.CompleteActivityUseCase
+import com.you.plot.core.domain.usecase.tracker.GetActiveActivityUseCase
+import com.you.plot.core.domain.usecase.tracker.PauseActivityUseCase
+import com.you.plot.core.domain.usecase.tracker.ResumeActivityUseCase
+import com.you.plot.core.domain.usecase.tracker.UpdateActivityLocationUseCase
 import com.you.plot.core.domain.usecase.tracker.distanceTo
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -32,11 +32,11 @@ import javax.inject.Inject
 class TrackingService : Service() {
 
     @Inject lateinit var locationRepository: LocationRepo
-    @Inject lateinit var updateLocationUseCase: UpdateSessionLocationUseCase
-    @Inject lateinit var getActiveSessionUseCase: GetActiveSessionUseCase
-    @Inject lateinit var pauseSessionUseCase: PauseSessionUseCase
-    @Inject lateinit var resumeSessionUseCase: ResumeSessionUseCase
-    @Inject lateinit var completeSessionUseCase: CompleteSessionUseCase
+    @Inject lateinit var updateLocationUseCase: UpdateActivityLocationUseCase
+    @Inject lateinit var getActiveActivityUseCase: GetActiveActivityUseCase
+    @Inject lateinit var pauseActivityUseCase: PauseActivityUseCase
+    @Inject lateinit var resumeActivityUseCase: ResumeActivityUseCase
+    @Inject lateinit var completeActivityUseCase: CompleteActivityUseCase
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var trackingJob: Job? = null
@@ -48,7 +48,7 @@ class TrackingService : Service() {
         const val ACTION_STOP   = "ACTION_STOP"
         const val ACTION_PAUSE  = "ACTION_PAUSE"
         const val ACTION_RESUME = "ACTION_RESUME"
-        const val EXTRA_SESSION_ID = "session_id"
+        const val EXTRA_SESSION_ID = "activity_id"
 
         // Notification action request codes
         private const val RC_PAUSE  = 10
@@ -59,8 +59,8 @@ class TrackingService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START  -> {
-                val sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1L)
-                if (sessionId != -1L) startTracking(sessionId)
+                val activityId = intent.getLongExtra(EXTRA_SESSION_ID, -1L)
+                if (activityId != -1L) startTracking(activityId)
             }
             ACTION_PAUSE  -> handlePause()
             ACTION_RESUME -> handleResume()
@@ -71,9 +71,9 @@ class TrackingService : Service() {
 
     // ── Tracking loop ─────────────────────────────────────────────────────────
 
-    private fun startTracking(sessionId: Long) {
+    private fun startTracking(activityId: Long) {
         createNotificationChannel()
-        startForeground(NotifConstants.NOTIF_TRACKING_ID, buildNotification(sessionId))
+        startForeground(NotifConstants.NOTIF_TRACKING_ID, buildNotification(activityId))
 
         trackingJob = serviceScope.launch {
             locationRepository.getLocationUpdates(intervalMs = 5_000L).collect { location ->
@@ -85,21 +85,21 @@ class TrackingService : Service() {
                 prevLocation  = location
 
                 updateLocationUseCase(
-                    sessionId      = sessionId,
+                    activityId      = activityId,
                     newLocation    = location,
                     speedKmh       = speedKmh,
                     elapsedSeconds = elapsedSeconds,
                 )
 
                 // Refresh notification with live stats
-                val session = getActiveSessionUseCase()
-                if (session != null) {
-                    val distStr  = "%.2f km".format(session.distanceCoveredKm)
-                    val speedStr = "%.1f km/h".format(session.currentSpeedKmh)
-                    val etaStr   = session.estimatedCompletionMillis
+                val activity = getActiveActivityUseCase()
+                if (activity != null) {
+                    val distStr  = "%.2f km".format(activity.distCovered)
+                    val speedStr = "%.1f km/h".format(activity.currentSpeed)
+                    val etaStr   = activity.estimatedCompletion
                         ?.let { "ETA ${timeFmt.format(Date(it))}" }
                         ?: ""
-                    updateNotification(sessionId, "$distStr · $speedStr · $etaStr")
+                    updateNotification(activityId, "$distStr · $speedStr · $etaStr")
                 }
             }
         }
@@ -110,23 +110,23 @@ class TrackingService : Service() {
     private fun handlePause() {
         trackingJob?.cancel()
         serviceScope.launch {
-            getActiveSessionUseCase()?.let { pauseSessionUseCase(it.id) }
+            getActiveActivityUseCase()?.let { pauseActivityUseCase(it.id) }
             updateNotification(-1L, "Paused")
         }
     }
 
     private fun handleResume() {
         serviceScope.launch {
-            val session = getActiveSessionUseCase() ?: return@launch
-            resumeSessionUseCase(session.id)
-            startTracking(session.id)           // re-starts the collection loop
+            val activity = getActiveActivityUseCase() ?: return@launch
+            resumeActivityUseCase(activity.id)
+            startTracking(activity.id)           // re-starts the collection loop
         }
     }
 
     private fun stopTracking() {
         trackingJob?.cancel()
         serviceScope.launch {
-            getActiveSessionUseCase()?.let { completeSessionUseCase(it.id) }
+            getActiveActivityUseCase()?.let { completeActivityUseCase(it.id) }
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -144,16 +144,16 @@ class TrackingService : Service() {
             .createNotificationChannel(channel)
     }
 
-    private fun buildNotification(sessionId: Long, contentText: String = "Activity in progress ...") =
-        baseNotificationBuilder(contentText, sessionId).build()
+    private fun buildNotification(activityId: Long, contentText: String = "Activity in progress ...") =
+        baseNotificationBuilder(contentText, activityId).build()
 
-    private fun updateNotification(sessionId: Long, contentText: String) {
-        val notification = baseNotificationBuilder(contentText, sessionId).build()
+    private fun updateNotification(activityId: Long, contentText: String) {
+        val notification = baseNotificationBuilder(contentText, activityId).build()
         getSystemService(NotificationManager::class.java)
             .notify(NotifConstants.NOTIF_TRACKING_ID, notification)
     }
 
-    private fun baseNotificationBuilder(contentText: String, sessionId: Long) =
+    private fun baseNotificationBuilder(contentText: String, activityId: Long) =
         NotificationCompat.Builder(this, NotifConstants.CHANNEL_TRACKING_ID)
             .setContentTitle("YouPlot — Tracking")
             .setContentText(contentText)

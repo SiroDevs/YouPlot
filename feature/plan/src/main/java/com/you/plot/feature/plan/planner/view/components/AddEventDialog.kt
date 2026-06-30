@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 fun AddEventDialog(
     day: Int,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, hour: Int, minute: Int, durationMinutes: Int) -> Unit,
+    onConfirm: (name: String, hour: Int, minute: Int, duration: Int) -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
     var durationStr by remember { mutableStateOf("0") }

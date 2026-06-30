@@ -3,17 +3,17 @@ package com.you.plot.feature.tracker.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.you.plot.core.domain.entity.ActivitySession
+import com.you.plot.core.domain.entity.ActivityActivity
 import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.common.entity.SessionStatus
+import com.you.plot.core.common.entity.ActivityStatus
 import com.you.plot.core.domain.entity.WaypointProgress
 import com.you.plot.core.domain.repos.LocationRepo
-import com.you.plot.core.domain.usecase.tracker.CompleteSessionUseCase
-import com.you.plot.core.domain.usecase.tracker.GetActiveSessionUseCase
-import com.you.plot.core.domain.usecase.tracker.PauseSessionUseCase
-import com.you.plot.core.domain.usecase.tracker.ResumeSessionUseCase
-import com.you.plot.core.domain.usecase.tracker.StartSessionUseCase
-import com.you.plot.core.domain.usecase.tracker.UpdateSessionLocationUseCase
+import com.you.plot.core.domain.usecase.tracker.CompleteActivityUseCase
+import com.you.plot.core.domain.usecase.tracker.GetActiveActivityUseCase
+import com.you.plot.core.domain.usecase.tracker.PauseActivityUseCase
+import com.you.plot.core.domain.usecase.tracker.ResumeActivityUseCase
+import com.you.plot.core.domain.usecase.tracker.StartActivityUseCase
+import com.you.plot.core.domain.usecase.tracker.UpdateActivityLocationUseCase
 import com.you.plot.core.domain.usecase.tracker.distanceTo
 import com.you.plot.feature.tracker.utils.TrackerUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,12 +33,12 @@ private const val PAUSE_DWELL_TICKS = 3
 @HiltViewModel
 class TrackerViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val startSessionUseCase: StartSessionUseCase,
-    private val updateLocationUseCase: UpdateSessionLocationUseCase,
-    private val pauseSessionUseCase: PauseSessionUseCase,
-    private val resumeSessionUseCase: ResumeSessionUseCase,
-    private val completeSessionUseCase: CompleteSessionUseCase,
-    private val getActiveSessionUseCase: GetActiveSessionUseCase,
+    private val startActivityUseCase: StartActivityUseCase,
+    private val updateLocationUseCase: UpdateActivityLocationUseCase,
+    private val pauseActivityUseCase: PauseActivityUseCase,
+    private val resumeActivityUseCase: ResumeActivityUseCase,
+    private val completeActivityUseCase: CompleteActivityUseCase,
+    private val getActiveActivityUseCase: GetActiveActivityUseCase,
     private val locationRepository: LocationRepo,
 ) : ViewModel() {
     private val planId: Long = checkNotNull(savedStateHandle["planId"])
@@ -48,23 +48,23 @@ class TrackerViewModel @Inject constructor(
 
     private var locationJob: Job? = null
     private var elapsedSeconds = 0L
-    private var sessionId = 0L
+    private var activityId = 0L
     private var stopVerifyWaypoint: WaypointProgress? = null
     private var stopVerifyStartLocation: LatLng? = null
     private var distanceSinceStop = 0.0
     private var stationaryTicks = 0
 
     init {
-        loadOrCreateSession()
+        loadOrCreateActivity()
     }
 
-    private fun loadOrCreateSession() {
+    private fun loadOrCreateActivity() {
         viewModelScope.launch {
-            val existing = getActiveSessionUseCase()
+            val existing = getActiveActivityUseCase()
             if (existing != null && existing.planId == planId) {
-                sessionId = existing.id
-                _state.update { it.copy(session = existing, isLoading = false) }
-                if (existing.status == SessionStatus.IN_PROGRESS) startLocationTracking()
+                activityId = existing.id
+                _state.update { it.copy(activity = existing, isLoading = false) }
+                if (existing.status == ActivityStatus.IN_PROGRESS) startLocationTracking()
             } else {
                 _state.update { it.copy(isLoading = false) }
             }
@@ -89,7 +89,7 @@ class TrackerViewModel @Inject constructor(
     fun dismissPermissionRationale() =
         _state.update { it.copy(showPermissionRationale = false) }
 
-    fun startSession() {
+    fun startActivity() {
         val s = _state.value
         if (!s.allPermissionsGranted) {
             _state.update { it.copy(showPermissionRationale = true) }
@@ -97,11 +97,11 @@ class TrackerViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            runCatching { startSessionUseCase(planId) }
+            runCatching { startActivityUseCase(planId) }
                 .onSuccess { id ->
-                    sessionId = id
-                    val session = getActiveSessionUseCase()
-                    _state.update { it.copy(session = session, isLoading = false) }
+                    activityId = id
+                    val activity = getActiveActivityUseCase()
+                    _state.update { it.copy(activity = activity, isLoading = false) }
                     startLocationTracking()
                 }
                 .onFailure { e ->
@@ -117,19 +117,19 @@ class TrackerViewModel @Inject constructor(
                 elapsedSeconds += 5
 
                 // Derive speed from distance delta / tick interval
-                val prev = _state.value.session?.currentLocation
+                val prev = _state.value.activity?.currentLocation
                 val deltaDist = prev?.distanceTo(location) ?: 0.0
                 val speedKmh = (deltaDist / (5.0 / 3600.0)).coerceAtMost(200.0) // cap at 200 km/h
 
                 updateLocationUseCase(
-                    sessionId = sessionId,
+                    activityId = activityId,
                     newLocation = location,
                     speedKmh = speedKmh,
                     elapsedSeconds = elapsedSeconds,
                 )
 
-                val updated = getActiveSessionUseCase()
-                _state.update { it.copy(session = updated) }
+                val updated = getActiveActivityUseCase()
+                _state.update { it.copy(activity = updated) }
 
                 checkWaypointStopReminder(updated)
                 handleStopVerification(location, speedKmh)
@@ -138,10 +138,10 @@ class TrackerViewModel @Inject constructor(
         }
     }
 
-    private fun checkWaypointStopReminder(session: ActivitySession?) {
+    private fun checkWaypointStopReminder(activity: ActivityActivity?) {
         if (_state.value.showFullScreenStopReminder) return  // already showing
         val pending = _state.value.pendingStopWaypoint
-        val arrived = session?.waypointProgress?.firstOrNull { wp ->
+        val arrived = activity?.waypointProgress?.firstOrNull { wp ->
             wp.isReached &&
                 !wp.wasSkipped &&
                 wp.waypoint.isStopPlanned &&
@@ -160,7 +160,7 @@ class TrackerViewModel @Inject constructor(
     fun onStopAcknowledged() {
         val wp = _state.value.pendingStopWaypoint ?: return
         stopVerifyWaypoint = wp
-        stopVerifyStartLocation = _state.value.session?.currentLocation
+        stopVerifyStartLocation = _state.value.activity?.currentLocation
         distanceSinceStop = 0.0
         _state.update { it.copy(showFullScreenStopReminder = false) }
     }
@@ -187,12 +187,12 @@ class TrackerViewModel @Inject constructor(
         when {
             distanceSinceStop >= STOP_SKIPPED_KM -> {
                 // User never actually stopped → mark as skipped
-                val updated = _state.value.session?.copy(
-                    waypointProgress = _state.value.session!!.waypointProgress.map { wp ->
+                val updated = _state.value.activity?.copy(
+                    waypointProgress = _state.value.activity!!.waypointProgress.map { wp ->
                         if (wp.waypoint.id == verifyWp.waypoint.id) wp.copy(wasSkipped = true) else wp
                     }
                 )
-                _state.update { it.copy(session = updated, pendingStopWaypoint = null) }
+                _state.update { it.copy(activity = updated, pendingStopWaypoint = null) }
                 stopVerifyWaypoint = null
             }
 
@@ -204,42 +204,42 @@ class TrackerViewModel @Inject constructor(
     }
 
     private fun handleAutoPause(speedKmh: Double) {
-        val session = _state.value.session ?: return
-        if (session.status != SessionStatus.IN_PROGRESS) return
+        val activity = _state.value.activity ?: return
+        if (activity.status != ActivityStatus.IN_PROGRESS) return
 
         if (speedKmh < PAUSE_SPEED_THRESHOLD_KMH) {
             stationaryTicks++
             if (stationaryTicks >= PAUSE_DWELL_TICKS) {
                 stationaryTicks = 0
-                pauseSession()
+                pauseActivity()
             }
         } else {
             stationaryTicks = 0
         }
     }
 
-    fun pauseSession() {
+    fun pauseActivity() {
         locationJob?.cancel()
         stationaryTicks = 0
         viewModelScope.launch {
-            pauseSessionUseCase(sessionId)
-            _state.update { it.copy(session = getActiveSessionUseCase()) }
+            pauseActivityUseCase(activityId)
+            _state.update { it.copy(activity = getActiveActivityUseCase()) }
         }
     }
 
-    fun resumeSession() {
+    fun resumeActivity() {
         viewModelScope.launch {
-            resumeSessionUseCase(sessionId)
-            _state.update { it.copy(session = getActiveSessionUseCase()) }
+            resumeActivityUseCase(activityId)
+            _state.update { it.copy(activity = getActiveActivityUseCase()) }
             startLocationTracking()
         }
     }
 
-    fun completeSession() {
+    fun completeActivity() {
         locationJob?.cancel()
         viewModelScope.launch {
-            completeSessionUseCase(sessionId)
-            _state.update { it.copy(session = getActiveSessionUseCase()) }
+            completeActivityUseCase(activityId)
+            _state.update { it.copy(activity = getActiveActivityUseCase()) }
         }
     }
 

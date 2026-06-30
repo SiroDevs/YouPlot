@@ -17,7 +17,7 @@
 package com.you.plot.feature.plan.planner.utils
 
 import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Event
 import com.you.plot.core.domain.entity.Route
 import java.util.Calendar
 
@@ -36,9 +36,9 @@ data class PlannerUiState(
     val startMinute: Int = 0,
     val avgDistancePerDayKmOverride: Double? = null,
     val numberOfDays: Int = 1,
-    val avgSpeedKmh: Double = 10.0,
-    val generatedEvents: List<PlanEvent> = emptyList(),
-    val customEvents: List<PlanEvent> = emptyList(),
+    val avgSpeed: Double = 10.0,
+    val generatedEvents: List<Event> = emptyList(),
+    val customEvents: List<Event> = emptyList(),
     val selectedDay: Int = 1,
     val currentStep: Int = 0,
     val isSaving: Boolean = false,
@@ -51,34 +51,34 @@ data class PlannerUiState(
         get() = startDateMillis + startHour * 3_600_000L + startMinute * 60_000L
 
     /** Auto-calculated from route / template, but user can override */
-    val avgDistancePerDayKm: Double
+    val avgDistPerDay: Double
         get() = avgDistancePerDayKmOverride
-            ?: ((selectedRoute?.totalDistanceKm ?: selectedTemplate?.avgDistancePerDayKm?.times(numberOfDays) ?: 0.0)
+            ?: ((selectedRoute?.totalDist ?: selectedTemplate?.avgDistPerDay?.times(numberOfDays) ?: 0.0)
                 .div(numberOfDays.coerceAtLeast(1)))
 
     /** All events for the currently selected day, sorted by time */
-    val eventsForSelectedDay: List<PlanEvent>
+    val eventsForSelectedDay: List<Event>
         get() = (generatedEvents + customEvents)
             .filter { it.dayNumber == selectedDay }
-            .sortedBy { it.plannedTimeMillis }
+            .sortedBy { it.plannedTime }
 
     /** Total distance covered by the end of the selected day */
-    val dayTotalDistanceKm: Double
-        get() = eventsForSelectedDay.maxOfOrNull { it.distanceCoveredKm } ?: 0.0
+    val dayTotalDist: Double
+        get() = eventsForSelectedDay.maxOfOrNull { it.distCovered } ?: 0.0
 
     /** Distance remaining after this day */
-    val remainingDistanceKm: Double
+    val remainingDist: Double
         get() {
-            val totalDist = selectedRoute?.totalDistanceKm
-                ?: (avgDistancePerDayKm * numberOfDays)
-            return (totalDist - dayTotalDistanceKm).coerceAtLeast(0.0)
+            val totalDist = selectedRoute?.totalDist
+                ?: (avgDistPerDay * numberOfDays)
+            return (totalDist - dayTotalDist).coerceAtLeast(0.0)
         }
 
     /** Adjusted distance per remaining day after today */
-    val adjustedRemainingDailyDistanceKm: Double
+    val adjustedRemainingDailyDist: Double
         get() {
             val daysLeft = (numberOfDays - selectedDay).coerceAtLeast(1)
-            return remainingDistanceKm / daysLeft
+            return remainingDist / daysLeft
         }
 }
 

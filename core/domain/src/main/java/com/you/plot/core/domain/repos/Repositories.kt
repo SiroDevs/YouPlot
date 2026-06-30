@@ -1,7 +1,7 @@
 package com.you.plot.core.domain.repos
 
 import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.domain.entity.ActivitySession
+import com.you.plot.core.domain.entity.ActivityActivity
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.domain.entity.Route
 import kotlinx.coroutines.flow.Flow
@@ -23,13 +23,13 @@ interface PlanRepo {
     suspend fun updatePlan(plan: ActivityPlan)
 }
 
-interface SessionRepo {
-    fun getSessionsByPlanId(planId: Long): Flow<List<ActivitySession>>
-    suspend fun getSessionById(id: Long): ActivitySession?
-    suspend fun getActiveSession(): ActivitySession?
-    suspend fun saveSession(session: ActivitySession): Long
-    suspend fun updateSession(session: ActivitySession)
-    suspend fun deleteSession(id: Long)
+interface ActivityRepo {
+    fun getActivitysByPlanId(planId: Long): Flow<List<ActivityActivity>>
+    suspend fun getActivityById(id: Long): ActivityActivity?
+    suspend fun getActiveActivity(): ActivityActivity?
+    suspend fun saveActivity(activity: ActivityActivity): Long
+    suspend fun updateActivity(activity: ActivityActivity)
+    suspend fun deleteActivity(id: Long)
 }
 
 interface LocationRepo {

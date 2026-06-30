@@ -22,7 +22,7 @@ class SaveRouteUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(route: Route): Long {
         require(route.name.isNotBlank()) { "Route name cannot be empty" }
-        require(route.totalDistanceKm > 0) { "Route must have a positive distance" }
+        require(route.totalDist > 0) { "Route must have a positive distance" }
         return repository.saveRoute(route)
     }
 }

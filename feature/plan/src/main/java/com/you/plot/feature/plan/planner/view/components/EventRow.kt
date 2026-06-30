@@ -20,11 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.timeFmt
-import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Event
 import java.util.Date
 
 @Composable
-fun EventRow(event: PlanEvent, isCustom: Boolean, onRemove: () -> Unit) {
+fun EventRow(event: Event, isCustom: Boolean, onRemove: () -> Unit) {
     Card(
         Modifier.fillMaxWidth(),
         colors = if (isCustom)
@@ -44,13 +44,13 @@ fun EventRow(event: PlanEvent, isCustom: Boolean, onRemove: () -> Unit) {
                         color = MaterialTheme.colorScheme.secondary)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(timeFmt.format(Date(event.plannedTimeMillis)),
+                    Text(timeFmt.format(Date(event.plannedTime)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary)
-                    Text("${"%.1f".format(event.distanceCoveredKm)} km covered",
+                    Text("${"%.1f".format(event.distCovered)} km covered",
                         style = MaterialTheme.typography.bodySmall)
-                    if (event.durationMinutes > 0)
-                        Text("${event.durationMinutes} min stop",
+                    if (event.duration > 0)
+                        Text("${event.duration} min stop",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }

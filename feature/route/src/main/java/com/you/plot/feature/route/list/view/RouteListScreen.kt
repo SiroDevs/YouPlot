@@ -127,7 +127,7 @@ fun RouteListItem(route: Route, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(2.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("%.1f km".format(route.totalDistanceKm),
+                    Text("%.1f km".format(route.totalDist),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium)
@@ -146,7 +146,7 @@ fun RouteListItem(route: Route, onClick: () -> Unit) {
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("↑%.0fm".format(route.totalElevationGainMeters),
+                Text("↑%.0fm".format(route.elevationGain),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }

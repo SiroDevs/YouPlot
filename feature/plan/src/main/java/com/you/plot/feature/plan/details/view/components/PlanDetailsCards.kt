@@ -36,13 +36,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.timeFmt
-import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Event
 import com.you.plot.core.ui.components.general.SummaryRow
 import com.you.plot.feature.plan.details.utils.PlanDetailUiState
 import java.util.Date
 
 @Composable
-fun EventCard(event: PlanEvent) {
+fun EventCard(event: Event) {
     Card(
         Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
@@ -61,7 +61,7 @@ fun EventCard(event: PlanEvent) {
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    timeFmt.format(Date(event.plannedTimeMillis)),
+                    timeFmt.format(Date(event.plannedTime)),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
@@ -72,13 +72,13 @@ fun EventCard(event: PlanEvent) {
                 Text(event.name, style = MaterialTheme.typography.titleSmall)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "${"%.1f".format(event.distanceCoveredKm)} km covered",
+                        "${"%.1f".format(event.distCovered)} km covered",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    if (event.durationMinutes > 0) {
+                    if (event.duration > 0) {
                         Text(
-                            "${event.durationMinutes} min stop",
+                            "${event.duration} min stop",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -106,8 +106,8 @@ fun DaySummaryCard(state: PlanDetailUiState) {
                 fontWeight = FontWeight.Bold,
             )
             HorizontalDivider(Modifier.padding(vertical = 4.dp))
-            SummaryRow("Distance covered", "${"%.1f".format(state.dayTotalDistanceKm)} km")
-            SummaryRow("Remaining distance", "${"%.1f".format(state.remainingDistanceKm)} km")
+            SummaryRow("Distance covered", "${"%.1f".format(state.dayTotalDist)} km")
+            SummaryRow("Remaining distance", "${"%.1f".format(state.remainingDist)} km")
             val daysLeft = (state.plan?.numberOfDays ?: 1) - state.selectedDay
             if (daysLeft > 0) {
                 SummaryRow(

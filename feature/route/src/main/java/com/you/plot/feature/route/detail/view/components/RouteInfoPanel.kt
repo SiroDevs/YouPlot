@@ -103,19 +103,19 @@ fun RouteInfoPanel(
                 createdAt = createdAt,
                 description = description,
             )
-            1 -> WaypointsTab(waypoints = waypoints, totalDistanceKm = distanceKm)
+            1 -> WaypointsTab(waypoints = waypoints, totalDist = distanceKm)
         }
     }
 }
 
 @Composable
-private fun WaypointsTab(waypoints: List<Waypoint>, totalDistanceKm: Double) {
+private fun WaypointsTab(waypoints: List<Waypoint>, totalDist: Double) {
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp),
     ) {
         items(waypoints.sortedBy { it.orderIndex }) { wp ->
-            RouteDetailWaypointRow(wp = wp, total = totalDistanceKm)
+            RouteDetailWaypointRow(wp = wp, total = totalDist)
         }
         item { Spacer(Modifier.height(96.dp)) }
     }

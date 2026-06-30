@@ -2,7 +2,7 @@ package com.you.plot.core.domain.entity
 
 import com.you.plot.core.common.entity.ElevationPoint
 import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.common.entity.SessionStatus
+import com.you.plot.core.common.entity.ActivityStatus
 import com.you.plot.core.common.entity.SportType
 
 data class WaypointSearchResult(
@@ -16,8 +16,8 @@ data class Waypoint(
     val name: String,
     val position: LatLng,
     val orderIndex: Int,
-    val elevationMeters: Double = 0.0,
-    val distanceFromStartKm: Double = 0.0,
+    val elevation: Double = 0.0,
+    val distFromStart: Double = 0.0,
     val isStopPlanned: Boolean = false,
 )
 
@@ -30,22 +30,22 @@ data class Route(
     val endPoint: LatLng,
     val waypoints: List<Waypoint> = emptyList(),
     val elevationProfile: List<ElevationPoint> = emptyList(),
-    val totalDistanceKm: Double,
-    val totalElevationGainMeters: Double = 0.0,
-    val totalElevationLossMeters: Double = 0.0,
+    val totalDist: Double,
+    val elevationGain: Double = 0.0,
+    val elevationLoss: Double = 0.0,
     val isRoundTrip: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
 )
 
-data class PlanEvent(
+data class Event(
     val id: Long = 0L,
     val planId: Long,
     val dayNumber: Int,
     val name: String,
     val waypointId: Long? = null,
-    val plannedTimeMillis: Long,
-    val durationMinutes: Int = 0,
-    val distanceCoveredKm: Double = 0.0,
+    val plannedTime: Long,
+    val duration: Int = 0,
+    val distCovered: Double = 0.0,
     val orderIndex: Int,
 )
 
@@ -56,9 +56,9 @@ data class ActivityPlan(
     val description: String = "",
     val startDateMillis: Long,
     val numberOfDays: Int,
-    val avgSpeedKmh: Double,
-    val avgDistancePerDayKm: Double,
-    val events: List<PlanEvent> = emptyList(),
+    val avgSpeed: Double,
+    val avgDistPerDay: Double,
+    val events: List<Event> = emptyList(),
     val createdAt: Long = System.currentTimeMillis(),
 )
 
@@ -71,16 +71,16 @@ data class WaypointProgress(
     val wasSkipped: Boolean = false,
 )
 
-data class ActivitySession(
+data class ActivityActivity(
     val id: Long = 0L,
     val planId: Long,
     val routeId: Long,
-    val status: SessionStatus = SessionStatus.NOT_STARTED,
-    val startedAtMillis: Long? = null,
-    val elapsedTimeSeconds: Long = 0L,
+    val status: ActivityStatus = ActivityStatus.NOT_STARTED,
+    val startedAt: Long? = null,
+    val elapsedTime: Long = 0L,
     val currentLocation: LatLng? = null,
-    val currentSpeedKmh: Double = 0.0,
-    val distanceCoveredKm: Double = 0.0,
+    val currentSpeed: Double = 0.0,
+    val distCovered: Double = 0.0,
     val waypointProgress: List<WaypointProgress> = emptyList(),
-    val estimatedCompletionMillis: Long? = null,
+    val estimatedCompletion: Long? = null,
 )

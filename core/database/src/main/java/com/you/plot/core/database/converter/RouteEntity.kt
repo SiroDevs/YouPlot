@@ -24,17 +24,17 @@ fun Route.toEntity() = RouteEntity(
     id = id, name = name, description = description, sportType = sportType,
     startLat = startPoint.latitude, startLng = startPoint.longitude,
     endLat = endPoint.latitude, endLng = endPoint.longitude,
-    waypointsJson = waypoints.toJson(), elevationProfileJson = elevationProfile.toJson(),
-    totalDistanceKm = totalDistanceKm, totalElevationGainMeters = totalElevationGainMeters,
-    totalElevationLossMeters = totalElevationLossMeters, isRoundTrip = isRoundTrip,
+    waypoints = waypoints.toJson(), elevationProfile = elevationProfile.toJson(),
+    totalDist = totalDist, elevationGain = elevationGain,
+    elevationLoss = elevationLoss, isRoundTrip = isRoundTrip,
     createdAt = createdAt,
 )
 
 fun RouteEntity.toDomain() = Route(
     id = id, name = name, description = description, sportType = sportType,
     startPoint = LatLng(startLat, startLng), endPoint = LatLng(endLat, endLng),
-    waypoints = waypointsJson.toWaypointList(), elevationProfile = elevationProfileJson.toElevationList(),
-    totalDistanceKm = totalDistanceKm, totalElevationGainMeters = totalElevationGainMeters,
-    totalElevationLossMeters = totalElevationLossMeters, isRoundTrip = isRoundTrip,
+    waypoints = waypoints.toWaypointList(), elevationProfile = elevationProfile.toElevationList(),
+    totalDist = totalDist, elevationGain = elevationGain,
+    elevationLoss = elevationLoss, isRoundTrip = isRoundTrip,
     createdAt = createdAt,
 )

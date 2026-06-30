@@ -2,23 +2,21 @@ package com.you.plot.feature.plan.planner.view.screen.steps
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.designsystem.theme.AppTheme
-import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Event
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.ui.components.general.DayTimeline
 import com.you.plot.feature.plan.planner.utils.PlannerUiState
@@ -74,80 +72,86 @@ private fun PlannerStep2Content(
         )
     }
 
-    Column(Modifier.fillMaxSize()) {
-
-        // Day tab row
-        LazyRow(
-            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            items(state.numberOfDays, key = { i -> "day_tab_$i" }) { i ->
-                val day = i + 1
-                FilterChip(
-                    selected = state.selectedDay == day,
-                    onClick = { onDaySelected(day) },
-                    label = { Text("Day $day") },
-                )
-            }
-        }
-
-        // Horizontal timeline
-        DayTimeline(
-            events = state.eventsForSelectedDay,
-            modifier = Modifier.fillMaxWidth().height(90.dp).padding(horizontal = 12.dp),
-        )
-
-        HorizontalDivider(Modifier.padding(vertical = 4.dp))
-
-        // Event list for the day
-        LazyColumn(
-            Modifier.weight(1f).padding(horizontal = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            item(key = "top_spacer") { Spacer(Modifier.height(4.dp)) }
-
-            items(
-                state.eventsForSelectedDay,
-                key = { "${it.id}-${it.orderIndex}-${it.plannedTimeMillis}" },
-            ) { event ->
-                val isCustom = state.customEvents.any { it.id == event.id }
-                EventRow(
-                    event = event,
-                    isCustom = isCustom,
-                    onRemove = {
-                        if (isCustom) onRemoveCustomEvent(event.id)
-                        else onRemoveGeneratedEvent(event.id)
-                    },
-                )
-            }
-
-            item(key = "bottom_spacer") { Spacer(Modifier.height(4.dp)) }
-
-            // End-of-day summary
-            item(key = "day_summary") {
-                DaySummaryCard(
-                    dayTotalKm = state.dayTotalDistanceKm,
-                    remainingKm = state.remainingDistanceKm,
-                    adjustedDailyKm = state.adjustedRemainingDailyDistanceKm,
-                    daysLeft = state.numberOfDays - state.selectedDay,
-                )
-            }
-
-            item(key = "fab_spacer") { Spacer(Modifier.height(80.dp)) }
-        }
-
-        // Add event button — Review is handled by the FAB
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-        ) {
-            Button(
+    Scaffold(
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
                 onClick = { showAddEventDialog = true },
-                modifier = Modifier.fillMaxWidth(),
+                expanded = true,
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text("Add Event") },
+            )
+        },
+    ) { padding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            LazyRow(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Icon(Icons.Default.Add, null, Modifier.size(16.dp))
-                Spacer(Modifier.width(4.dp))
-                Text("Add Event")
+                items(state.numberOfDays, key = { i -> "day_tab_$i" }) { i ->
+                    val day = i + 1
+                    FilterChip(
+                        selected = state.selectedDay == day,
+                        onClick = { onDaySelected(day) },
+                        label = { Text("Day $day") },
+                    )
+                }
             }
+
+            // Horizontal timeline
+            DayTimeline(
+                events = state.eventsForSelectedDay,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(90.dp)
+                    .padding(horizontal = 12.dp),
+            )
+
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+            LazyColumn(
+                Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                item(key = "top_spacer") { Spacer(Modifier.height(4.dp)) }
+
+                items(
+                    state.eventsForSelectedDay,
+                    key = { "${it.id}-${it.orderIndex}-${it.plannedTime}" },
+                ) { event ->
+                    val isCustom = state.customEvents.any { it.id == event.id }
+                    EventRow(
+                        event = event,
+                        isCustom = isCustom,
+                        onRemove = {
+                            if (isCustom) onRemoveCustomEvent(event.id)
+                            else onRemoveGeneratedEvent(event.id)
+                        },
+                    )
+                }
+
+                item(key = "bottom_spacer") { Spacer(Modifier.height(4.dp)) }
+
+                // End-of-day summary
+                item(key = "day_summary") {
+                    DaySummaryCard(
+                        dayTotalDist = state.dayTotalDist,
+                        remainingDist = state.remainingDist,
+                        adjustedDailyDist = state.adjustedRemainingDailyDist,
+                        daysLeft = state.numberOfDays - state.selectedDay,
+                    )
+                }
+
+                item(key = "fab_spacer") { Spacer(Modifier.height(80.dp)) }
+            }
+
         }
     }
 }
@@ -161,26 +165,25 @@ private fun PlannerStep2Preview() {
         sportType = SportType.CYCLING,
         startPoint = LatLng(-1.286, 36.817),
         endPoint = LatLng(-4.04, 39.67),
-        totalDistanceKm = 480.0,
+        totalDist = 480.0,
     )
-    // Generated PlanEvents use distinct negative synthetic ids (see PlannerStep2's
-    // composite LazyColumn key on id+orderIndex+plannedTimeMillis).
+    
     val dayStart = 0L
     val generated = listOf(
-        PlanEvent(
+        Event(
             id = -1L, planId = 0L, dayNumber = 1, name = "Start",
-            plannedTimeMillis = dayStart + 6L * 3_600_000L,
-            durationMinutes = 0, distanceCoveredKm = 0.0, orderIndex = 0,
+            plannedTime = dayStart + 6L * 3_600_000L,
+            duration = 0, distCovered = 0.0, orderIndex = 0,
         ),
-        PlanEvent(
+        Event(
             id = -2L, planId = 0L, dayNumber = 1, name = "Checkpoint",
-            plannedTimeMillis = dayStart + 9L * 3_600_000L,
-            durationMinutes = 15, distanceCoveredKm = 45.0, orderIndex = 1,
+            plannedTime = dayStart + 9L * 3_600_000L,
+            duration = 15, distCovered = 45.0, orderIndex = 1,
         ),
-        PlanEvent(
+        Event(
             id = -3L, planId = 0L, dayNumber = 1, name = "End of Day",
-            plannedTimeMillis = dayStart + 14L * 3_600_000L,
-            durationMinutes = 0, distanceCoveredKm = 96.0, orderIndex = 2,
+            plannedTime = dayStart + 14L * 3_600_000L,
+            duration = 0, distCovered = 96.0, orderIndex = 2,
         ),
     )
     AppTheme {
@@ -188,7 +191,7 @@ private fun PlannerStep2Preview() {
             state = PlannerUiState(
                 selectedRoute = sampleRoute,
                 numberOfDays = 5,
-                avgSpeedKmh = 18.0,
+                avgSpeed = 18.0,
                 selectedDay = 1,
                 generatedEvents = generated,
                 startDateMillis = 0L,

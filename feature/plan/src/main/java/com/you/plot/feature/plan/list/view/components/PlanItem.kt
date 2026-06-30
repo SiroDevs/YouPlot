@@ -33,7 +33,7 @@ fun PlanItem(plan: ActivityPlan, onClick: () -> Unit, onStartTracking: () -> Uni
                 Text(plan.name, style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "${plan.numberOfDays} day(s) · %.1f km/day".format(plan.avgDistancePerDayKm),
+                    "${plan.numberOfDays} day(s) · %.1f km/day".format(plan.avgDistPerDay),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 val dateStr = SimpleDateFormat("dd MMM yyyy", LocalLocale.current.platformLocale)

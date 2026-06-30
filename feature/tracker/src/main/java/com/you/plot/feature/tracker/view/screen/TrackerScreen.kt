@@ -49,7 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.common.entity.SessionStatus
+import com.you.plot.core.common.entity.ActivityStatus
 import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.feature.tracker.utils.vibrate
 import com.you.plot.feature.tracker.view.components.FullScreenStopReminder
@@ -180,7 +180,7 @@ fun TrackerScreen(
         },
         sheetContent = {
             WaypointBottomSheet(
-                waypoints = state.session?.waypointProgress ?: emptyList(),
+                waypoints = state.activity?.waypointProgress ?: emptyList(),
             )
         },
     ) { padding ->
@@ -193,9 +193,9 @@ fun TrackerScreen(
             return@BottomSheetScaffold
         }
 
-        val session = state.session
+        val activity = state.activity
 
-        if (session == null) {
+        if (activity == null) {
             Box(Modifier
                 .fillMaxSize()
                 .padding(padding), contentAlignment = Alignment.Center) {
@@ -212,7 +212,7 @@ fun TrackerScreen(
                         )
                     }
                     Button(
-                        onClick = { viewModel.startSession() },
+                        onClick = { viewModel.startActivity() },
                         modifier = Modifier.fillMaxWidth(0.65f),
                         enabled = state.allPermissionsGranted,
                     ) {
@@ -237,26 +237,26 @@ fun TrackerScreen(
                         .fillMaxWidth()
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp)),
-                    currentLocation = session.currentLocation,
-                    waypoints = session.waypointProgress,
+                    currentLocation = activity.currentLocation,
+                    waypoints = activity.waypointProgress,
                 )
 
-                val elapsed = session.elapsedTimeSeconds
+                val elapsed = activity.elapsedTime
                 val h = elapsed / 3600;
                 val m = (elapsed % 3600) / 60;
                 val s = elapsed % 60
                 val nextEta = state.nextUnreachedWaypoint?.estimatedArrivalMillis
-                val doneEta = state.estimatedCompletionMillis
+                val doneEta = state.estimatedCompletion
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatCard(
                         "Distance",
-                        "%.2f km".format(session.distanceCoveredKm),
+                        "%.2f km".format(activity.distCovered),
                         Modifier.weight(1f)
                     )
                     StatCard(
                         "Speed",
-                        "%.1f km/h".format(session.currentSpeedKmh),
+                        "%.1f km/h".format(activity.currentSpeed),
                         Modifier.weight(1f)
                     )
                     StatCard("Elapsed", "%02d:%02d:%02d".format(h, m, s), Modifier.weight(1f))
@@ -274,20 +274,20 @@ fun TrackerScreen(
                     )
                     StatCard(
                         "Status",
-                        session.status.name.lowercase().replaceFirstChar { it.uppercase() },
+                        activity.status.name.lowercase().replaceFirstChar { it.uppercase() },
                         Modifier.weight(1f),
                     )
                 }
 
                 // Controls
-                when (session.status) {
-                    SessionStatus.IN_PROGRESS -> {
+                when (activity.status) {
+                    ActivityStatus.IN_PROGRESS -> {
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             OutlinedButton(
-                                onClick = { viewModel.pauseSession() },
+                                onClick = { viewModel.pauseActivity() },
                                 modifier = Modifier.weight(1f),
                             ) {
                                 Icon(Icons.Default.Pause, null)
@@ -295,7 +295,7 @@ fun TrackerScreen(
                                 Text("Pause")
                             }
                             Button(
-                                onClick = { viewModel.completeSession() },
+                                onClick = { viewModel.completeActivity() },
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.error,
@@ -308,13 +308,13 @@ fun TrackerScreen(
                         }
                     }
 
-                    SessionStatus.PAUSED -> {
+                    ActivityStatus.PAUSED -> {
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Button(
-                                onClick = { viewModel.resumeSession() },
+                                onClick = { viewModel.resumeActivity() },
                                 modifier = Modifier.weight(1f),
                             ) {
                                 Icon(Icons.Default.PlayArrow, null)
@@ -322,7 +322,7 @@ fun TrackerScreen(
                                 Text("Resume")
                             }
                             OutlinedButton(
-                                onClick = { viewModel.completeSession() },
+                                onClick = { viewModel.completeActivity() },
                                 modifier = Modifier.weight(1f),
                             ) {
                                 Text("Finish")
@@ -330,7 +330,7 @@ fun TrackerScreen(
                         }
                     }
 
-                    SessionStatus.COMPLETED -> {
+                    ActivityStatus.COMPLETED -> {
                         Card(
                             Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(

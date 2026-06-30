@@ -17,57 +17,57 @@
 package com.you.plot.core.database.converter
 
 import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.common.entity.SessionStatus
+import com.you.plot.core.common.entity.ActivityStatus
 import com.you.plot.core.database.model.PlanEntity
-import com.you.plot.core.database.model.PlanEventEntity
-import com.you.plot.core.database.model.SessionEntity
+import com.you.plot.core.database.model.EventEntity
+import com.you.plot.core.database.model.ActivityEntity
 import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.domain.entity.ActivitySession
-import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.ActivityActivity
+import com.you.plot.core.domain.entity.Event
 
 fun ActivityPlan.toEntity() = PlanEntity(
     id = id, routeId = routeId, name = name, description = description,
     startDateMillis = startDateMillis, numberOfDays = numberOfDays,
-    avgSpeedKmh = avgSpeedKmh, avgDistancePerDayKm = avgDistancePerDayKm, createdAt = createdAt,
+    avgSpeed = avgSpeed, avgDistPerDay = avgDistPerDay, createdAt = createdAt,
 )
 
-fun PlanEntity.toDomain(events: List<PlanEventEntity>) = ActivityPlan(
+fun PlanEntity.toDomain(events: List<EventEntity>) = ActivityPlan(
     id = id, routeId = routeId, name = name, description = description,
     startDateMillis = startDateMillis, numberOfDays = numberOfDays,
-    avgSpeedKmh = avgSpeedKmh, avgDistancePerDayKm = avgDistancePerDayKm,
+    avgSpeed = avgSpeed, avgDistPerDay = avgDistPerDay,
     events = events.map { it.toDomain() }, createdAt = createdAt,
 )
 
-fun PlanEvent.toEntity() = PlanEventEntity(
+fun Event.toEntity() = EventEntity(
     id = id, planId = planId, dayNumber = dayNumber, name = name,
-    waypointId = waypointId, plannedTimeMillis = plannedTimeMillis,
-    durationMinutes = durationMinutes, distanceCoveredKm = distanceCoveredKm, orderIndex = orderIndex,
+    waypointId = waypointId, plannedTime = plannedTime,
+    duration = duration, distCovered = distCovered, orderIndex = orderIndex,
 )
 
-fun PlanEventEntity.toDomain() = PlanEvent(
+fun EventEntity.toDomain() = Event(
     id = id, planId = planId, dayNumber = dayNumber, name = name,
-    waypointId = waypointId, plannedTimeMillis = plannedTimeMillis,
-    durationMinutes = durationMinutes, distanceCoveredKm = distanceCoveredKm, orderIndex = orderIndex,
+    waypointId = waypointId, plannedTime = plannedTime,
+    duration = duration, distCovered = distCovered, orderIndex = orderIndex,
 )
 
-fun ActivitySession.toEntity() = SessionEntity(
+fun ActivityActivity.toEntity() = ActivityEntity(
     id = id, planId = planId, routeId = routeId, status = status.name,
-    startedAtMillis = startedAtMillis, elapsedTimeSeconds = elapsedTimeSeconds,
+    startedAt = startedAt, elapsedTime = elapsedTime,
     currentLat = currentLocation?.latitude, currentLng = currentLocation?.longitude,
-    currentSpeedKmh = currentSpeedKmh, distanceCoveredKm = distanceCoveredKm,
-    waypointProgressJson = waypointProgress.toJson(),
-    estimatedCompletionMillis = estimatedCompletionMillis,
+    currentSpeed = currentSpeed, distCovered = distCovered,
+    waypointProgress = waypointProgress.toJson(),
+    estimatedCompletion = estimatedCompletion,
 )
 
-fun SessionEntity.toDomain() = ActivitySession(
+fun ActivityEntity.toDomain() = ActivityActivity(
     id = id, planId = planId, routeId = routeId,
-    status = SessionStatus.valueOf(status),
-    startedAtMillis = startedAtMillis, elapsedTimeSeconds = elapsedTimeSeconds,
+    status = ActivityStatus.valueOf(status),
+    startedAt = startedAt, elapsedTime = elapsedTime,
     currentLocation = if (currentLat != null && currentLng != null) LatLng(
         currentLat,
         currentLng
     ) else null,
-    currentSpeedKmh = currentSpeedKmh, distanceCoveredKm = distanceCoveredKm,
-    waypointProgress = waypointProgressJson.toWaypointProgressList(),
-    estimatedCompletionMillis = estimatedCompletionMillis,
+    currentSpeed = currentSpeed, distCovered = distCovered,
+    waypointProgress = waypointProgress.toWaypointProgressList(),
+    estimatedCompletion = estimatedCompletion,
 )

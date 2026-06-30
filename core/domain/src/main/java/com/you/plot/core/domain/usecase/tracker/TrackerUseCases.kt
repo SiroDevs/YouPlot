@@ -1,18 +1,18 @@
 package com.you.plot.core.domain.usecase.tracker
 
 import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.common.entity.SessionStatus
-import com.you.plot.core.domain.entity.ActivitySession
+import com.you.plot.core.common.entity.ActivityStatus
+import com.you.plot.core.domain.entity.ActivityActivity
 import com.you.plot.core.domain.entity.WaypointProgress
 import com.you.plot.core.domain.repos.PlanRepo
 import com.you.plot.core.domain.repos.RouteRepo
-import com.you.plot.core.domain.repos.SessionRepo
+import com.you.plot.core.domain.repos.ActivityRepo
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import kotlin.math.*
 
-class StartSessionUseCase @Inject constructor(
-    private val sessionRepo: SessionRepo,
+class StartActivityUseCase @Inject constructor(
+    private val activityRepo: ActivityRepo,
     private val planRepo: PlanRepo,
     private val routeRepo: RouteRepo,
 ) {
@@ -24,83 +24,83 @@ class StartSessionUseCase @Inject constructor(
             val event = plan.events.firstOrNull { it.waypointId == wp.id }
             WaypointProgress(
                 waypoint = wp,
-                plannedArrivalMillis = event?.plannedTimeMillis ?: System.currentTimeMillis(),
-                estimatedArrivalMillis = event?.plannedTimeMillis ?: System.currentTimeMillis(),
-                distanceRemainingKm = route.totalDistanceKm,
+                plannedArrivalMillis = event?.plannedTime ?: System.currentTimeMillis(),
+                estimatedArrivalMillis = event?.plannedTime ?: System.currentTimeMillis(),
+                distanceRemainingKm = route.totalDist,
             )
         }
 
         val nowMs = System.currentTimeMillis()
         // Estimated completion = start + (total distance / avg speed) hours
         val estimatedCompletion =
-            nowMs + ((route.totalDistanceKm / plan.avgSpeedKmh) * 3_600_000L).toLong()
+            nowMs + ((route.totalDist / plan.avgSpeed) * 3_600_000L).toLong()
 
-        val session = ActivitySession(
+        val activity = ActivityActivity(
             planId = planId,
             routeId = plan.routeId,
-            status = SessionStatus.IN_PROGRESS,
-            startedAtMillis = nowMs,
+            status = ActivityStatus.IN_PROGRESS,
+            startedAt = nowMs,
             waypointProgress = waypointProgress,
-            estimatedCompletionMillis = estimatedCompletion,
+            estimatedCompletion = estimatedCompletion,
         )
-        return sessionRepo.saveSession(session)
+        return activityRepo.saveActivity(activity)
     }
 }
 
-class UpdateSessionLocationUseCase @Inject constructor(
-    private val sessionRepo: SessionRepo,
+class UpdateActivityLocationUseCase @Inject constructor(
+    private val activityRepo: ActivityRepo,
 ) {
     suspend operator fun invoke(
-        sessionId: Long,
+        activityId: Long,
         newLocation: LatLng,
         speedKmh: Double,
         elapsedSeconds: Long,
     ) {
-        val session = sessionRepo.getSessionById(sessionId) ?: return
-        val updated = session.recalculate(newLocation, speedKmh, elapsedSeconds)
-        sessionRepo.updateSession(updated)
+        val activity = activityRepo.getActivityById(activityId) ?: return
+        val updated = activity.recalculate(newLocation, speedKmh, elapsedSeconds)
+        activityRepo.updateActivity(updated)
     }
 }
 
-class PauseSessionUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
-    suspend operator fun invoke(sessionId: Long) {
-        val session = sessionRepo.getSessionById(sessionId) ?: return
-        sessionRepo.updateSession(session.copy(status = SessionStatus.PAUSED))
+class PauseActivityUseCase @Inject constructor(private val activityRepo: ActivityRepo) {
+    suspend operator fun invoke(activityId: Long) {
+        val activity = activityRepo.getActivityById(activityId) ?: return
+        activityRepo.updateActivity(activity.copy(status = ActivityStatus.PAUSED))
     }
 }
 
-class ResumeSessionUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
-    suspend operator fun invoke(sessionId: Long) {
-        val session = sessionRepo.getSessionById(sessionId) ?: return
-        sessionRepo.updateSession(session.copy(status = SessionStatus.IN_PROGRESS))
+class ResumeActivityUseCase @Inject constructor(private val activityRepo: ActivityRepo) {
+    suspend operator fun invoke(activityId: Long) {
+        val activity = activityRepo.getActivityById(activityId) ?: return
+        activityRepo.updateActivity(activity.copy(status = ActivityStatus.IN_PROGRESS))
     }
 }
 
-class CompleteSessionUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
-    suspend operator fun invoke(sessionId: Long) {
-        val session = sessionRepo.getSessionById(sessionId) ?: return
-        sessionRepo.updateSession(session.copy(status = SessionStatus.COMPLETED))
+class CompleteActivityUseCase @Inject constructor(private val activityRepo: ActivityRepo) {
+    suspend operator fun invoke(activityId: Long) {
+        val activity = activityRepo.getActivityById(activityId) ?: return
+        activityRepo.updateActivity(activity.copy(status = ActivityStatus.COMPLETED))
     }
 }
 
-class GetActiveSessionUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
-    suspend operator fun invoke(): ActivitySession? = sessionRepo.getActiveSession()
+class GetActiveActivityUseCase @Inject constructor(private val activityRepo: ActivityRepo) {
+    suspend operator fun invoke(): ActivityActivity? = activityRepo.getActiveActivity()
 }
 
-class GetSessionsByPlanUseCase @Inject constructor(private val sessionRepo: SessionRepo) {
-    operator fun invoke(planId: Long): Flow<List<ActivitySession>> =
-        sessionRepo.getSessionsByPlanId(planId)
+class GetActivitysByPlanUseCase @Inject constructor(private val activityRepo: ActivityRepo) {
+    operator fun invoke(planId: Long): Flow<List<ActivityActivity>> =
+        activityRepo.getActivitysByPlanId(planId)
 }
 
 // ─── recalculate: ETAs, distances, estimated completion ──────────────────────
 
-fun ActivitySession.recalculate(
+fun ActivityActivity.recalculate(
     newLocation: LatLng,
     speedKmh: Double,
     elapsedSeconds: Long,
-): ActivitySession {
+): ActivityActivity {
     val distanceDelta = currentLocation?.distanceTo(newLocation) ?: 0.0
-    val newDistance = distanceCoveredKm + distanceDelta
+    val newDistance = distCovered + distanceDelta
     val nowMs = System.currentTimeMillis()
 
     val updatedProgress = waypointProgress.map { wp ->
@@ -126,15 +126,15 @@ fun ActivitySession.recalculate(
     val distToFinish = lastWp?.distanceRemainingKm ?: 0.0
     val newCompletion = if (speedKmh > 0)
         nowMs + ((distToFinish / speedKmh) * 3_600_000L).toLong()
-    else estimatedCompletionMillis
+    else estimatedCompletion
 
     return copy(
         currentLocation = newLocation,
-        currentSpeedKmh = speedKmh,
-        distanceCoveredKm = newDistance,
-        elapsedTimeSeconds = elapsedSeconds,
+        currentSpeed = speedKmh,
+        distCovered = newDistance,
+        elapsedTime = elapsedSeconds,
         waypointProgress = updatedProgress,
-        estimatedCompletionMillis = newCompletion,
+        estimatedCompletion = newCompletion,
     )
 }
 

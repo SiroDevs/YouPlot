@@ -121,7 +121,7 @@ class PlotterRepo @Inject constructor(
                 val elevProfile = decodedPoints.mapIndexed { idx, _ ->
                     ElevationPoint(
                         distanceKm = distKm * idx.toDouble() / decodedPoints.size,
-                        elevationMeters = 1400.0 + 80 * sin(idx.toDouble() / decodedPoints.size * PI * 2),
+                        elevation = 1400.0 + 80 * sin(idx.toDouble() / decodedPoints.size * PI * 2),
                     )
                 }
                 val (gain, loss) = buildElevationStats(elevProfile)
@@ -130,9 +130,9 @@ class PlotterRepo @Inject constructor(
                     id = i,
                     waypoints = decodedPoints,
                     elevationProfile = elevProfile,
-                    totalDistanceKm = distKm,
-                    totalElevationGainMeters = gain,
-                    totalElevationLossMeters = loss,
+                    totalDist = distKm,
+                    elevationGain = gain,
+                    elevationLoss = loss,
                     colorArgb = MapConstants.CANDIDATE_COLORS[i % MapConstants.CANDIDATE_COLORS.size],
                 )
             }

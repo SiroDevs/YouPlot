@@ -32,7 +32,7 @@ fun List<WaypointProgress>.toJson(): String {
                 JSONObject().apply {
                     put("id", id); put("routeId", routeId); put("name", name)
                     put("lat", position.latitude); put("lng", position.longitude)
-                    put("orderIndex", orderIndex); put("elevation", elevationMeters)
+                    put("orderIndex", orderIndex); put("elevation", elevation)
                     put("isStopPlanned", isStopPlanned)
                 }
             })
@@ -55,7 +55,7 @@ fun String.toWaypointProgressList(): List<WaypointProgress> {
                 name = wObj.getString("name"),
                 position = LatLng(wObj.getDouble("lat"), wObj.getDouble("lng")),
                 orderIndex = wObj.getInt("orderIndex"),
-                elevationMeters = wObj.getDouble("elevation"),
+                elevation = wObj.getDouble("elevation"),
                 isStopPlanned = wObj.getBoolean("isStopPlanned"),
             ),
             plannedArrivalMillis = obj.getLong("planned"),

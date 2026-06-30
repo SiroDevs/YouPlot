@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "sessions",
+    tableName = "activitys",
     foreignKeys = [
         ForeignKey(
             entity = PlanEntity::class,
@@ -17,17 +17,17 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("planId")],
 )
-data class SessionEntity(
+data class ActivityEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val planId: Long,
     val routeId: Long,
     val status: String,
-    val startedAtMillis: Long?,
-    val elapsedTimeSeconds: Long,
+    val startedAt: Long?,
+    val elapsedTime: Long,
     val currentLat: Double?,
     val currentLng: Double?,
-    val currentSpeedKmh: Double,
-    val distanceCoveredKm: Double,
-    val waypointProgressJson: String,
-    val estimatedCompletionMillis: Long?,
+    val currentSpeed: Double,
+    val distCovered: Double,
+    val waypointProgress: String,
+    val estimatedCompletion: Long?,
 )

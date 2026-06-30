@@ -117,13 +117,13 @@ private fun PlannerStep1Content(
         }
     }
 
-    val totalDistance = state.selectedRoute?.totalDistanceKm
-        ?: (state.avgDistancePerDayKm * state.numberOfDays)
-    val etaHours = if (state.avgSpeedKmh > 0) totalDistance / state.avgSpeedKmh else 0.0
+    val totalDistance = state.selectedRoute?.totalDist
+        ?: (state.avgDistPerDay * state.numberOfDays)
+    val etaHours = if (state.avgSpeed > 0) totalDistance / state.avgSpeed else 0.0
     val etaDays = state.numberOfDays
     val dailyHours = if (etaDays > 0) etaHours / etaDays else etaHours
     val etaText = buildString {
-        append("%.1f km/day".format(state.avgDistancePerDayKm))
+        append("%.1f km/day".format(state.avgDistPerDay))
         append(" · ")
         val h = dailyHours.toInt()
         val m = ((dailyHours - h) * 60).roundToInt()
@@ -188,8 +188,8 @@ private fun PlannerStep1Content(
         PlanSliderCard(
             icon = { Icon(Icons.Default.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp)) },
             label = "Distance per Day",
-            valueLabel = "%.1f km".format(state.avgDistancePerDayKm),
-            value = state.avgDistancePerDayKm.toFloat(),
+            valueLabel = "%.1f km".format(state.avgDistPerDay),
+            value = state.avgDistPerDay.toFloat(),
             onValueChange = { onAvgDistancePerDayChange(it.toDouble()) },
             valueRange = 1f..100f,
             steps = 98,
@@ -199,8 +199,8 @@ private fun PlannerStep1Content(
         PlanSliderCard(
             icon = { Icon(Icons.Default.Speed, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp)) },
             label = "Average Speed",
-            valueLabel = "%.1f km/h".format(state.avgSpeedKmh),
-            value = state.avgSpeedKmh.toFloat(),
+            valueLabel = "%.1f km/h".format(state.avgSpeed),
+            value = state.avgSpeed.toFloat(),
             onValueChange = { onAvgSpeedChange(it.toDouble()) },
             valueRange = 1f..40f,
             steps = 38,
@@ -245,7 +245,7 @@ private fun PlannerStep1Preview() {
         sportType = SportType.CYCLING,
         startPoint = LatLng(-1.286, 36.817),
         endPoint = LatLng(-4.04, 39.67),
-        totalDistanceKm = 480.0,
+        totalDist = 480.0,
     )
     AppTheme {
         PlannerStep1Content(
@@ -254,7 +254,7 @@ private fun PlannerStep1Preview() {
                 planName = "Coast Tour Plan",
                 description = "Five days along the Indian Ocean coast.",
                 numberOfDays = 5,
-                avgSpeedKmh = 18.0,
+                avgSpeed = 18.0,
             ),
             onPlanNameChange = {},
             onDescriptionChange = {},

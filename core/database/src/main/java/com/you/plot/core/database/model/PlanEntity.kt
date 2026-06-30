@@ -40,7 +40,7 @@ data class PlanEntity(
     val description: String,
     val startDateMillis: Long,
     val numberOfDays: Int,
-    val avgSpeedKmh: Double,
-    val avgDistancePerDayKm: Double,
+    val avgSpeed: Double,
+    val avgDistPerDay: Double,
     val createdAt: Long,
 )

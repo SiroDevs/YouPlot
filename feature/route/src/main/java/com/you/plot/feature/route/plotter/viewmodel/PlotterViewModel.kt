@@ -353,7 +353,7 @@ class PlotterViewModel @Inject constructor(
                     if (s.isRoundTrip) add(start)
                 }
                 val totalDist =
-                    if (s.isRoundTrip) candidate.totalDistanceKm * 2 else candidate.totalDistanceKm
+                    if (s.isRoundTrip) candidate.totalDist * 2 else candidate.totalDist
 
                 val waypointEntities = allPoints.mapIndexed { index, latLng ->
                     val humanName = when (index) {
@@ -376,7 +376,7 @@ class PlotterViewModel @Inject constructor(
                         name = humanName,
                         position = latLng,
                         orderIndex = index,
-                        distanceFromStartKm = cumDist,
+                        distFromStart = cumDist,
                         isStopPlanned = index != 0 && index != allPoints.lastIndex,
                     )
                 }
@@ -396,9 +396,9 @@ class PlotterViewModel @Inject constructor(
                         endPoint = end,
                         waypoints = waypointEntities,
                         elevationProfile = candidate.elevationProfile,
-                        totalDistanceKm = totalDist,
-                        totalElevationGainMeters = candidate.totalElevationGainMeters,
-                        totalElevationLossMeters = candidate.totalElevationLossMeters,
+                        totalDist = totalDist,
+                        elevationGain = candidate.elevationGain,
+                        elevationLoss = candidate.elevationLoss,
                         isRoundTrip = s.isRoundTrip,
                     ),
                 )

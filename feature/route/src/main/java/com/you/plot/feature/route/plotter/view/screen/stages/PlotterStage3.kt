@@ -88,7 +88,7 @@ private fun PlotterStage3Content(
             }
 
             state.selectedCandidate?.let { c ->
-                val dist = if (state.isRoundTrip) c.totalDistanceKm * 2 else c.totalDistanceKm
+                val dist = if (state.isRoundTrip) c.totalDist * 2 else c.totalDist
                 Text(
                     "Est. distance: ${"%.1f".format(dist)} km",
                     style = MaterialTheme.typography.bodySmall,

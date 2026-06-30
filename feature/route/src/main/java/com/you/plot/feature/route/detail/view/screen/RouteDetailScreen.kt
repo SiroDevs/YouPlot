@@ -219,9 +219,9 @@ private fun RouteDetailContent(
             }
 
             RouteInfoPanel(
-                distanceKm = route.totalDistanceKm,
-                elevGainM = route.totalElevationGainMeters,
-                elevLossM = route.totalElevationLossMeters,
+                distanceKm = route.totalDist,
+                elevGainM = route.elevationGain,
+                elevLossM = route.elevationLoss,
                 elevationProfile = route.elevationProfile,
                 sportType = route.sportType,
                 isRoundTrip = route.isRoundTrip,
@@ -248,18 +248,18 @@ private fun sampleRoute(): Route {
         Waypoint(
             id = 1, routeId = 1L, name = "Nairobi CBD",
             position = LatLng(-1.286, 36.817), orderIndex = 0,
-            elevationMeters = 1700.0, distanceFromStartKm = 0.0,
+            elevation = 1700.0, distFromStart = 0.0,
         ),
         Waypoint(
             id = 2, routeId = 1L, name = "Uhuru Park",
             position = LatLng(-1.291, 36.819), orderIndex = 1,
-            elevationMeters = 1720.0, distanceFromStartKm = 2.1,
+            elevation = 1720.0, distFromStart = 2.1,
             isStopPlanned = true,
         ),
         Waypoint(
             id = 3, routeId = 1L, name = "Lavington",
             position = LatLng(-1.300, 36.830), orderIndex = 2,
-            elevationMeters = 1750.0, distanceFromStartKm = 8.4,
+            elevation = 1750.0, distFromStart = 8.4,
         ),
     )
     return Route(
@@ -271,9 +271,9 @@ private fun sampleRoute(): Route {
         endPoint = LatLng(-1.300, 36.830),
         waypoints = waypoints,
         elevationProfile = profile,
-        totalDistanceKm = 8.4,
-        totalElevationGainMeters = 120.0,
-        totalElevationLossMeters = 95.0,
+        totalDist = 8.4,
+        elevationGain = 120.0,
+        elevationLoss = 95.0,
         isRoundTrip = false,
         createdAt = createdAt,
     )

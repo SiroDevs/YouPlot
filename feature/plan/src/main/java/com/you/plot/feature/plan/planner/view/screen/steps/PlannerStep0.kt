@@ -75,7 +75,7 @@ private fun PlannerStep0Content(
                 state.routes.forEach { route ->
                     SourceCard(
                         title = route.name,
-                        subtitle = "${"%.1f".format(route.totalDistanceKm)} km · ${route.sportType.name.lowercase().replaceFirstChar { it.uppercase() }}",
+                        subtitle = "${"%.1f".format(route.totalDist)} km · ${route.sportType.name.lowercase().replaceFirstChar { it.uppercase() }}",
                         isSelected = state.selectedRoute?.id == route.id,
                         onClick = { onRouteSelected(route) },
                     )
@@ -92,7 +92,7 @@ private fun PlannerStep0Content(
                 state.templatePlans.forEach { plan ->
                     SourceCard(
                         title = plan.name,
-                        subtitle = "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDistancePerDayKm)} km/day",
+                        subtitle = "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDistPerDay)} km/day",
                         isSelected = state.selectedTemplate?.id == plan.id,
                         onClick = { onTemplateSelected(plan) },
                     )
@@ -114,7 +114,7 @@ private fun PlannerStep0Preview() {
         sportType = SportType.CYCLING,
         startPoint = LatLng(-1.286, 36.817),
         endPoint = LatLng(-4.04, 39.67),
-        totalDistanceKm = 480.0,
+        totalDist = 480.0,
     )
     val sampleRoute2 = Route(
         id = 2L,
@@ -122,7 +122,7 @@ private fun PlannerStep0Preview() {
         sportType = SportType.HIKING,
         startPoint = LatLng(-1.286, 36.817),
         endPoint = LatLng(-1.0, 37.0),
-        totalDistanceKm = 65.0,
+        totalDist = 65.0,
     )
     AppTheme {
         PlannerStep0Content(

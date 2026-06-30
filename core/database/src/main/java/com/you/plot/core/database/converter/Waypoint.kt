@@ -13,8 +13,8 @@ fun List<Waypoint>.toJson(): String {
         arr.put(JSONObject().apply {
             put("id", wp.id); put("routeId", wp.routeId); put("name", wp.name)
             put("lat", wp.position.latitude); put("lng", wp.position.longitude)
-            put("orderIndex", wp.orderIndex); put("elevation", wp.elevationMeters)
-            put("distanceFromStartKm", wp.distanceFromStartKm)
+            put("orderIndex", wp.orderIndex); put("elevation", wp.elevation)
+            put("distFromStart", wp.distFromStart)
             put("isStopPlanned", wp.isStopPlanned)
         })
     }
@@ -30,8 +30,8 @@ fun String.toWaypointList(): List<Waypoint> {
             name = obj.getString("name"),
             position = LatLng(obj.getDouble("lat"), obj.getDouble("lng")),
             orderIndex = obj.getInt("orderIndex"),
-            elevationMeters = obj.getDouble("elevation"),
-            distanceFromStartKm = obj.optDouble("distanceFromStartKm", 0.0),
+            elevation = obj.getDouble("elevation"),
+            distFromStart = obj.optDouble("distFromStart", 0.0),
             isStopPlanned = obj.getBoolean("isStopPlanned"),
         )
     }

@@ -66,15 +66,15 @@ fun RouteCandidateCard(
                 Text("Route ${candidate.id + 1}", style = MaterialTheme.typography.titleSmall)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
-                        "${"%.1f".format(candidate.totalDistanceKm)} km",
+                        "${"%.1f".format(candidate.totalDist)} km",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        "↑ ${"%.0f".format(candidate.totalElevationGainMeters)} m",
+                        "↑ ${"%.0f".format(candidate.elevationGain)} m",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        "↓ ${"%.0f".format(candidate.totalElevationLossMeters)} m",
+                        "↓ ${"%.0f".format(candidate.elevationLoss)} m",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }

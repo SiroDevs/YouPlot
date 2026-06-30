@@ -40,16 +40,16 @@ fun RouteDetailWaypointRow(wp: Waypoint, total: Double) {
         Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
         Column(Modifier.weight(1f)) {
             Text(wp.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-            if (wp.distanceFromStartKm > 0.0) {
+            if (wp.distFromStart > 0.0) {
                 Text(
-                    "%.1f km from start".format(wp.distanceFromStartKm),
+                    "%.1f km from start".format(wp.distFromStart),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
         if (total > 0) {
-            val pct = (wp.distanceFromStartKm / total * 100).toInt()
+            val pct = (wp.distFromStart / total * 100).toInt()
             Text(
                 "$pct%",
                 style = MaterialTheme.typography.labelSmall,
