@@ -162,6 +162,34 @@ class PlotterRepo @Inject constructor(
         }.getOrNull()
     }
 
+    suspend fun resolveAreaLabel(latLng: LatLng): String = withContext(Dispatchers.IO) {
+        runCatching {
+            val url = "${MapConstants.NOMINATIM_BASE}reverse?lat=${latLng.latitude}&lon=${latLng.longitude}" +
+                "&format=jsonv2&zoom=14&addressdetails=1"
+            val conn = (URL(url).openConnection() as HttpURLConnection).apply {
+                setRequestProperty("User-Agent", osmUserAgent)
+                connectTimeout = 5_000; readTimeout = 5_000
+            }
+            val json = JSONObject(conn.inputStream.bufferedReader().readText())
+            conn.disconnect()
+            val addr = json.optJSONObject("address")
+            listOfNotNull(
+                addr?.optString("suburb")?.ifEmpty { null },
+                addr?.optString("neighbourhood")?.ifEmpty { null },
+                addr?.optString("village")?.ifEmpty { null },
+                addr?.optString("town")?.ifEmpty { null },
+                addr?.optString("city")?.ifEmpty { null },
+                addr?.optString("county")?.ifEmpty { null },
+                json.optString("display_name").split(",").firstOrNull()?.trim()?.ifEmpty { null },
+            ).firstOrNull()
+        }.getOrNull()
+            ?: run {
+                val ns = if (latLng.latitude >= 0) "Northern" else "Southern"
+                val ew = if (latLng.longitude >= 0) "Eastern" else "Western"
+                "$ns $ew Area"
+            }
+    }
+
     suspend fun searchLocationsWithCountry(query: String, countryCode: String): List<WaypointSearchResult> =
         withContext(Dispatchers.IO) {
             runCatching {

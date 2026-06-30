@@ -51,7 +51,7 @@ fun PlannerStep3(state: PlannerUiState, vm: PlannerViewModel) {
                 CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.width(8.dp))
             }
-            Text(if (state.isSaving) "Saving…" else "Save Plan")
+            Text(if (state.isSaving) "Saving ..." else "Save Plan")
         }
     }
 }

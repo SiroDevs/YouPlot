@@ -172,7 +172,7 @@ fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
                 CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.width(8.dp))
             }
-            Text(if (state.isSaving) "Saving…" else "Save Route")
+            Text(if (state.isSaving) "Saving ..." else "Save Route")
         }
     }
 }

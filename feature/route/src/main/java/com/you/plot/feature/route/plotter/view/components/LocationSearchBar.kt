@@ -3,27 +3,20 @@ package com.you.plot.feature.route.plotter.view.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,8 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,37 +37,36 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppSpecs
-import com.you.plot.core.common.utils.COUNTRY_LIST
 import com.you.plot.core.domain.entity.WaypointSearchResult
 
 @Composable
 fun LocationSearchBar(
     query: String,
-    onQueryChange: (String) -> Unit,
+    onQryChange: () -> Unit,
+    onSearch: (String) -> Unit,
     results: List<WaypointSearchResult>,
     isSearching: Boolean,
     placeholder: String,
     onResultSelected: (WaypointSearchResult) -> Unit,
     modifier: Modifier = Modifier,
-    selectedCountryCode: String = "ke",
+    selectedCtryCode: String = "ke",
     onCountrySelected: ((String) -> Unit)? = null,
     onChooseOnMap: (() -> Unit)? = null,
     onUseMyLocation: (() -> Unit)? = null,
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    var showCountryMenu by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    var typed by remember { mutableStateOf(query) }
+    LaunchedEffect(query) { if (query != typed) typed = query }
 
     val showQuickActions = isFocused && (onChooseOnMap != null || onUseMyLocation != null)
     val hasDropdown = showQuickActions || results.isNotEmpty()
-    val countryLabel =
-        COUNTRY_LIST.firstOrNull { it.first == selectedCountryCode }?.first?.uppercase()
-            ?.ifEmpty { "ALL" } ?: "KE"
+    val showClearButton = typed.isNotEmpty()
 
     Column(
         modifier
@@ -86,8 +78,8 @@ fun LocationSearchBar(
             )
     ) {
         OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
+            value = typed,
+            onValueChange = { typed = it },
             placeholder = { Text(placeholder) },
             leadingIcon = {
                 if (isSearching) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -95,8 +87,11 @@ fun LocationSearchBar(
             },
             trailingIcon = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (query.isNotEmpty()) {
-                        IconButton(onClick = { onQueryChange("") }) {
+                    if (showClearButton) {
+                        IconButton(onClick = {
+                            typed = ""
+                            onQryChange()
+                        }) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "Clear",
@@ -104,61 +99,27 @@ fun LocationSearchBar(
                             )
                         }
                     }
-                    // Country selector button
                     if (onCountrySelected != null) {
-                        Box {
-                            TextButton(
-                                onClick = { showCountryMenu = true },
-                                modifier = Modifier.padding(end = 4.dp),
-                            ) {
-                                Text(
-                                    countryLabel.ifEmpty { "🌍" },
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                                Icon(
-                                    Icons.Default.KeyboardArrowDown,
-                                    contentDescription = "Select country",
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = showCountryMenu,
-                                onDismissRequest = { showCountryMenu = false },
-                            ) {
-                                COUNTRY_LIST.forEach { (code, name) ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                            ) {
-                                                Text(
-                                                    code.uppercase().ifEmpty { "🌍" },
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                )
-                                                Text(
-                                                    name,
-                                                    style = MaterialTheme.typography.bodySmall
-                                                )
-                                            }
-                                        },
-                                        onClick = {
-                                            onCountrySelected(code)
-                                            showCountryMenu = false
-                                        },
-                                    )
-                                }
-                            }
-                        }
+                        CountrySelector(
+                            selectedCtryCode = selectedCtryCode,
+                            onCountrySelected = onCountrySelected
+                        )
                     }
                 }
             },
             singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    isFocused = false
+
+                    onSearch(typed)
+                }
+            ),
             shape = if (hasDropdown) AppSpecs.TOP_SHAPE else AppSpecs.FULL_SHAPE,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
@@ -256,24 +217,5 @@ fun LocationSearchBar(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun QuickActionRow(icon: @Composable () -> Unit, label: String, onClick: () -> Unit) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 13.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        icon()
-        Text(
-            label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }

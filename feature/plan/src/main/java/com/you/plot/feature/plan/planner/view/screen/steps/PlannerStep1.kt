@@ -211,7 +211,7 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
                     color = MaterialTheme.colorScheme.onPrimary,
                 )
                 Spacer(Modifier.padding(horizontal = 4.dp))
-                Text("Generating…")
+                Text("Generating ...")
             } else {
                 Text("Generate Schedule →")
             }

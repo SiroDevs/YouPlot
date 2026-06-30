@@ -194,7 +194,7 @@ private fun PlotterStage.nextButtonConfig(state: PlotterUiState): NextButtonConf
         )
 
         PlotterStage.STAGE_5 -> NextButtonConfig(
-            if (state.isSaving) "Saving…" else "Save Route",
+            if (state.isSaving) "Saving ..." else "Save Route",
             !state.isSaving
         )
     }

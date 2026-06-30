@@ -206,7 +206,7 @@ fun TrackerScreen(
                     Text("Ready to start?", style = MaterialTheme.typography.headlineMedium)
                     if (!state.allPermissionsGranted) {
                         Text(
-                            "Waiting for permissions…",
+                            "Waiting for permissions ...",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

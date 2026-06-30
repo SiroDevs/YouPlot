@@ -144,7 +144,7 @@ class TrackingService : Service() {
             .createNotificationChannel(channel)
     }
 
-    private fun buildNotification(sessionId: Long, contentText: String = "Activity in progress…") =
+    private fun buildNotification(sessionId: Long, contentText: String = "Activity in progress ...") =
         baseNotificationBuilder(contentText, sessionId).build()
 
     private fun updateNotification(sessionId: Long, contentText: String) {
