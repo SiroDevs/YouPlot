@@ -124,7 +124,7 @@ class PlannerViewModel @Inject constructor(
             .filter { it.plannedTimeMillis <= eventMillis }
             .maxOfOrNull { it.distanceCoveredKm } ?: 0.0
         val event = PlanEvent(
-            id = System.currentTimeMillis(),          // temp local id
+            id = System.currentTimeMillis(),
             planId = 0L,
             dayNumber = day,
             name = name,
@@ -167,7 +167,7 @@ class PlannerViewModel @Inject constructor(
                     setError("Speed must be greater than 0"); return
                 }
                 _state.update { it.copy(isGenerating = true) }
-                viewModelScope.launch {
+                /*viewModelScope.launch {
                     runCatching { generateEvents() }
                         .onFailure { e ->
                             _state.update {
@@ -177,7 +177,8 @@ class PlannerViewModel @Inject constructor(
                                 )
                             }
                         }
-                }
+                }*/
+                _state.update { it.copy(currentStep = 2) }
             }
 
             2 -> _state.update { it.copy(currentStep = 3) }

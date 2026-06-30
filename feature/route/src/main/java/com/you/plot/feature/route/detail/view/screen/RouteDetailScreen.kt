@@ -1,27 +1,24 @@
 package com.you.plot.feature.route.detail.view.screen
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.IosShare
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,15 +35,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.entity.ElevationPoint
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.dateFmt
+import com.you.plot.core.designsystem.theme.AppTheme
+import com.you.plot.core.domain.entity.Route
+import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.feature.route.detail.view.components.RouteDetailRow
-import com.you.plot.feature.route.detail.view.components.RouteDetailStatCard
-import com.you.plot.feature.route.detail.view.components.RouteDetailWaypointRow
+import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
+import com.you.plot.feature.route.detail.viewmodel.RouteDetailUiState
 import com.you.plot.feature.route.detail.viewmodel.RouteDetailViewModel
-import com.you.plot.feature.route.plotter.view.components.ElevationProfileGraph
 import com.you.plot.feature.route.plotter.view.components.PlotterMap
 import java.util.Date
 
@@ -58,24 +59,43 @@ fun RouteDetailScreen(
     onCreatePlan: (Long) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    var showDeleteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.isDeleted) { if (state.isDeleted) onBack() }
 
+    RouteDetailContent(
+        state = state,
+        onBack = onBack,
+        onCreatePlan = onCreatePlan,
+        onDeleteRoute = viewModel::deleteRoute,
+        showMap = true,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RouteDetailContent(
+    state: RouteDetailUiState,
+    onBack: () -> Unit,
+    onCreatePlan: (Long) -> Unit,
+    onDeleteRoute: () -> Unit,
+    showMap: Boolean,
+) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showMoreMenu by remember { mutableStateOf(false) }
+
+    // ── Delete confirmation ───────────────────────────────────────────────────
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text("Delete Route?") },
             text = { Text("This permanently deletes the route and all associated plans.") },
             confirmButton = {
-                TextButton(onClick = { showDeleteDialog = false; viewModel.deleteRoute() }) {
+                TextButton(onClick = { showDeleteDialog = false; onDeleteRoute() }) {
                     Text("Delete", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showDeleteDialog = false
-                }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") }
             },
         )
     }
@@ -87,13 +107,77 @@ fun RouteDetailScreen(
                 showGoBack = true,
                 onNavIconClick = onBack,
                 actions = {
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                    // Edit button
+                    IconButton(onClick = { /* TODO: navigate to edit screen */ }) {
+                        Icon(Icons.Outlined.Edit, contentDescription = "Edit route")
+                    }
+                    // ⋮ More menu
+                    Box {
+                        IconButton(onClick = { showMoreMenu = true }) {
+                            Icon(Icons.Outlined.MoreVert, contentDescription = "More options")
+                        }
+                        DropdownMenu(
+                            expanded = showMoreMenu,
+                            onDismissRequest = { showMoreMenu = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Export Route") },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Outlined.IosShare, null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    // WIP — no action yet
+                                },
+                                enabled = false,   // clearly WIP
+                                trailingIcon = {
+                                    Text(
+                                        "Soon",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                },
+                            )
+                            HorizontalDivider()
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        "Delete Route",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    showDeleteDialog = true
+                                },
+                            )
+                        }
                     }
                 },
             )
         },
+        floatingActionButton = {
+            state.route?.let { route ->
+                ExtendedFloatingActionButton(
+                    onClick = { onCreatePlan(route.id) },
+                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                    text = { Text("Plan this Route") },
+                )
+            }
+        },
     ) { padding ->
+
         if (state.isLoading) {
             Box(Modifier
                 .fillMaxSize()
@@ -102,6 +186,7 @@ fun RouteDetailScreen(
             }
             return@Scaffold
         }
+
         val route = state.route ?: run {
             Box(Modifier
                 .fillMaxSize()
@@ -111,139 +196,127 @@ fun RouteDetailScreen(
             return@Scaffold
         }
 
-        LazyColumn(Modifier
+        Column(Modifier
             .fillMaxSize()
             .padding(padding)) {
-            item {
+
+            if (showMap) {
                 PlotterMap(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(240.dp),
                     startPoint = route.startPoint,
                     endPoint = route.endPoint,
-                    waypoints = route.waypoints
-                        .filter {
-                            !it.name.equals("Start", true) && !it.name.equals(
-                                "Finish",
-                                true
-                            )
-                        }
-                        .map { it.position },
+                    waypoints = emptyList(),
                     candidates = emptyList(),
                     selectedCandidateId = null,
                     isRoundTrip = route.isRoundTrip,
                     startPointName = route.waypoints.minByOrNull { it.orderIndex }?.name ?: "Start",
                     endPointName = route.waypoints.maxByOrNull { it.orderIndex }?.name ?: "Finish",
+//                    routePolyline = route.waypoints.sortedBy { it.orderIndex }.map { it.position },
                     onMapTap = {},
                 )
             }
 
-            item {
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    RouteDetailStatCard(
-                        "Distance",
-                        "%.1f km".format(route.totalDistanceKm),
-                        Modifier.weight(1f)
-                    )
-                    RouteDetailStatCard(
-                        "↑ Gain",
-                        "%.0f m".format(route.totalElevationGainMeters),
-                        Modifier.weight(1f)
-                    )
-                    RouteDetailStatCard(
-                        "↓ Loss",
-                        "%.0f m".format(route.totalElevationLossMeters),
-                        Modifier.weight(1f)
-                    )
-                }
-                Spacer(Modifier.height(12.dp))
-            }
-
-            if (route.elevationProfile.isNotEmpty()) {
-                item {
-                    Column(Modifier.padding(horizontal = 16.dp)) {
-                        Text(
-                            "Elevation Profile", style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        ElevationProfileGraph(
-                            profile = route.elevationProfile,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(90.dp)
-                                .clip(RoundedCornerShape(10.dp)),
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                }
-            }
-
-            item {
-                Card(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                    ),
-                ) {
-                    Column(
-                        Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        RouteDetailRow(
-                            "Sport",
-                            route.sportType.name.lowercase().replaceFirstChar { it.uppercase() })
-                        RouteDetailRow("Type", if (route.isRoundTrip) "Round Trip" else "One-Way")
-                        RouteDetailRow("Created", dateFmt.format(Date(route.createdAt)))
-                        if (route.description.isNotBlank()) {
-                            HorizontalDivider()
-                            Text(
-                                route.description, style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(12.dp))
-            }
-
-            if (route.waypoints.isNotEmpty()) {
-                item {
-                    Text(
-                        "Waypoints", style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                    Spacer(Modifier.height(6.dp))
-                }
-                items(route.waypoints.sortedBy { it.orderIndex }) { wp ->
-                    RouteDetailWaypointRow(wp = wp, total = route.totalDistanceKm)
-                }
-                item { Spacer(Modifier.height(8.dp)) }
-            }
-
-            item {
-                Button(
-                    onClick = { onCreatePlan(route.id) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                ) {
-                    Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.size(6.dp))
-                    Text("Plan this Route")
-                }
-                Spacer(Modifier.height(32.dp))
-            }
+            RouteInfoPanel(
+                distanceKm = route.totalDistanceKm,
+                elevGainM = route.totalElevationGainMeters,
+                elevLossM = route.totalElevationLossMeters,
+                elevationProfile = route.elevationProfile,
+                sportType = route.sportType,
+                isRoundTrip = route.isRoundTrip,
+                waypoints = route.waypoints,
+                createdAt = dateFmt.format(Date(route.createdAt)),
+                description = route.description,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
+    }
+}
+
+private fun sampleRoute(): Route {
+    val createdAt = 1_700_000_000_000L
+    val profile = listOf(
+        ElevationPoint(0.0, 1700.0),
+        ElevationPoint(1.0, 1720.0),
+        ElevationPoint(2.0, 1755.0),
+        ElevationPoint(3.0, 1742.0),
+        ElevationPoint(4.0, 1768.0),
+        ElevationPoint(5.0, 1750.0),
+    )
+    val waypoints = listOf(
+        Waypoint(
+            id = 1, routeId = 1L, name = "Nairobi CBD",
+            position = LatLng(-1.286, 36.817), orderIndex = 0,
+            elevationMeters = 1700.0, distanceFromStartKm = 0.0,
+        ),
+        Waypoint(
+            id = 2, routeId = 1L, name = "Uhuru Park",
+            position = LatLng(-1.291, 36.819), orderIndex = 1,
+            elevationMeters = 1720.0, distanceFromStartKm = 2.1,
+            isStopPlanned = true,
+        ),
+        Waypoint(
+            id = 3, routeId = 1L, name = "Lavington",
+            position = LatLng(-1.300, 36.830), orderIndex = 2,
+            elevationMeters = 1750.0, distanceFromStartKm = 8.4,
+        ),
+    )
+    return Route(
+        id = 1L,
+        name = "Morning Loop",
+        description = "Easy paced run through the city.",
+        sportType = SportType.RUNNING,
+        startPoint = LatLng(-1.286, 36.817),
+        endPoint = LatLng(-1.300, 36.830),
+        waypoints = waypoints,
+        elevationProfile = profile,
+        totalDistanceKm = 8.4,
+        totalElevationGainMeters = 120.0,
+        totalElevationLossMeters = 95.0,
+        isRoundTrip = false,
+        createdAt = createdAt,
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RouteDetailScreenLoadingPreview() {
+    AppTheme {
+        RouteDetailContent(
+            state = RouteDetailUiState(isLoading = true),
+            onBack = {},
+            onCreatePlan = {},
+            onDeleteRoute = {},
+            showMap = false,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RouteDetailScreenNotFoundPreview() {
+    AppTheme {
+        RouteDetailContent(
+            state = RouteDetailUiState(isLoading = false, route = null),
+            onBack = {},
+            onCreatePlan = {},
+            onDeleteRoute = {},
+            showMap = false,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RouteDetailScreenLoadedPreview() {
+    AppTheme {
+        RouteDetailContent(
+            state = RouteDetailUiState(isLoading = false, route = sampleRoute()),
+            onBack = {},
+            onCreatePlan = {},
+            onDeleteRoute = {},
+            showMap = false,
+        )
     }
 }

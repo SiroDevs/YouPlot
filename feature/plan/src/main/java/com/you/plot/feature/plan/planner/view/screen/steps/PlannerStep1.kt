@@ -93,7 +93,6 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
         }
     }
 
-    // ETA calculation
     val totalDistance = state.selectedRoute?.totalDistanceKm
         ?: (state.avgDistancePerDayKm * state.numberOfDays)
     val etaHours = if (state.avgSpeedKmh > 0) totalDistance / state.avgSpeedKmh else 0.0
@@ -167,7 +166,6 @@ fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
             supportingText = if (state.selectedRoute != null) "Auto from route — drag to override" else null,
         )
 
-        // Speed scroller
         SliderCard(
             icon = { Icon(Icons.Default.Speed, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp)) },
             label = "Average Speed",

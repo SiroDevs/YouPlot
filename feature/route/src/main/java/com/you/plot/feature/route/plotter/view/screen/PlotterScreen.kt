@@ -185,11 +185,11 @@ data class NextButtonConfig(val label: String, val enabled: Boolean)
 
 private fun PlotterStage.nextButtonConfig(state: PlotterUiState): NextButtonConfig? =
     when (this) {
-        PlotterStage.STAGE_1 -> NextButtonConfig("Set Destination →", state.startPoint != null)
-        PlotterStage.STAGE_2 -> NextButtonConfig("Add Waypoints →", state.endPoint != null)
-        PlotterStage.STAGE_3 -> NextButtonConfig("Compare Routes →", true)
+        PlotterStage.STAGE_1 -> NextButtonConfig("Set Destination", state.startPoint != null)
+        PlotterStage.STAGE_2 -> NextButtonConfig("Add Waypoints", state.endPoint != null)
+        PlotterStage.STAGE_3 -> NextButtonConfig("Compare Routes", true)
         PlotterStage.STAGE_4 -> NextButtonConfig(
-            "Review & Save →",
+            "Review & Save",
             state.selectedCandidateId != null
         )
 

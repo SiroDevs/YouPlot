@@ -23,13 +23,32 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.feature.route.plotter.view.components.RouteTypeCard
 import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
+
 @Composable
 fun PlotterStage3(state: PlotterUiState, vm: PlotterViewModel) {
+    PlotterStage3Content(
+        state = state,
+        onRoundTripChange = vm::setRoundTrip,
+        onToggleSuggestedWaypoints = vm::toggleSuggestedWaypoints,
+        onRemoveManualWaypoint = vm::removeManualWaypoint,
+    )
+}
+
+@Composable
+private fun PlotterStage3Content(
+    state: PlotterUiState,
+    onRoundTripChange: (Boolean) -> Unit,
+    onToggleSuggestedWaypoints: (Boolean) -> Unit,
+    onRemoveManualWaypoint: (Int) -> Unit,
+) {
     Column(
         Modifier
             .fillMaxSize()
@@ -56,14 +75,14 @@ fun PlotterStage3(state: PlotterUiState, vm: PlotterViewModel) {
                     title = "One-Way",
                     description = "Start → Finish",
                     selected = !state.isRoundTrip,
-                    onClick = { vm.setRoundTrip(false) },
+                    onClick = { onRoundTripChange(false) },
                     modifier = Modifier.weight(1f),
                 )
                 RouteTypeCard(
                     title = "Round Trip",
                     description = "Return to Start",
                     selected = state.isRoundTrip,
-                    onClick = { vm.setRoundTrip(true) },
+                    onClick = { onRoundTripChange(true) },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -94,7 +113,7 @@ fun PlotterStage3(state: PlotterUiState, vm: PlotterViewModel) {
                 Text("Use suggested waypoints", style = MaterialTheme.typography.bodyMedium)
                 Switch(
                     checked = state.useSuggestedWaypoints,
-                    onCheckedChange = vm::toggleSuggestedWaypoints,
+                    onCheckedChange = onToggleSuggestedWaypoints,
                 )
             }
 
@@ -123,7 +142,7 @@ fun PlotterStage3(state: PlotterUiState, vm: PlotterViewModel) {
                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
                     .padding(horizontal = 16.dp),
             ) {
-                itemsIndexed(state.manualWaypoints) { index, pt ->
+                itemsIndexed(state.manualWaypoints, key = { index, _ -> "waypoint_$index" }) { index, pt ->
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -136,7 +155,7 @@ fun PlotterStage3(state: PlotterUiState, vm: PlotterViewModel) {
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.weight(1f),
                         )
-                        IconButton(onClick = { vm.removeManualWaypoint(index) }) {
+                        IconButton(onClick = { onRemoveManualWaypoint(index) }) {
                             Icon(Icons.Default.Close, "Remove", modifier = Modifier.size(16.dp))
                         }
                     }
@@ -145,5 +164,48 @@ fun PlotterStage3(state: PlotterUiState, vm: PlotterViewModel) {
         }
 
         Spacer(Modifier.height(72.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PlotterStage3ManualWaypointsPreview() {
+    AppTheme {
+        PlotterStage3Content(
+            state = PlotterUiState(
+                isRoundTrip = false,
+                useSuggestedWaypoints = false,
+                manualWaypoints = listOf(
+                    LatLng(-1.286, 36.817),
+                    LatLng(-1.290, 36.820),
+                    LatLng(-1.295, 36.825),
+                ),
+            ),
+            onRoundTripChange = {},
+            onToggleSuggestedWaypoints = {},
+            onRemoveManualWaypoint = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PlotterStage3SuggestedWaypointsPreview() {
+    AppTheme {
+        PlotterStage3Content(
+            state = PlotterUiState(
+                isRoundTrip = true,
+                useSuggestedWaypoints = true,
+                suggestedWaypoints = listOf(
+                    LatLng(-1.286, 36.817),
+                    LatLng(-1.290, 36.820),
+                    LatLng(-1.295, 36.825),
+                    LatLng(-1.300, 36.830),
+                ),
+            ),
+            onRoundTripChange = {},
+            onToggleSuggestedWaypoints = {},
+            onRemoveManualWaypoint = {},
+        )
     }
 }
