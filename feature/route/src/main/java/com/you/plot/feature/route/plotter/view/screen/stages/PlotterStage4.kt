@@ -14,30 +14,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.common.entity.ElevationPoint
-import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.common.entity.RouteCandidate
-import com.you.plot.core.designsystem.theme.AppTheme
-import com.you.plot.feature.route.plotter.utils.PlotterUiState
+import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.plotter.view.components.ElevationProfileGraph
 import com.you.plot.feature.route.plotter.view.components.RouteCandidateCard
-import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
+import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 
 @Composable
-fun PlotterStage4(state: PlotterUiState, vm: PlotterViewModel) {
-    PlotterStage4Content(
-        state = state,
-        onSelectCandidate = vm::selectCandidate,
-    )
-}
-
-@Composable
-private fun PlotterStage4Content(
-    state: PlotterUiState,
-    onSelectCandidate: (Int) -> Unit,
-) {
+fun PlotterStage4(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
     Column(Modifier.fillMaxSize()) {
         Spacer(Modifier.weight(1f))
 
@@ -49,18 +33,18 @@ private fun PlotterStage4Content(
                 .padding(horizontal = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item(key = "top_spacer") { Spacer(Modifier.height(4.dp)) }
+            item { Spacer(Modifier.height(4.dp)) }
 
-            itemsIndexed(state.routeCandidates, key = { _, c -> "candidate_${c.id}" }) { _, candidate ->
+            itemsIndexed(state.routeCandidates) { _, candidate ->
                 RouteCandidateCard(
                     candidate = candidate,
                     isSelected = candidate.id == state.selectedCandidateId,
-                    onClick = { onSelectCandidate(candidate.id) },
+                    onClick = { vm.selectCandidate(candidate.id) },
                 )
             }
 
             state.selectedCandidate?.let { c ->
-                item(key = "elevation_profile") {
+                item {
                     Text(
                         "Elevation Profile – Route ${c.id + 1}",
                         style = MaterialTheme.typography.labelMedium,
@@ -75,49 +59,7 @@ private fun PlotterStage4Content(
                 }
             }
 
-            item(key = "bottom_spacer") { Spacer(Modifier.height(72.dp)) }
+            item { Spacer(Modifier.height(72.dp)) }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PlotterStage4Preview() {
-    val sampleProfile = listOf(
-        ElevationPoint(0.0, 1700.0),
-        ElevationPoint(1.0, 1720.0),
-        ElevationPoint(2.0, 1750.0),
-        ElevationPoint(3.0, 1735.0),
-        ElevationPoint(4.0, 1760.0),
-        ElevationPoint(5.0, 1745.0),
-    )
-    val candidates = listOf(
-        RouteCandidate(
-            id = 0,
-            waypoints = listOf(LatLng(-1.286, 36.817), LatLng(-1.300, 36.830)),
-            elevationProfile = sampleProfile,
-            totalDistanceKm = 5.4,
-            totalElevationGainMeters = 80.0,
-            totalElevationLossMeters = 55.0,
-            colorArgb = 0xFF1976D2L,
-        ),
-        RouteCandidate(
-            id = 1,
-            waypoints = listOf(LatLng(-1.286, 36.817), LatLng(-1.305, 36.835)),
-            elevationProfile = sampleProfile,
-            totalDistanceKm = 6.2,
-            totalElevationGainMeters = 110.0,
-            totalElevationLossMeters = 70.0,
-            colorArgb = 0xFFD32F2FL,
-        ),
-    )
-    AppTheme {
-        PlotterStage4Content(
-            state = PlotterUiState(
-                routeCandidates = candidates,
-                selectedCandidateId = 0,
-            ),
-            onSelectCandidate = {},
-        )
     }
 }

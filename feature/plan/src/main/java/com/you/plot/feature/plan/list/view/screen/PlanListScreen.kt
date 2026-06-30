@@ -38,15 +38,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.designsystem.theme.AppTheme
-import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.feature.plan.list.view.components.PlanItem
-import com.you.plot.feature.plan.list.viewmodel.PlanListUiState
 import com.you.plot.feature.plan.list.viewmodel.PlanListViewModel
+import com.you.plot.feature.plan.list.view.components.PlanItem
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanListScreen(
     viewModel: PlanListViewModel,
@@ -56,22 +53,6 @@ fun PlanListScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    PlanListScreenContent(
-        state = state,
-        onCreatePlan = onCreatePlan,
-        onPlanClick = onPlanClick,
-        onStartTracking = onStartTracking,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PlanListScreenContent(
-    state: PlanListUiState,
-    onCreatePlan: () -> Unit,
-    onPlanClick: (Long) -> Unit,
-    onStartTracking: (Long) -> Unit,
-) {
     Scaffold(
         topBar = { AppTopBar(title = "Plans") },
         floatingActionButton = {
@@ -103,53 +84,5 @@ private fun PlanListScreenContent(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PlanListScreenPreview() {
-    val plans = listOf(
-        ActivityPlan(
-            id = 1L,
-            routeId = 1L,
-            name = "Coast Tour Plan",
-            description = "Five days along the Indian Ocean coast.",
-            startDateMillis = 0L,
-            numberOfDays = 5,
-            avgSpeedKmh = 18.0,
-            avgDistancePerDayKm = 96.0,
-        ),
-        ActivityPlan(
-            id = 2L,
-            routeId = 2L,
-            name = "Mountain Loop",
-            description = "Weekend mountain hike.",
-            startDateMillis = 0L,
-            numberOfDays = 2,
-            avgSpeedKmh = 5.0,
-            avgDistancePerDayKm = 12.0,
-        ),
-    )
-    AppTheme {
-        PlanListScreenContent(
-            state = PlanListUiState(plans = plans, isLoading = false),
-            onCreatePlan = {},
-            onPlanClick = {},
-            onStartTracking = {},
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PlanListScreenEmptyPreview() {
-    AppTheme {
-        PlanListScreenContent(
-            state = PlanListUiState(plans = emptyList(), isLoading = false),
-            onCreatePlan = {},
-            onPlanClick = {},
-            onStartTracking = {},
-        )
     }
 }

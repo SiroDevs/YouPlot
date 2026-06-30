@@ -37,9 +37,7 @@ fun AppNavHost(
                 viewModel = hiltViewModel(),
                 onPlotRoute = { navController.navigate(Routes.ROUTE_PLOTTER) },
                 onViewAllRoutes = { navController.navigate(Routes.ROUTE_LIST) },
-                // FIX: was navigating to ROUTE_LIST instead of the tapped route detail
                 onRouteClick = { routeId -> navController.navigate(Routes.routeDetail(routeId)) },
-                // FIX: create plan with no pre-selected route
                 onCreatePlan = { navController.navigate(Routes.PLAN_CREATE) },
                 onPlanClick = { planId -> navController.navigate(Routes.planDetail(planId)) },
                 onStartTracking = { planId -> navController.navigate(Routes.tracker(planId)) },
@@ -53,12 +51,10 @@ fun AppNavHost(
             RouteListScreen(
                 viewModel = hiltViewModel(),
                 onCreateRoute = { navController.navigate(Routes.ROUTE_PLOTTER) },
-                // FIX: was navigating to PLAN_LIST instead of the tapped route detail
                 onRouteClick = { routeId -> navController.navigate(Routes.routeDetail(routeId)) },
             )
         }
 
-        // NEW: Route detail screen — shows stats, waypoints, elevation + "Plan this Route" button
         composable(
             route = Routes.ROUTE_DETAIL,
             arguments = listOf(navArgument("routeId") { type = NavType.LongType }),

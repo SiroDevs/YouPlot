@@ -45,13 +45,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.AppConstants
-import com.you.plot.core.data.repos.ThemeMode
 import com.you.plot.core.data.repos.ThemeRepo
-import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.designsystem.theme.ThemeSelectorDialog
 import com.you.plot.core.designsystem.theme.themeName
 import com.you.plot.core.ui.components.action.AppTopBar
@@ -61,11 +58,10 @@ import com.you.plot.core.ui.components.general.InfoDivider
 import com.you.plot.core.ui.components.general.InfoItem
 import com.you.plot.core.ui.components.general.InfoSection
 import com.you.plot.core.ui.components.general.ValueItem
-import com.you.plot.feature.settings.utils.DEFAULT_SPEED_LIMITS
-import com.you.plot.feature.settings.utils.SettingsUiState
 import com.you.plot.feature.settings.view.components.SpeedLimitDialog
 import com.you.plot.feature.settings.viewmodel.SettingsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -73,46 +69,13 @@ fun SettingsScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    SettingsScreenContent(
-        state = state,
-        theme = themeRepo.selectedTheme,
-        onSetTheme = themeRepo::setTheme,
-        onBack = onBack,
-        onShowDefaultSportDialog = viewModel::showDefaultSportDialog,
-        onDismissDefaultSportDialog = viewModel::dismissDefaultSportDialog,
-        onSetDefaultSport = viewModel::setDefaultSport,
-        onSetDistanceUnitMetric = viewModel::setDistanceUnitMetric,
-        onSetUsePaceForRunWalk = viewModel::setUsePaceForRunWalk,
-        onShowSpeedEditor = viewModel::showSpeedEditor,
-        onDismissSpeedEditor = viewModel::dismissSpeedEditor,
-        onSetSpeedLimit = viewModel::setSpeedLimit,
-        onSetNotificationsEnabled = viewModel::setNotificationsEnabled,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SettingsScreenContent(
-    state: SettingsUiState,
-    theme: ThemeMode,
-    onSetTheme: (ThemeMode) -> Unit,
-    onBack: () -> Unit,
-    onShowDefaultSportDialog: () -> Unit,
-    onDismissDefaultSportDialog: () -> Unit,
-    onSetDefaultSport: (SportType) -> Unit,
-    onSetDistanceUnitMetric: (Boolean) -> Unit,
-    onSetUsePaceForRunWalk: (Boolean) -> Unit,
-    onShowSpeedEditor: (SportType) -> Unit,
-    onDismissSpeedEditor: () -> Unit,
-    onSetSpeedLimit: (SportType, Float, Float) -> Unit,
-    onSetNotificationsEnabled: (Boolean) -> Unit,
-) {
+    val theme = themeRepo.selectedTheme
     var showThemeDialog by remember { mutableStateOf(false) }
 
     if (showThemeDialog) {
         ThemeSelectorDialog(
             current = theme, onDismiss = { showThemeDialog = false },
-            onThemeSelected = { onSetTheme(it); showThemeDialog = false })
+            onThemeSelected = { themeRepo.setTheme(it); showThemeDialog = false })
     }
     if (state.showDefaultSportDialog) {
         PickerDialog(
@@ -121,20 +84,24 @@ private fun SettingsScreenContent(
                 it to it.name.lowercase().replaceFirstChar { c -> c.uppercase() }
             },
             selected = state.defaultSport,
-            onDismiss = onDismissDefaultSportDialog,
-            onConfirm = onSetDefaultSport,
+            onDismiss = viewModel::dismissDefaultSportDialog,
+            onConfirm = viewModel::setDefaultSport,
         )
     }
+    // Speed limit editor dialog
     state.editingSpeedSport?.let { sport ->
         val limits = state.sportSpeedLimits[sport] ?: return@let
         SpeedLimitDialog(
             sport = sport,
             limits = limits,
             usePace = state.usePaceForRunWalk && (sport == SportType.RUNNING || sport == SportType.WALKING),
-            onDismiss = onDismissSpeedEditor,
+            onDismiss = viewModel::dismissSpeedEditor,
             onSave = { min, max ->
-                onSetSpeedLimit(sport, min, max)
-                onDismissSpeedEditor()
+                viewModel.setSpeedLimit(
+                    sport,
+                    min,
+                    max
+                ); viewModel.dismissSpeedEditor()
             },
         )
     }
@@ -157,7 +124,7 @@ private fun SettingsScreenContent(
                 ValueItem(
                     icon = Icons.Default.DirectionsRun, title = "Default Sport",
                     value = state.defaultSport.name.lowercase().replaceFirstChar { it.uppercase() },
-                    onClick = onShowDefaultSportDialog,
+                    onClick = viewModel::showDefaultSportDialog
                 )
                 InfoDivider()
                 ToggleItem(
@@ -165,21 +132,21 @@ private fun SettingsScreenContent(
                     title = "Distance Unit",
                     subtitle = if (state.distanceUnitMetric) "Kilometres (km)" else "Miles (mi)",
                     checked = state.distanceUnitMetric,
-                    onCheckedChange = onSetDistanceUnitMetric,
+                    onCheckedChange = viewModel::setDistanceUnitMetric
                 )
                 InfoDivider()
                 ToggleItem(
                     icon = Icons.Default.Speed,
-                    title = "Use Pace for Running/Walking",
+                    title = "Show Pace for Running & Walking",
                     subtitle = if (state.usePaceForRunWalk) "Displaying min/km" else "Displaying km/h",
                     checked = state.usePaceForRunWalk,
-                    onCheckedChange = onSetUsePaceForRunWalk,
+                    onCheckedChange = viewModel::setUsePaceForRunWalk
                 )
             }
 
             InfoSection("Speed Limits") {
                 Text(
-                    "Set speed range shown in sliders for each sport.",
+                    "Set the min/max speed range shown in sliders for each sport.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -193,11 +160,11 @@ private fun SettingsScreenContent(
                         title = sport.name.lowercase().replaceFirstChar { it.uppercase() },
                         value = if (limits != null) {
                             if (usePace)
-                                "${kmhToPace(limits.minKmh)} – ${kmhToPace(limits.maxKmh)} min/km"
+                                "${kmhToPaceStr(limits.maxKmh)} – ${kmhToPaceStr(limits.minKmh)}"
                             else
-                                "${limits.minKmh.toInt()} – ${limits.maxKmh.toInt()} km/h"
+                                "${limits.minKmh.toInt()}–${limits.maxKmh.toInt()} km/h"
                         } else "Default",
-                        onClick = { onShowSpeedEditor(sport) },
+                        onClick = { viewModel.showSpeedEditor(sport) },
                     )
                     if (index < SportType.entries.lastIndex) InfoDivider()
                 }
@@ -208,7 +175,7 @@ private fun SettingsScreenContent(
                     icon = Icons.Default.Notifications, title = "Plan Reminders",
                     subtitle = "Receive reminders for upcoming plans",
                     checked = state.notificationsEnabled,
-                    onCheckedChange = onSetNotificationsEnabled,
+                    onCheckedChange = viewModel::setNotificationsEnabled
                 )
             }
 
@@ -225,14 +192,7 @@ private fun SettingsScreenContent(
     }
 }
 
-fun kmhToPace(kmh: Float): String {
-    if (kmh <= 0f) return "–"
-    val secPerKm = 3600f / kmh
-    val min = (secPerKm / 60).toInt()
-    val sec = (secPerKm % 60).toInt()
-    return "%d:%02d".format(min, sec)
-}
-
+/** km/h → "mm:ss min/km" pace string */
 fun kmhToPaceStr(kmh: Float): String {
     if (kmh <= 0f) return "–"
     val secPerKm = 3600f / kmh
@@ -248,32 +208,3 @@ private val SportType.settingsIcon: ImageVector
         SportType.HIKING -> Icons.Default.TrendingUp
         SportType.WALKING -> Icons.Default.DirectionsWalk
     }
-
-@Preview(showBackground = true)
-@Composable
-private fun SettingsScreenPreview() {
-    AppTheme {
-        SettingsScreenContent(
-            state = SettingsUiState(
-                themeMode = ThemeMode.SYSTEM,
-                notificationsEnabled = true,
-                distanceUnitMetric = true,
-                defaultSport = SportType.RUNNING,
-                usePaceForRunWalk = true,
-                sportSpeedLimits = DEFAULT_SPEED_LIMITS,
-            ),
-            theme = ThemeMode.SYSTEM,
-            onSetTheme = {},
-            onBack = {},
-            onShowDefaultSportDialog = {},
-            onDismissDefaultSportDialog = {},
-            onSetDefaultSport = {},
-            onSetDistanceUnitMetric = {},
-            onSetUsePaceForRunWalk = {},
-            onShowSpeedEditor = {},
-            onDismissSpeedEditor = {},
-            onSetSpeedLimit = { _, _, _ -> },
-            onSetNotificationsEnabled = {},
-        )
-    }
-}

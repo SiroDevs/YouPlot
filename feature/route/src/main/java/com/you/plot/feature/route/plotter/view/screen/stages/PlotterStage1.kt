@@ -4,39 +4,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.common.entity.WaypointSearchResult
-import com.you.plot.core.designsystem.theme.AppTheme
-import com.you.plot.feature.route.plotter.utils.PlotterUiState
+import com.you.plot.core.domain.entity.WaypointSearchResult
+import com.you.plot.feature.route.list.viewmodel.RoutePlotterUiState
 import com.you.plot.feature.route.plotter.view.components.LocationSearchBar
 import com.you.plot.feature.route.plotter.view.components.SelectedPointChip
-import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
+import com.you.plot.feature.route.plotter.view.screen.fmt
+import com.you.plot.feature.route.plotter.viewmodel.RoutePlotterViewModel
 
 @Composable
-fun PlotterStage1(state: PlotterUiState, vm: PlotterViewModel) {
-    PlotterStage1Content(
-        state = state,
-        onQryClear = vm::onQryClear,
-        onSearch = vm::onSearch,
-        onWaypointSearchResultSelected = vm::onWaypointSearchResultSelected,
-        onCountrySelected = vm::setCountryCode,
-        onUseMyLocation = vm::onUseMyLocation,
-    )
-}
-
-@Composable
-private fun PlotterStage1Content(
-    state: PlotterUiState,
-    onQryClear: () -> Unit,
-    onSearch: (String) -> Unit,
-    onWaypointSearchResultSelected: (WaypointSearchResult) -> Unit,
-    onCountrySelected: (String) -> Unit,
-    onUseMyLocation: () -> Unit,
-) {
+fun PlotterStage1(state: RoutePlotterUiState, vm: RoutePlotterViewModel) {
     Column(
         Modifier
             .fillMaxSize()
@@ -49,17 +31,16 @@ private fun PlotterStage1Content(
         ) {
             LocationSearchBar(
                 query = state.searchQuery,
-                onQryChange = { onQryClear() },
-                onSearch = onSearch,
+                onQueryChange = vm::onSearchQueryChange,
                 results = state.searchResults,
                 isSearching = state.isSearching,
-                placeholder = "Search start location ...",
-                onResultSelected = onWaypointSearchResultSelected,
+                placeholder = "Search start location…",
+                onResultSelected = vm::onWaypointSearchResultSelected,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 selectedCountryCode = state.selectedCountryCode,
-                onCountrySelected = onCountrySelected,
-                onChooseOnMap = { onQryClear() },
-                onUseMyLocation = onUseMyLocation,
+                onCountrySelected = vm::setCountryCode,
+                onChooseOnMap = { vm.onSearchQueryChange("") },
+                onUseMyLocation = vm::onUseMyLocation,
             )
 
             state.startPoint?.let {
@@ -75,19 +56,30 @@ private fun PlotterStage1Content(
 
 @Preview(showBackground = true)
 @Composable
-private fun PlotterStage1Preview() {
-    AppTheme {
-        PlotterStage1Content(
-            state = PlotterUiState(
-                searchQuery = "Nairobi CBD",
-                startPoint = LatLng(-1.286, 36.817),
-                startPointName = "Nairobi CBD",
-            ),
-            onQryClear = {},
-            onSearch = {},
-            onWaypointSearchResultSelected = {},
-            onCountrySelected = {},
-            onUseMyLocation = {},
-        )
+fun PlotterStage1Preview() {
+    val result =
+        WaypointSearchResult(displayName = "Shell GPO", latLng = LatLng(latitude = 0.0, longitude = 0.0))
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(top = 4.dp),
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+        ) {
+            LocationSearchBar(
+                query = "",
+                onQueryChange = {},
+                results = listOf(result),
+                isSearching = false,
+                placeholder = "Search start location…",
+                onResultSelected = {},
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                onChooseOnMap = { },
+                onUseMyLocation = { },
+            )
+        }
     }
 }

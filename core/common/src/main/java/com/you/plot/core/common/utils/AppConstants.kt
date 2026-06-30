@@ -24,7 +24,7 @@ object MapConstants {
 
     const val NOMINATIM_BASE = "https://nominatim.openstreetmap.org/"
     const val PHOTON_BASE = "https://photon.komoot.io"
-    const val OSRM_ROUTER = "https://router.project-osrm.org/route/v1/"
+    const val OSRM_ROUTER = "https://router.project-osrm.org/route/v1/driving"
 }
 
 object PrefConstants {

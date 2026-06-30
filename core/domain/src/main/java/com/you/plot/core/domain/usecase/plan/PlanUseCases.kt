@@ -52,21 +52,15 @@ class GeneratePlanEventsUseCase @Inject constructor(
     suspend operator fun invoke(plan: ActivityPlan): List<PlanEvent> {
         val route = routeRepo.getRouteById(plan.routeId) ?: return emptyList()
         val events = mutableListOf<PlanEvent>()
-        val days = plan.numberOfDays.coerceAtLeast(1)
-        val speed = plan.avgSpeedKmh.coerceAtLeast(0.1)
         val distancePerDay = if (plan.avgDistancePerDayKm > 0)
-            plan.avgDistancePerDayKm else route.totalDistanceKm / days
+            plan.avgDistancePerDayKm else route.totalDistanceKm / plan.numberOfDays
 
         var dayStart = plan.startDateMillis
         var cumulativeDistance = 0.0
         var orderIndex = 0
-        // Synthetic negative ids keep generated rows uniquely keyable in the UI
-        // before they're persisted (the DB later assigns positive autoincrement ids).
-        fun nextSyntheticId() = -(orderIndex + 1L)
 
-        for (day in 1..days) {
+        for (day in 1..plan.numberOfDays) {
             events += PlanEvent(
-                id = nextSyntheticId(),
                 planId = plan.id,
                 dayNumber = day,
                 name = "Begin activity",
@@ -77,16 +71,14 @@ class GeneratePlanEventsUseCase @Inject constructor(
             )
 
             val dayEndDistance = cumulativeDistance + distancePerDay
-            val waypointCount = route.waypoints.size.coerceAtLeast(1)
             route.waypoints
                 .filter { it.orderIndex > 0 }
                 .forEach { waypoint ->
                     val waypointDistance = waypoint.orderIndex.toDouble() /
-                            waypointCount * route.totalDistanceKm
+                            route.waypoints.size * route.totalDistanceKm
                     if (waypointDistance in cumulativeDistance..dayEndDistance) {
-                        val hoursFromStart = (waypointDistance - cumulativeDistance) / speed
+                        val hoursFromStart = (waypointDistance - cumulativeDistance) / plan.avgSpeedKmh
                         events += PlanEvent(
-                            id = nextSyntheticId(),
                             planId = plan.id,
                             dayNumber = day,
                             name = waypoint.name,
@@ -99,11 +91,10 @@ class GeneratePlanEventsUseCase @Inject constructor(
                     }
                 }
 
-            val hoursForDay = distancePerDay / speed
+            val hoursForDay = distancePerDay / plan.avgSpeedKmh
             val dayEndMillis = dayStart + (hoursForDay * 3_600_000).toLong()
 
             events += PlanEvent(
-                id = nextSyntheticId(),
                 planId = plan.id,
                 dayNumber = day,
                 name = "End of activity — Day $day",

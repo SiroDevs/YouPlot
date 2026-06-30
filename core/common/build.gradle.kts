@@ -12,5 +12,4 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.osmdroid.android)
     implementation(libs.play.services.location)
-    testImplementation(libs.junit)
 }

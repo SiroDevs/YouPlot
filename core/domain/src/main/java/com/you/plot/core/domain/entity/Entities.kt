@@ -5,6 +5,11 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.SessionStatus
 import com.you.plot.core.common.entity.SportType
 
+data class WaypointSearchResult(
+    val displayName: String,
+    val latLng: LatLng,
+)
+
 data class Waypoint(
     val id: Long = 0L,
     val routeId: Long,

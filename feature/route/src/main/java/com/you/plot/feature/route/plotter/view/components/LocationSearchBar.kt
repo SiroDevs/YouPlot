@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -30,7 +33,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,18 +45,16 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppSpecs
 import com.you.plot.core.common.utils.COUNTRY_LIST
-import com.you.plot.core.common.entity.WaypointSearchResult
+import com.you.plot.core.domain.entity.WaypointSearchResult
 
 @Composable
 fun LocationSearchBar(
     query: String,
-    onQryChange: () -> Unit,
-    onSearch: (String) -> Unit,
+    onQueryChange: (String) -> Unit,
     results: List<WaypointSearchResult>,
     isSearching: Boolean,
     placeholder: String,
@@ -69,12 +69,9 @@ fun LocationSearchBar(
     var showCountryMenu by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    var typed by remember { mutableStateOf(query) }
-    LaunchedEffect(query) { if (query != typed) typed = query }
 
     val showQuickActions = isFocused && (onChooseOnMap != null || onUseMyLocation != null)
     val hasDropdown = showQuickActions || results.isNotEmpty()
-    val showClearButton = typed.isNotEmpty()
     val countryLabel =
         COUNTRY_LIST.firstOrNull { it.first == selectedCountryCode }?.first?.uppercase()
             ?.ifEmpty { "ALL" } ?: "KE"
@@ -89,8 +86,8 @@ fun LocationSearchBar(
             )
     ) {
         OutlinedTextField(
-            value = typed,
-            onValueChange = { typed = it },
+            value = query,
+            onValueChange = onQueryChange,
             placeholder = { Text(placeholder) },
             leadingIcon = {
                 if (isSearching) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -98,11 +95,8 @@ fun LocationSearchBar(
             },
             trailingIcon = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (showClearButton) {
-                        IconButton(onClick = {
-                            typed = ""
-                            onQryChange()
-                        }) {
+                    if (query.isNotEmpty()) {
+                        IconButton(onClick = { onQueryChange("") }) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "Clear",
@@ -110,6 +104,7 @@ fun LocationSearchBar(
                             )
                         }
                     }
+                    // Country selector button
                     if (onCountrySelected != null) {
                         Box {
                             TextButton(
@@ -164,18 +159,6 @@ fun LocationSearchBar(
                 }
             },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    keyboardController?.hide()
-                    focusManager.clearFocus()
-                    isFocused = false
-
-                    onSearch(typed)
-                }
-            ),
             shape = if (hasDropdown) AppSpecs.TOP_SHAPE else AppSpecs.FULL_SHAPE,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
@@ -273,5 +256,24 @@ fun LocationSearchBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun QuickActionRow(icon: @Composable () -> Unit, label: String, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 13.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        icon()
+        Text(
+            label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }

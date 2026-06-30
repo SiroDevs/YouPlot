@@ -24,8 +24,6 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.ui.tooling.preview.Preview
-import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.core.ui.components.general.InfoDivider
 import com.you.plot.core.ui.components.general.InfoItem
@@ -115,13 +113,5 @@ fun AboutScreen(onBack: () -> Unit) {
 
             Spacer(Modifier.height(24.dp))
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AboutScreenPreview() {
-    AppTheme {
-        AboutScreen(onBack = {})
     }
 }

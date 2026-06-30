@@ -31,28 +31,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.common.entity.SportType
-import com.you.plot.core.designsystem.theme.AppTheme
-import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.feature.dashboard.dashboard.utils.DashboardUiState
 import com.you.plot.feature.dashboard.dashboard.utils.PlanFilter
 import com.you.plot.feature.dashboard.view.components.DashboardPlanItem
 import com.you.plot.feature.dashboard.view.components.DashboardSectionHeader
-import com.you.plot.feature.dashboard.view.components.EmptyDashboard
 import com.you.plot.feature.dashboard.view.components.PlanFilterRow
 import com.you.plot.feature.dashboard.view.components.RecentRoutesRow
 import com.you.plot.feature.dashboard.viewmodel.DashboardViewModel
+import com.you.plot.feature.dashboard.view.components.EmptyDashboard
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 @SuppressLint("ConstantLocale")
 val dateFmt = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
@@ -67,36 +61,6 @@ fun DashboardScreen(
     onHelpFeedback: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    DashboardScreenContent(
-        state = state,
-        onPlotRoute = onPlotRoute,
-        onViewAllRoutes = onViewAllRoutes,
-        onRouteClick = onRouteClick,
-        onCreatePlan = onCreatePlan,
-        onPlanClick = onPlanClick,
-        onStartTracking = onStartTracking,
-        onSettings = onSettings,
-        onAbout = onAbout,
-        onHelpFeedback = onHelpFeedback,
-        onSetPlanFilter = viewModel::setPlanFilter,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DashboardScreenContent(
-    state: DashboardUiState,
-    onPlotRoute: () -> Unit,
-    onViewAllRoutes: () -> Unit,
-    onRouteClick: (Long) -> Unit,
-    onCreatePlan: () -> Unit,
-    onPlanClick: (Long) -> Unit,
-    onStartTracking: (Long) -> Unit,
-    onSettings: () -> Unit,
-    onAbout: () -> Unit,
-    onHelpFeedback: () -> Unit,
-    onSetPlanFilter: (PlanFilter) -> Unit,
-) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -189,7 +153,7 @@ private fun DashboardScreenContent(
                 )
                 PlanFilterRow(
                     selected = state.planFilter,
-                    onSelect = onSetPlanFilter,
+                    onSelect = viewModel::setPlanFilter,
                 )
                 Spacer(Modifier.height(4.dp))
             }
@@ -225,105 +189,5 @@ private fun DashboardScreenContent(
 
             item { Spacer(Modifier.height(88.dp)) } // FAB clearance
         }
-    }
-}
-
-private val sampleRoutes = listOf(
-    Route(
-        id = 1L,
-        name = "Morning Loop",
-        sportType = SportType.RUNNING,
-        startPoint = LatLng(-1.286, 36.817),
-        endPoint = LatLng(-1.300, 36.830),
-        totalDistanceKm = 8.4,
-    ),
-    Route(
-        id = 2L,
-        name = "Karura Forest Trail",
-        sportType = SportType.HIKING,
-        startPoint = LatLng(-1.243, 36.835),
-        endPoint = LatLng(-1.250, 36.850),
-        totalDistanceKm = 12.7,
-    ),
-    Route(
-        id = 3L,
-        name = "Lakeside Ride",
-        sportType = SportType.CYCLING,
-        startPoint = LatLng(-1.310, 36.700),
-        endPoint = LatLng(-1.320, 36.720),
-        totalDistanceKm = 24.0,
-    ),
-)
-
-private val samplePlans = listOf(
-    ActivityPlan(
-        id = 10L,
-        routeId = 1L,
-        name = "Weekend Run",
-        description = "Easy morning loop",
-        startDateMillis = System.currentTimeMillis() + 24 * 60 * 60 * 1000L,
-        numberOfDays = 1,
-        avgSpeedKmh = 10.0,
-        avgDistancePerDayKm = 8.4,
-    ),
-    ActivityPlan(
-        id = 11L,
-        routeId = 2L,
-        name = "Forest Hike",
-        description = "Half-day trail outing",
-        startDateMillis = System.currentTimeMillis() + 3L * 24 * 60 * 60 * 1000L,
-        numberOfDays = 1,
-        avgSpeedKmh = 4.5,
-        avgDistancePerDayKm = 12.7,
-    ),
-)
-
-@Preview(showBackground = true)
-@Composable
-private fun DashboardScreenPreview() {
-    AppTheme {
-        DashboardScreenContent(
-            state = DashboardUiState(
-                recentRoutes = sampleRoutes,
-                plans = samplePlans,
-                planFilter = PlanFilter.ALL,
-                isLoading = false,
-            ),
-            onPlotRoute = {},
-            onViewAllRoutes = {},
-            onRouteClick = {},
-            onCreatePlan = {},
-            onPlanClick = {},
-            onStartTracking = {},
-            onSettings = {},
-            onAbout = {},
-            onHelpFeedback = {},
-            onSetPlanFilter = {},
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DashboardEmptyPreview() {
-    AppTheme {
-        DashboardScreenContent(
-            state = DashboardUiState(
-                recentRoutes = emptyList(),
-                plans = emptyList(),
-                planFilter = PlanFilter.ALL,
-                isLoading = false,
-            ),
-            onPlotRoute = {},
-            onViewAllRoutes = {},
-            onRouteClick = {},
-            onCreatePlan = {},
-            onPlanClick = {},
-            onStartTracking = {},
-            onSettings = {},
-            onAbout = {},
-            onHelpFeedback = {},
-            onSetPlanFilter = {},
-        )
     }
 }

@@ -32,23 +32,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.dateFmt
-import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.domain.entity.PlanEvent
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.core.ui.components.general.DayTimeline
-import com.you.plot.feature.plan.details.utils.PlanDetailUiState
-import com.you.plot.feature.plan.details.utils.ReminderEntry
 import com.you.plot.feature.plan.details.view.components.AddReminderDialog
 import com.you.plot.feature.plan.details.view.components.DaySummaryCard
+import com.you.plot.core.ui.components.general.DayTimeline
 import com.you.plot.feature.plan.details.view.components.EventCard
 import com.you.plot.feature.plan.details.view.components.ReminderRow
 import com.you.plot.feature.plan.details.viewmodel.PlanDetailViewModel
 import java.util.Date
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanDetailScreen(
     viewModel: PlanDetailViewModel,
@@ -58,39 +54,10 @@ fun PlanDetailScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
 
-    PlanDetailScreenContent(
-        state = state,
-        onBack = onBack,
-        onStartTracking = onStartTracking,
-        onSelectDay = viewModel::selectDay,
-        onShowAddReminderDialog = viewModel::showAddReminderDialog,
-        onHideAddReminderDialog = viewModel::hideAddReminderDialog,
-        onAddReminder = { label, fireAt -> viewModel.addReminder(context, label, fireAt) },
-        onRemoveReminder = { entry -> viewModel.removeReminder(context, entry) },
-        onExportPlanToCalendar = { plan ->
-            val intent = buildCalendarIntent(plan)
-            context.startActivity(intent)
-        },
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PlanDetailScreenContent(
-    state: PlanDetailUiState,
-    onBack: () -> Unit,
-    onStartTracking: (Long) -> Unit,
-    onSelectDay: (Int) -> Unit,
-    onShowAddReminderDialog: () -> Unit,
-    onHideAddReminderDialog: () -> Unit,
-    onAddReminder: (label: String, fireAtMillis: Long) -> Unit,
-    onRemoveReminder: (ReminderEntry) -> Unit,
-    onExportPlanToCalendar: (ActivityPlan) -> Unit,
-) {
     if (state.showAddReminderDialog) {
         AddReminderDialog(
-            onDismiss = onHideAddReminderDialog,
-            onConfirm = { label, fireAt -> onAddReminder(label, fireAt) },
+            onDismiss = { viewModel.hideAddReminderDialog() },
+            onConfirm = { label, fireAt -> viewModel.addReminder(context, label, fireAt) },
         )
     }
 
@@ -101,11 +68,14 @@ private fun PlanDetailScreenContent(
                 onNavIconClick = onBack,
                 actions = {
                     state.plan?.let { plan ->
-                        IconButton(onClick = { onExportPlanToCalendar(plan) }) {
+                        IconButton(onClick = {
+                            val intent = buildCalendarIntent(plan)
+                            context.startActivity(intent)
+                        }) {
                             Icon(Icons.Default.DateRange, "Export to Calendar")
                         }
                     }
-                    IconButton(onClick = onShowAddReminderDialog) {
+                    IconButton(onClick = { viewModel.showAddReminderDialog() }) {
                         Icon(Icons.Default.Notifications, "Add Reminder")
                     }
                     state.plan?.let { plan ->
@@ -154,7 +124,7 @@ private fun PlanDetailScreenContent(
                         val day = i + 1
                         FilterChip(
                             selected = state.selectedDay == day,
-                            onClick = { onSelectDay(day) },
+                            onClick = { viewModel.selectDay(day) },
                             label = { Text("Day $day") },
                         )
                     }
@@ -190,7 +160,7 @@ private fun PlanDetailScreenContent(
                 items(state.reminders, key = { it.index }) { reminder ->
                     ReminderRow(
                         entry = reminder,
-                        onRemove = { onRemoveReminder(reminder) },
+                        onRemove = { viewModel.removeReminder(context, reminder) },
                     )
                 }
             }
@@ -210,58 +180,5 @@ private fun buildCalendarIntent(plan: ActivityPlan): Intent {
         putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, plan.startDateMillis)
         putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis)
         putExtra(CalendarContract.Events.ALL_DAY, plan.numberOfDays > 1)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PlanDetailScreenPreview() {
-    val events = listOf(
-        PlanEvent(
-            id = 1L, planId = 1L, dayNumber = 1, name = "Start",
-            plannedTimeMillis = 6L * 3_600_000L,
-            durationMinutes = 0, distanceCoveredKm = 0.0, orderIndex = 0,
-        ),
-        PlanEvent(
-            id = 2L, planId = 1L, dayNumber = 1, name = "Lunch break",
-            plannedTimeMillis = 12L * 3_600_000L,
-            durationMinutes = 45, distanceCoveredKm = 48.0, orderIndex = 1,
-        ),
-        PlanEvent(
-            id = 3L, planId = 1L, dayNumber = 1, name = "End of Day",
-            plannedTimeMillis = 17L * 3_600_000L,
-            durationMinutes = 0, distanceCoveredKm = 96.0, orderIndex = 2,
-        ),
-    )
-    val plan = ActivityPlan(
-        id = 1L,
-        routeId = 1L,
-        name = "Coast Tour Plan",
-        description = "Five days along the Indian Ocean coast.",
-        startDateMillis = 0L,
-        numberOfDays = 5,
-        avgSpeedKmh = 18.0,
-        avgDistancePerDayKm = 96.0,
-        events = events,
-    )
-    AppTheme {
-        PlanDetailScreenContent(
-            state = PlanDetailUiState(
-                plan = plan,
-                selectedDay = 1,
-                isLoading = false,
-                reminders = listOf(
-                    ReminderEntry(index = 0, label = "Pack the night before", fireAtMillis = 0L),
-                ),
-            ),
-            onBack = {},
-            onStartTracking = {},
-            onSelectDay = {},
-            onShowAddReminderDialog = {},
-            onHideAddReminderDialog = {},
-            onAddReminder = { _, _ -> },
-            onRemoveReminder = {},
-            onExportPlanToCalendar = {},
-        )
     }
 }

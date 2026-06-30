@@ -33,14 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.common.entity.SportType
-import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.feature.route.list.viewmodel.RouteListUiState
 import com.you.plot.feature.route.list.viewmodel.RouteListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,20 +46,7 @@ fun RouteListScreen(
     onRouteClick: (Long) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
-    RouteListContent(
-        state = state,
-        onCreateRoute = onCreateRoute,
-        onRouteClick = onRouteClick,
-    )
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun RouteListContent(
-    state: RouteListUiState,
-    onCreateRoute: () -> Unit,
-    onRouteClick: (Long) -> Unit,
-) {
     Scaffold(
         topBar = { AppTopBar(title = "Routes") },
         floatingActionButton = {
@@ -169,73 +151,5 @@ fun RouteListItem(route: Route, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RouteListScreenEmptyPreview() {
-    AppTheme {
-        RouteListContent(
-            state = RouteListUiState(routes = emptyList(), isLoading = false),
-            onCreateRoute = {},
-            onRouteClick = {},
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RouteListScreenLoadingPreview() {
-    AppTheme {
-        RouteListContent(
-            state = RouteListUiState(routes = emptyList(), isLoading = true),
-            onCreateRoute = {},
-            onRouteClick = {},
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RouteListScreenWithRoutesPreview() {
-    AppTheme {
-        RouteListContent(
-            state = RouteListUiState(
-                isLoading = false,
-                routes = listOf(
-                    Route(
-                        id = 1L,
-                        name = "Morning Loop",
-                        sportType = SportType.RUNNING,
-                        startPoint = LatLng(-1.286, 36.817),
-                        endPoint = LatLng(-1.300, 36.830),
-                        totalDistanceKm = 8.4,
-                        totalElevationGainMeters = 120.0,
-                        isRoundTrip = true,
-                    ),
-                    Route(
-                        id = 2L,
-                        name = "Karura Forest Trail",
-                        sportType = SportType.HIKING,
-                        startPoint = LatLng(-1.245, 36.832),
-                        endPoint = LatLng(-1.260, 36.845),
-                        totalDistanceKm = 12.7,
-                        totalElevationGainMeters = 235.0,
-                    ),
-                    Route(
-                        id = 3L,
-                        name = "Ngong Hills Ride",
-                        sportType = SportType.CYCLING,
-                        startPoint = LatLng(-1.355, 36.650),
-                        endPoint = LatLng(-1.395, 36.660),
-                        totalDistanceKm = 22.0,
-                        totalElevationGainMeters = 480.0,
-                    ),
-                ),
-            ),
-            onCreateRoute = {},
-            onRouteClick = {},
-        )
     }
 }
