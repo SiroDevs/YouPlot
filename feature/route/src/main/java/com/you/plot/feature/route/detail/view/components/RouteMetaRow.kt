@@ -65,7 +65,7 @@ fun RouteMetaRow(
         }
 
         VerticalDivider(
-            modifier = Modifier.height(20.dp),
+            modifier = Modifier.height(25.dp),
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
         )
 
@@ -79,7 +79,7 @@ fun RouteMetaRow(
 
         if (createdAt != null) {
             VerticalDivider(
-                modifier = Modifier.height(20.dp),
+                modifier = Modifier.height(25.dp),
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
             )
             Column(modifier = Modifier.weight(1f)) {

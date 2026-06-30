@@ -4,28 +4,34 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.dateFmt
+import com.you.plot.core.designsystem.theme.AppTheme
+import com.you.plot.core.domain.entity.PlanEvent
+import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.ui.components.general.SummaryRow
 import com.you.plot.feature.plan.planner.utils.PlannerUiState
 import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 import java.util.Date
 
 @Composable
-fun PlannerStep3(state: PlannerUiState, vm: PlannerViewModel) {
+internal fun PlannerStep3(state: PlannerUiState, vm: PlannerViewModel) {
+    PlannerStep3Content(state = state)
+}
+
+@Composable
+private fun PlannerStep3Content(state: PlannerUiState) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -41,17 +47,37 @@ fun PlannerStep3(state: PlannerUiState, vm: PlannerViewModel) {
         val totalEvents = state.generatedEvents.size + state.customEvents.size
         SummaryRow("Total events", "$totalEvents across ${state.numberOfDays} day(s)")
 
-        Spacer(Modifier.height(8.dp))
-        Button(
-            onClick = vm::savePlan,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !state.isSaving,
-        ) {
-            if (state.isSaving) {
-                CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                Spacer(Modifier.width(8.dp))
-            }
-            Text(if (state.isSaving) "Saving ..." else "Save Plan")
-        }
+        // Save Plan is handled by the FAB
+        Spacer(Modifier.height(88.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PlannerStep3Preview() {
+    val sampleRoute = Route(
+        id = 1L,
+        name = "Coast Tour",
+        sportType = SportType.CYCLING,
+        startPoint = LatLng(-1.286, 36.817),
+        endPoint = LatLng(-4.04, 39.67),
+        totalDistanceKm = 480.0,
+    )
+    val generated = listOf(
+        PlanEvent(id = -1L, planId = 0L, dayNumber = 1, name = "Start", plannedTimeMillis = 0L, orderIndex = 0),
+        PlanEvent(id = -2L, planId = 0L, dayNumber = 1, name = "Mid", plannedTimeMillis = 1L, orderIndex = 1),
+        PlanEvent(id = -3L, planId = 0L, dayNumber = 1, name = "End", plannedTimeMillis = 2L, orderIndex = 2),
+    )
+    AppTheme {
+        PlannerStep3Content(
+            state = PlannerUiState(
+                selectedRoute = sampleRoute,
+                planName = "Coast Tour Plan",
+                numberOfDays = 5,
+                avgSpeedKmh = 18.0,
+                generatedEvents = generated,
+                startDateMillis = 0L,
+            ),
+        )
     }
 }
