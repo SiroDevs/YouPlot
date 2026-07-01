@@ -35,10 +35,10 @@ include(":core:ui")
 
 // Feature modules
 include(":feature:dashboard")
-include(":feature:startpoint")
 include(":feature:route")
 include(":feature:plan")
 include(":feature:tracker")
 include(":feature:settings")
 include(":feature:extra")
+include(":feature:startpoint")
 include(":feature:trash")

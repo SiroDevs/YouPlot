@@ -17,15 +17,14 @@ import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
+import com.you.plot.feature.route.plotter.utils.statsFor
 import com.you.plot.core.ui.maps.PlotterMap
 import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable
 fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
     val candidate = state.selectedCandidate
-    val dist = candidate?.let {
-        if (state.isRoundTrip) it.totalDist * 2 else it.totalDist
-    } ?: 0.0
+    val stats = candidate?.statsFor(state.isRoundTrip)
 
     Column(Modifier.fillMaxSize()) {
         PlotterMap(
@@ -47,8 +46,10 @@ fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
 
         PlotterStage5Panel(
             state = state,
-            distanceKm = dist,
-            candidate = candidate,
+            distanceKm = stats?.totalDist ?: 0.0,
+            elevGainM = stats?.elevationGain ?: 0.0,
+            elevLossM = stats?.elevationLoss ?: 0.0,
+            elevationPoints = stats?.elevationPoints ?: emptyList(),
             onSportTypeChange = vm::setSportType,
         )
     }
@@ -58,15 +59,17 @@ fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
 private fun PlotterStage5Panel(
     state: PlotterUiState,
     distanceKm: Double,
-    candidate: RouteCandidate?,
+    elevGainM: Double,
+    elevLossM: Double,
+    elevationPoints: List<ElevationPoint>,
     onSportTypeChange: (SportType) -> Unit,
 ) {
     RouteInfoPanel(
         modifier = Modifier.fillMaxSize(),
         distanceKm = distanceKm,
-        elevGainM = candidate?.elevationGain ?: 0.0,
-        elevLossM = candidate?.elevationLoss ?: 0.0,
-        elevationPoints = candidate?.elevationPoints ?: emptyList(),
+        elevGainM = elevGainM,
+        elevLossM = elevLossM,
+        elevationPoints = elevationPoints,
         sportType = state.sportType,
         isRoundTrip = state.isRoundTrip,
         onSportTypeChange = onSportTypeChange,
@@ -142,7 +145,9 @@ private fun PlotterStage5PanelPreview() {
                 selectedCandidateId = 0,
             ),
             distanceKm = candidate.totalDist,
-            candidate = candidate,
+            elevGainM = candidate.elevationGain,
+            elevLossM = candidate.elevationLoss,
+            elevationPoints = candidate.elevationPoints,
             onSportTypeChange = {},
         )
     }

@@ -15,8 +15,10 @@ import com.you.plot.core.data.service.CurrentLocationResolver
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.domain.entity.WaypointSearchResult
+import com.you.plot.core.domain.entity.StartPoint
 import com.you.plot.core.domain.usecase.route.DeleteRouteUseCase
 import com.you.plot.core.domain.usecase.route.SaveRouteUseCase
+import com.you.plot.core.domain.usecase.startpoint.GetAllStartPointsUseCase
 import com.you.plot.core.domain.usecase.startpoint.GetStartPointByIdUseCase
 import com.you.plot.core.domain.usecase.startpoint.RecordStartPointUsageUseCase
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
@@ -25,6 +27,7 @@ import com.you.plot.feature.route.plotter.utils.buildRouteWaypoints
 import com.you.plot.feature.route.plotter.utils.deriveAutoRouteName
 import com.you.plot.feature.route.plotter.utils.hasLocationPermission
 import com.you.plot.feature.route.plotter.utils.previousStage
+import com.you.plot.feature.route.plotter.utils.statsFor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +48,7 @@ class PlotterViewModel @Inject constructor(
     private val deleteRouteUseCase: DeleteRouteUseCase,
     private val plotterRepo: PlotterRepo,
     private val getStartPointById: GetStartPointByIdUseCase,
+    private val getAllStartPoints: GetAllStartPointsUseCase,
     private val recordStartPointUsage: RecordStartPointUsageUseCase,
     private val currentLocationResolver: CurrentLocationResolver,
     @ApplicationContext private val context: Context,
@@ -67,6 +71,24 @@ class PlotterViewModel @Inject constructor(
                 )
             }
         }
+        // Keep the list of saved start points fresh so the bookmark button in the
+        // stage-1 search bar can decide whether to render itself.
+        viewModelScope.launch {
+            getAllStartPoints().collect { list ->
+                _state.update { it.copy(savedStartPoints = list) }
+            }
+        }
+    }
+
+    /** Populate stage 1 with the details of a saved start point the user picked. */
+    fun onSavedStartPointPicked(sp: StartPoint) = _state.update {
+        it.copy(
+            startPoint = sp.position,
+            startPointName = sp.name,
+            searchQuery = sp.name,
+            searchResults = emptyList(),
+            selectedCtryCode = sp.countryCode.ifBlank { it.selectedCtryCode },
+        )
     }
 
     fun advanceStage() {
@@ -360,14 +382,13 @@ class PlotterViewModel @Inject constructor(
         _state.update { it.copy(isSaving = true) }
         viewModelScope.launch {
             runCatching {
-                val totalDist =
-                    if (s.isRoundTrip) candidate.totalDist * 2 else candidate.totalDist
+                val stats = candidate.statsFor(s.isRoundTrip)
                 val waypointEntities = buildRouteWaypoints(
                     start = start,
                     end = end,
                     intermediates = s.activeWaypoints,
                     isRoundTrip = s.isRoundTrip,
-                    totalDist = totalDist,
+                    totalDist = stats.totalDist,
                     startName = s.startPointName,
                     endName = s.endPointName,
                     countryCode = s.selectedCtryCode,
@@ -384,12 +405,12 @@ class PlotterViewModel @Inject constructor(
                         startPoint = start,
                         endPoint = end,
                         waypoints = waypointEntities,
-                        elevationPoints = candidate.elevationPoints,
-                        totalDist = totalDist,
-                        elevationGain = candidate.elevationGain,
-                        elevationLoss = candidate.elevationLoss,
+                        elevationPoints = stats.elevationPoints,
+                        totalDist = stats.totalDist,
+                        elevationGain = stats.elevationGain,
+                        elevationLoss = stats.elevationLoss,
                         isRoundTrip = s.isRoundTrip,
-                        polyline = candidate.waypoints,
+                        polyline = stats.polyline,
                     ),
                 )
                 recordStartPointUsage(

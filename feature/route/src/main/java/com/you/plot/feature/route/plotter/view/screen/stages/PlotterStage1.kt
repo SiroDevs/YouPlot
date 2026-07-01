@@ -10,6 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.designsystem.theme.AppTheme
+import com.you.plot.core.domain.entity.StartPoint
 import com.you.plot.core.domain.entity.WaypointSearchResult
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.core.ui.maps.LocationSearchBar
@@ -25,6 +26,7 @@ fun PlotterStage1(state: PlotterUiState, vm: PlotterViewModel) {
         onWaypointSearchResultSelected = vm::onWaypointSearchResultSelected,
         onCountrySelected = vm::setCountryCode,
         onUseMyLocation = vm::onUseMyLocation,
+        onSavedStartPointPicked = vm::onSavedStartPointPicked,
     )
 }
 
@@ -36,6 +38,7 @@ private fun PlotterStage1Content(
     onWaypointSearchResultSelected: (WaypointSearchResult) -> Unit,
     onCountrySelected: (String) -> Unit,
     onUseMyLocation: () -> Unit,
+    onSavedStartPointPicked: (StartPoint) -> Unit = {},
 ) {
     Column(
         Modifier
@@ -60,6 +63,8 @@ private fun PlotterStage1Content(
                 onCountrySelected = onCountrySelected,
                 onChooseOnMap = { onQryClear() },
                 onUseMyLocation = onUseMyLocation,
+                savedStartPoints = state.savedStartPoints,
+                onStartPointPicked = onSavedStartPointPicked,
             )
 
             state.startPoint?.let {

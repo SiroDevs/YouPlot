@@ -41,12 +41,17 @@ import com.you.plot.core.common.entity.ElevationPoint
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.entity.SportType
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 import com.you.plot.core.common.utils.MapConstants
 import com.you.plot.core.common.utils.dateFmt
+import com.you.plot.core.data.export.RouteExportFormat
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.ui.action.AppTopBar
+import com.you.plot.core.ui.dialog.ExportChoice
+import com.you.plot.core.ui.dialog.ExportFormatSheet
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
 import com.you.plot.feature.route.detail.viewmodel.RouteDetailUiState
 import com.you.plot.feature.route.detail.viewmodel.RouteDetailViewModel
@@ -61,8 +66,59 @@ fun RouteDetailScreen(
     onCreatePlan: (Long) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    var showExportSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.isDeleted) { if (state.isDeleted) onBack() }
+
+    // Fire the share intent as soon as the exporter finishes writing the file.
+    LaunchedEffect(state.pendingShareUri) {
+        val uri = state.pendingShareUri ?: return@LaunchedEffect
+        val mime = state.pendingShareMime ?: "*/*"
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = mime
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(send, "Export route"))
+        viewModel.consumeShare()
+    }
+
+    state.exportError?.let { err ->
+        AlertDialog(
+            onDismissRequest = { viewModel.clearExportError() },
+            title = { Text("Export failed") },
+            text = { Text(err) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.clearExportError() }) { Text("OK") }
+            },
+        )
+    }
+
+    if (showExportSheet) {
+        ExportFormatSheet(
+            title = "Export route as",
+            formats = RouteExportFormat.entries.map { format ->
+                val stubbed = format == RouteExportFormat.FIT || format == RouteExportFormat.IMAGE
+                ExportChoice(
+                    label = format.display,
+                    description = when (format) {
+                        RouteExportFormat.GPX -> "GPX 1.1 track + routepoints"
+                        RouteExportFormat.TCX -> "Garmin Training Center course"
+                        RouteExportFormat.PDF -> "Printable text summary"
+                        RouteExportFormat.FIT -> "Binary FIT — coming soon"
+                        RouteExportFormat.IMAGE -> "Map screenshot — coming soon"
+                    },
+                    enabled = !stubbed,
+                    onSelect = {
+                        showExportSheet = false
+                        viewModel.exportRoute(format)
+                    },
+                )
+            },
+            onDismiss = { showExportSheet = false },
+        )
+    }
 
     state.deleteError?.let { err ->
         AlertDialog(
@@ -142,15 +198,7 @@ private fun RouteDetailContent(
                                 },
                                 onClick = {
                                     showMoreMenu = false
-                                    // WIP — no action yet
-                                },
-                                enabled = false,   // clearly WIP
-                                trailingIcon = {
-                                    Text(
-                                        "Soon",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    showExportSheet = true
                                 },
                             )
                             HorizontalDivider()

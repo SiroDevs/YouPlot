@@ -25,7 +25,17 @@ data class PlanListUiState(
     val isLoading: Boolean = true,
     val menuTargetId: Long? = null,
     val clonedPlanId: Long? = null,
-)
+    val searchActive: Boolean = false,
+    val searchQuery: String = "",
+) {
+    private fun List<ActivityPlan>.filtered(): List<ActivityPlan> {
+        val q = searchQuery.trim()
+        if (q.isEmpty()) return this
+        return filter { it.name.contains(q, ignoreCase = true) || it.description.contains(q, ignoreCase = true) }
+    }
+    val visibleRecent: List<ActivityPlan> get() = recent.filtered()
+    val visibleFavorites: List<ActivityPlan> get() = favorites.filtered()
+}
 
 @HiltViewModel
 class PlanListViewModel @Inject constructor(
@@ -54,6 +64,13 @@ class PlanListViewModel @Inject constructor(
     fun openMenu(id: Long) = _state.update { it.copy(menuTargetId = id) }
     fun dismissMenu() = _state.update { it.copy(menuTargetId = null) }
     fun consumeClonedId() = _state.update { it.copy(clonedPlanId = null) }
+
+    fun toggleSearch() = _state.update {
+        if (it.searchActive) it.copy(searchActive = false, searchQuery = "")
+        else it.copy(searchActive = true)
+    }
+    fun setSearchQuery(q: String) = _state.update { it.copy(searchQuery = q) }
+    fun closeSearch() = _state.update { it.copy(searchActive = false, searchQuery = "") }
 
     fun toggleFavorite(plan: ActivityPlan) = viewModelScope.launch {
         setFavorite(plan.id, !plan.isFavorite)

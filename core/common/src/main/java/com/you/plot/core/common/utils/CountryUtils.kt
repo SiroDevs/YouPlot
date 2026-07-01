@@ -15,7 +15,7 @@ fun countryName(code: String): String? =
     COUNTRY_LIST.firstOrNull { it.first.equals(code, ignoreCase = true) && it.first.isNotBlank() }?.second
 
 val COUNTRY_LIST = listOf(
-    "" to "🌍 All countries",
+    "" to "All countries",
     "af" to "Afghanistan",
     "al" to "Albania",
     "dz" to "Algeria",

@@ -285,8 +285,16 @@ class PlotterRepo @Inject constructor(
                     elevation = results.getJSONObject(i).getDouble("elevation"),
                 )
             }
-        }.getOrElse {
-            fetchElevationPoints(decodedPoints, distKm)
+        }.getOrElse { e ->
+            // Open-Elevation was unreachable / errored out. Return a flat profile that
+            // spans the route distance so downstream stats degrade to zero gain/loss
+            // instead of recursing into a stack overflow.
+            e.printStackTrace()
+            if (decodedPoints.isEmpty()) emptyList()
+            else listOf(
+                ElevationPoint(distanceKm = 0.0, elevation = 0.0),
+                ElevationPoint(distanceKm = distKm, elevation = 0.0),
+            )
         }
     }
 

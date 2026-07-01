@@ -49,7 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.domain.entity.Route
-import com.you.plot.core.ui.action.AppTopBar
+import com.you.plot.core.ui.action.SearchableTopBar
 import com.you.plot.feature.route.list.viewmodel.RouteListTab
 import com.you.plot.feature.route.list.viewmodel.RouteListViewModel
 
@@ -79,7 +79,17 @@ fun RouteListScreen(
     }
 
     Scaffold(
-        topBar = { AppTopBar(title = "Routes", showGoBack = true) },
+        topBar = {
+            SearchableTopBar(
+                title = "Routes",
+                searchActive = state.searchActive,
+                searchQuery = state.searchQuery,
+                onQueryChange = viewModel::setSearchQuery,
+                onSearchClick = viewModel::toggleSearch,
+                onCloseSearch = viewModel::closeSearch,
+                placeholder = "Search routes",
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateRoute) {
                 Icon(Icons.Default.Add, contentDescription = "Plot route")
@@ -102,24 +112,29 @@ fun RouteListScreen(
                 when (RouteListTab.entries[page]) {
                     RouteListTab.RECENT -> RouteListBody(
                         isLoading = state.isLoading && state.recent.isEmpty(),
-                        routes = state.recent,
+                        routes = state.visibleRecent,
                         menuTargetId = state.menuTargetId,
                         onOpenMenu = viewModel::openMenu,
                         onDismissMenu = viewModel::dismissMenu,
                         onRouteClick = onRouteClick,
                         onToggleFavorite = viewModel::toggleFavorite,
                         onDelete = viewModel::delete,
+                        emptyLabel = if (state.searchQuery.isNotBlank())
+                            "No routes match \"${state.searchQuery}\""
+                        else "No routes yet — tap + to plot your first",
                     )
                     RouteListTab.FAVORITES -> RouteListBody(
                         isLoading = false,
-                        routes = state.favorites,
+                        routes = state.visibleFavorites,
                         menuTargetId = state.menuTargetId,
                         onOpenMenu = viewModel::openMenu,
                         onDismissMenu = viewModel::dismissMenu,
                         onRouteClick = onRouteClick,
                         onToggleFavorite = viewModel::toggleFavorite,
                         onDelete = viewModel::delete,
-                        emptyLabel = "No favorites yet — long-press a route to favorite it",
+                        emptyLabel = if (state.searchQuery.isNotBlank())
+                            "No favorites match \"${state.searchQuery}\""
+                        else "No favorites yet — long-press a route to favorite it",
                     )
                     RouteListTab.LISTS -> Box(
                         Modifier.fillMaxSize(),

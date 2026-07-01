@@ -5,6 +5,7 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.entity.SportType
+import com.you.plot.core.domain.entity.StartPoint
 import com.you.plot.core.domain.entity.WaypointSearchResult
 
 data class PlotterUiState(
@@ -35,6 +36,7 @@ data class PlotterUiState(
     val savedRouteId: Long? = null,
     val needsLocationPermission: Boolean = false,
     val error: String? = null,
+    val savedStartPoints: List<StartPoint> = emptyList(),
 ) {
     val activeWaypoints: List<LatLng>
         get() = if (useSuggestedWaypoints) suggestedWaypoints else manualWaypoints

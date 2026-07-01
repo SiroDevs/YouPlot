@@ -30,7 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.ui.action.AppTopBar
+import com.you.plot.core.ui.action.SearchableTopBar
 import com.you.plot.feature.plan.list.view.components.PlanItem
 import com.you.plot.feature.plan.list.viewmodel.PlanListTab
 import com.you.plot.feature.plan.list.viewmodel.PlanListViewModel
@@ -59,7 +59,17 @@ fun PlanListScreen(
     }
 
     Scaffold(
-        topBar = { AppTopBar(title = "Plans") },
+        topBar = {
+            SearchableTopBar(
+                title = "Plans",
+                searchActive = state.searchActive,
+                searchQuery = state.searchQuery,
+                onQueryChange = viewModel::setSearchQuery,
+                onSearchClick = viewModel::toggleSearch,
+                onCloseSearch = viewModel::closeSearch,
+                placeholder = "Search plans",
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreatePlan) {
                 Icon(Icons.Default.Add, contentDescription = "Create plan")
@@ -82,7 +92,7 @@ fun PlanListScreen(
                 when (PlanListTab.entries[page]) {
                     PlanListTab.RECENT -> PlanListBody(
                         isLoading = state.isLoading && state.recent.isEmpty(),
-                        plans = state.recent,
+                        plans = state.visibleRecent,
                         menuTargetId = state.menuTargetId,
                         onPlanClick = onPlanClick,
                         onStartTracking = onStartTracking,
@@ -91,10 +101,13 @@ fun PlanListScreen(
                         onToggleFavorite = viewModel::toggleFavorite,
                         onDelete = viewModel::delete,
                         onDuplicate = viewModel::duplicate,
+                        emptyLabel = if (state.searchQuery.isNotBlank())
+                            "No plans match \"${state.searchQuery}\""
+                        else "No plans yet — create a plan from a route",
                     )
                     PlanListTab.FAVORITES -> PlanListBody(
                         isLoading = false,
-                        plans = state.favorites,
+                        plans = state.visibleFavorites,
                         menuTargetId = state.menuTargetId,
                         onPlanClick = onPlanClick,
                         onStartTracking = onStartTracking,
@@ -103,7 +116,9 @@ fun PlanListScreen(
                         onToggleFavorite = viewModel::toggleFavorite,
                         onDelete = viewModel::delete,
                         onDuplicate = viewModel::duplicate,
-                        emptyLabel = "No favorite plans yet",
+                        emptyLabel = if (state.searchQuery.isNotBlank())
+                            "No favorites match \"${state.searchQuery}\""
+                        else "No favorite plans yet",
                     )
                     PlanListTab.LISTS -> Box(
                         Modifier.fillMaxSize(),

@@ -1,10 +1,14 @@
 package com.you.plot.feature.plan.details.viewmodel
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.you.plot.core.data.export.PlanExportFormat
+import com.you.plot.core.data.export.PlanExporter
 import com.you.plot.core.domain.usecase.plan.GetPlanByIdUseCase
+import com.you.plot.core.domain.usecase.route.GetRouteByIdUseCase
 import com.you.plot.feature.plan.details.utils.PlanDetailUiState
 import com.you.plot.feature.plan.details.utils.ReminderEntry
 import com.you.plot.feature.plan.reminder.PlanReminder
@@ -23,6 +27,8 @@ import javax.inject.Inject
 class PlanDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getPlanByIdUseCase: GetPlanByIdUseCase,
+    private val getRouteByIdUseCase: GetRouteByIdUseCase,
+    private val planExporter: PlanExporter,
 ) : ViewModel() {
 
     private val planId: Long = checkNotNull(savedStateHandle["planId"])
@@ -36,6 +42,32 @@ class PlanDetailViewModel @Inject constructor(
             _state.update { it.copy(plan = plan, isLoading = false) }
         }
     }
+
+    fun exportPlan(format: PlanExportFormat) {
+        val plan = _state.value.plan ?: return
+        _state.update { it.copy(isExporting = true) }
+        viewModelScope.launch {
+            runCatching {
+                val route = getRouteByIdUseCase(plan.routeId)
+                planExporter.export(plan, route, format)
+            }.onSuccess { uri ->
+                _state.update {
+                    it.copy(
+                        isExporting = false,
+                        pendingShareUri = uri,
+                        pendingShareMime = format.mime,
+                    )
+                }
+            }.onFailure { e ->
+                _state.update {
+                    it.copy(isExporting = false, exportError = e.message ?: "Export failed")
+                }
+            }
+        }
+    }
+
+    fun consumeShare() = _state.update { it.copy(pendingShareUri = null, pendingShareMime = null) }
+    fun clearExportError() = _state.update { it.copy(exportError = null) }
 
     fun selectDay(day: Int) = _state.update { it.copy(selectedDay = day) }
 

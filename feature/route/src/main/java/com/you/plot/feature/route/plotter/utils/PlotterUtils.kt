@@ -3,8 +3,10 @@ package com.you.plot.feature.route.plotter.utils
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import com.you.plot.core.common.entity.ElevationPoint
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.PlotterStage
+import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.utils.MapConstants
 import com.you.plot.core.common.utils.bearingLabel
 import com.you.plot.core.common.utils.destinationPoint
@@ -113,4 +115,42 @@ fun Context.hasLocationPermission(): Boolean {
     val coarse = checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
         PackageManager.PERMISSION_GRANTED
     return fine || coarse
+}
+
+/**
+ * Distance, gain, loss, elevation profile, and polyline adjusted for the chosen
+ * trip mode. For a real out-and-back the return leg re-covers every metre of the
+ * outbound leg, so distance doubles and the round-trip gain equals one-way gain
+ * plus one-way loss (which also equals loss, since start and end sit at the same
+ * altitude). Callers use this for both stage-5 display and for the values saved
+ * on the Route entity so the two never disagree.
+ */
+data class RouteStats(
+    val totalDist: Double,
+    val elevationGain: Double,
+    val elevationLoss: Double,
+    val elevationPoints: List<ElevationPoint>,
+    val polyline: List<LatLng>,
+)
+
+fun RouteCandidate.statsFor(isRoundTrip: Boolean): RouteStats {
+    if (!isRoundTrip) return RouteStats(
+        totalDist = totalDist,
+        elevationGain = elevationGain,
+        elevationLoss = elevationLoss,
+        elevationPoints = elevationPoints,
+        polyline = waypoints,
+    )
+    val roundGainLoss = elevationGain + elevationLoss
+    val forwardEnd = elevationPoints.lastOrNull()?.distanceKm ?: 0.0
+    val mirroredProfile = elevationPoints.asReversed().drop(1).map { pt ->
+        pt.copy(distanceKm = 2 * forwardEnd - pt.distanceKm)
+    }
+    return RouteStats(
+        totalDist = totalDist * 2,
+        elevationGain = roundGainLoss,
+        elevationLoss = roundGainLoss,
+        elevationPoints = elevationPoints + mirroredProfile,
+        polyline = waypoints + waypoints.asReversed().drop(1),
+    )
 }

@@ -1,8 +1,11 @@
 package com.you.plot.feature.route.detail.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.you.plot.core.data.export.RouteExportFormat
+import com.you.plot.core.data.export.RouteExporter
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.domain.usecase.route.DeleteRouteUseCase
 import com.you.plot.core.domain.usecase.route.GetRouteByIdUseCase
@@ -19,6 +22,10 @@ data class RouteDetailUiState(
     val isLoading: Boolean = true,
     val isDeleted: Boolean = false,
     val deleteError: String? = null,
+    val pendingShareUri: Uri? = null,
+    val pendingShareMime: String? = null,
+    val exportError: String? = null,
+    val isExporting: Boolean = false,
 )
 
 @HiltViewModel
@@ -26,6 +33,7 @@ class RouteDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getRouteByIdUseCase: GetRouteByIdUseCase,
     private val deleteRouteUseCase: DeleteRouteUseCase,
+    private val routeExporter: RouteExporter,
 ) : ViewModel() {
 
     private val routeId: Long = checkNotNull(savedStateHandle["routeId"])
@@ -52,4 +60,29 @@ class RouteDetailViewModel @Inject constructor(
     }
 
     fun clearDeleteError() = _state.update { it.copy(deleteError = null) }
+
+    fun exportRoute(format: RouteExportFormat) {
+        val route = _state.value.route ?: return
+        _state.update { it.copy(isExporting = true) }
+        viewModelScope.launch {
+            runCatching { routeExporter.export(route, format) }
+                .onSuccess { uri ->
+                    _state.update {
+                        it.copy(
+                            isExporting = false,
+                            pendingShareUri = uri,
+                            pendingShareMime = format.mime,
+                        )
+                    }
+                }
+                .onFailure { e ->
+                    _state.update {
+                        it.copy(isExporting = false, exportError = e.message ?: "Export failed")
+                    }
+                }
+        }
+    }
+
+    fun consumeShare() = _state.update { it.copy(pendingShareUri = null, pendingShareMime = null) }
+    fun clearExportError() = _state.update { it.copy(exportError = null) }
 }

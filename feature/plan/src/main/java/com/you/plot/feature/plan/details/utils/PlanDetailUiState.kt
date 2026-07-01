@@ -1,5 +1,6 @@
 package com.you.plot.feature.plan.details.utils
 
+import android.net.Uri
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.domain.entity.Event
 
@@ -15,6 +16,10 @@ data class PlanDetailUiState(
     val isLoading: Boolean = true,
     val reminders: List<ReminderEntry> = emptyList(),
     val showAddReminderDialog: Boolean = false,
+    val isExporting: Boolean = false,
+    val pendingShareUri: Uri? = null,
+    val pendingShareMime: String? = null,
+    val exportError: String? = null,
 ) {
     /** Events for the selected day, sorted by planned time */
     val eventsForDay: List<Event>

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -57,6 +58,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppSpecs
+import com.you.plot.core.domain.entity.StartPoint
 import com.you.plot.core.domain.entity.WaypointSearchResult
 
 @Composable
@@ -73,12 +75,29 @@ fun LocationSearchBar(
     onCountrySelected: ((String) -> Unit)? = null,
     onChooseOnMap: (() -> Unit)? = null,
     onUseMyLocation: (() -> Unit)? = null,
+    // Only when there is at least one saved start point does the bookmark icon
+    // appear; tapping it opens the searchable start-point picker.
+    savedStartPoints: List<StartPoint> = emptyList(),
+    onStartPointPicked: ((StartPoint) -> Unit)? = null,
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     var typed by remember { mutableStateOf(query) }
     LaunchedEffect(query) { if (query != typed) typed = query }
+    var showStartPointPicker by remember { mutableStateOf(false) }
+    val showBookmark = savedStartPoints.isNotEmpty() && onStartPointPicked != null
+
+    if (showStartPointPicker) {
+        StartPointPickerDialog(
+            startPoints = savedStartPoints,
+            onDismiss = { showStartPointPicker = false },
+            onPicked = { sp ->
+                onStartPointPicked?.invoke(sp)
+                showStartPointPicker = false
+            },
+        )
+    }
 
     val showQuickActions = isFocused && (onChooseOnMap != null || onUseMyLocation != null)
     val hasDropdown = showQuickActions || results.isNotEmpty()
@@ -112,6 +131,16 @@ fun LocationSearchBar(
                                 Icons.Default.Close,
                                 contentDescription = "Clear",
                                 modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                    if (showBookmark) {
+                        IconButton(onClick = { showStartPointPicker = true }) {
+                            Icon(
+                                Icons.Outlined.Bookmark,
+                                contentDescription = "Saved start points",
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }

@@ -16,6 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.IosShare
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -25,17 +27,25 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.dateFmt
+import com.you.plot.core.data.export.PlanExportFormat
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.ui.action.AppTopBar
+import com.you.plot.core.ui.dialog.ExportChoice
+import com.you.plot.core.ui.dialog.ExportFormatSheet
 import com.you.plot.feature.plan.details.view.components.AddReminderDialog
 import com.you.plot.feature.plan.details.view.components.DaySummaryCard
 import com.you.plot.core.ui.general.DayTimeline
@@ -53,11 +63,57 @@ fun PlanDetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    var showExportSheet by remember { mutableStateOf(false) }
 
     if (state.showAddReminderDialog) {
         AddReminderDialog(
             onDismiss = { viewModel.hideAddReminderDialog() },
             onConfirm = { label, fireAt -> viewModel.addReminder(context, label, fireAt) },
+        )
+    }
+
+    LaunchedEffect(state.pendingShareUri) {
+        val uri = state.pendingShareUri ?: return@LaunchedEffect
+        val mime = state.pendingShareMime ?: "*/*"
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = mime
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(send, "Export plan"))
+        viewModel.consumeShare()
+    }
+
+    state.exportError?.let { err ->
+        AlertDialog(
+            onDismissRequest = { viewModel.clearExportError() },
+            title = { Text("Export failed") },
+            text = { Text(err) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.clearExportError() }) { Text("OK") }
+            },
+        )
+    }
+
+    if (showExportSheet) {
+        ExportFormatSheet(
+            title = "Export plan as",
+            formats = PlanExportFormat.entries.map { format ->
+                ExportChoice(
+                    label = format.display,
+                    description = when (format) {
+                        PlanExportFormat.PDF -> "Printable itinerary"
+                        PlanExportFormat.TXT -> "Plain text summary"
+                        PlanExportFormat.IMAGE -> "Screenshot — coming soon"
+                    },
+                    enabled = format != PlanExportFormat.IMAGE,
+                    onSelect = {
+                        showExportSheet = false
+                        viewModel.exportPlan(format)
+                    },
+                )
+            },
+            onDismiss = { showExportSheet = false },
         )
     }
 
@@ -74,6 +130,9 @@ fun PlanDetailScreen(
                         }) {
                             Icon(Icons.Default.DateRange, "Export to Calendar")
                         }
+                    }
+                    IconButton(onClick = { showExportSheet = true }) {
+                        Icon(Icons.Outlined.IosShare, "Export plan")
                     }
                     IconButton(onClick = { viewModel.showAddReminderDialog() }) {
                         Icon(Icons.Default.Notifications, "Add Reminder")

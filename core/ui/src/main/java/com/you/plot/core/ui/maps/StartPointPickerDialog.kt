@@ -1,24 +1,7 @@
-/*
- * Copyright 2026 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.you.plot.core.ui.maps
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,6 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -46,7 +30,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -59,56 +42,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.you.plot.core.common.utils.COUNTRY_LIST
 import com.you.plot.core.common.utils.countryFlag
+import com.you.plot.core.domain.entity.StartPoint
 
 /**
- * Trigger that shows just the country's flag (no ISO letters — the ISO code still
- * flows through the caller via [selectedCtryCode]) and opens a full-page
- * [CountryPickerDialog] so users can search through the full list.
+ * Full-page picker for saved start points. Users can:
+ *  - search by name (case‑insensitive substring)
+ *  - toggle the trailing star to only show favorite start points
+ *  - tap a row to pick it and dismiss
+ *
+ * The dialog only makes sense to open when there is at least one saved start
+ * point; callers on the plotter side guard the trigger button accordingly.
  */
-@Composable
-fun CountrySelector(
-    selectedCtryCode: String,
-    onCountrySelected: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var showPicker by remember { mutableStateOf(false) }
-    val flag = if (selectedCtryCode.isBlank()) "🌐" else countryFlag(selectedCtryCode)
-
-    Box(modifier = modifier) {
-        TextButton(
-            onClick = { showPicker = true },
-            modifier = Modifier.padding(end = 4.dp),
-        ) {
-            Text(flag, style = MaterialTheme.typography.titleMedium)
-        }
-    }
-
-    if (showPicker) {
-        CountryPickerDialog(
-            selectedCtryCode = selectedCtryCode,
-            onDismiss = { showPicker = false },
-            onCountrySelected = {
-                onCountrySelected(it)
-                showPicker = false
-            },
-        )
-    }
-}
-
-/** Full-screen searchable list of countries showing each country's flag + name. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryPickerDialog(
-    selectedCtryCode: String,
-    onCountrySelected: (String) -> Unit,
+fun StartPointPickerDialog(
+    startPoints: List<StartPoint>,
     onDismiss: () -> Unit,
+    onPicked: (StartPoint) -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -118,26 +75,24 @@ fun CountryPickerDialog(
             dismissOnClickOutside = false,
         ),
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.surface,
-        ) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
             var query by remember { mutableStateOf("") }
+            var favoritesOnly by remember { mutableStateOf(false) }
             val focusRequester = remember { FocusRequester() }
             LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-            val filtered = remember(query) {
-                if (query.isBlank()) COUNTRY_LIST
-                else COUNTRY_LIST.filter { (code, name) ->
-                    name.contains(query, ignoreCase = true) ||
-                        code.equals(query.trim(), ignoreCase = true)
-                }
+            val filtered = remember(query, favoritesOnly, startPoints) {
+                startPoints
+                    .asSequence()
+                    .filter { !favoritesOnly || it.isFavorite }
+                    .filter { query.isBlank() || it.name.contains(query, ignoreCase = true) }
+                    .toList()
             }
 
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text("Country") },
+                        title = { Text("Start points") },
                         navigationIcon = {
                             IconButton(onClick = onDismiss) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Close")
@@ -155,13 +110,26 @@ fun CountryPickerDialog(
                     OutlinedTextField(
                         value = query,
                         onValueChange = { query = it },
-                        placeholder = { Text("Search country") },
+                        placeholder = { Text("Search start points") },
                         singleLine = true,
                         leadingIcon = { Icon(Icons.Default.Search, null) },
                         trailingIcon = {
-                            if (query.isNotEmpty()) {
-                                IconButton(onClick = { query = "" }) {
-                                    Icon(Icons.Default.Close, "Clear")
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (query.isNotEmpty()) {
+                                    IconButton(onClick = { query = "" }) {
+                                        Icon(Icons.Default.Close, "Clear")
+                                    }
+                                }
+                                // Star toggles the favorites‑only filter.
+                                IconButton(onClick = { favoritesOnly = !favoritesOnly }) {
+                                    Icon(
+                                        if (favoritesOnly) Icons.Outlined.Star
+                                        else Icons.Outlined.StarOutline,
+                                        contentDescription = "Favorites only",
+                                        tint = if (favoritesOnly)
+                                            MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
                                 }
                             }
                         },
@@ -177,20 +145,32 @@ fun CountryPickerDialog(
                             .focusRequester(focusRequester),
                     )
 
-                    LazyColumn(Modifier.fillMaxSize()) {
-                        items(filtered, key = { it.first.ifEmpty { "__all__" } }) { (code, name) ->
-                            CountryRow(
-                                code = code,
-                                name = name,
-                                isSelected = code == selectedCtryCode,
-                                onClick = { onCountrySelected(code) },
-                            )
-                            HorizontalDivider(
-                                Modifier.padding(start = 60.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                    if (filtered.isEmpty()) {
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Text(
+                                if (favoritesOnly) "No favorite start points"
+                                else "No matching start points",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        item { Spacer(Modifier.height(24.dp)) }
+                    } else {
+                        LazyColumn(Modifier.fillMaxSize()) {
+                            items(filtered, key = { it.id }) { sp ->
+                                StartPointPickerRow(sp = sp, onClick = { onPicked(sp) })
+                                HorizontalDivider(
+                                    Modifier.padding(start = 60.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                                )
+                            }
+                            item { Spacer(Modifier.height(24.dp)) }
+                        }
                     }
                 }
             }
@@ -199,50 +179,39 @@ fun CountryPickerDialog(
 }
 
 @Composable
-private fun CountryRow(
-    code: String,
-    name: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-) {
-    val bg = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-    else MaterialTheme.colorScheme.surface
+private fun StartPointPickerRow(sp: StartPoint, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            if (code.isBlank()) "🌍" else countryFlag(code),
-            style = MaterialTheme.typography.titleLarge,
-        )
-        Spacer(Modifier.width(14.dp))
-        Text(
-            name.removePrefix("🌍 "),
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-@Composable
-fun QuickActionRow(icon: @Composable () -> Unit, label: String, onClick: () -> Unit) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 13.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        icon()
-        Text(
-            label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        if (sp.countryCode.isNotBlank()) {
+            Text(countryFlag(sp.countryCode), style = MaterialTheme.typography.titleMedium)
+        }
+        Column(Modifier.weight(1f)) {
+            Text(
+                sp.name,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                "Used ${sp.usageCount} time${if (sp.usageCount == 1) "" else "s"}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (sp.isFavorite) {
+            Icon(
+                Icons.Outlined.Star,
+                contentDescription = "Favorite",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
+            )
+        }
     }
 }
