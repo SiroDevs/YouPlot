@@ -39,7 +39,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.ElevationPoint
 import com.you.plot.core.common.entity.LatLng
+import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.entity.SportType
+import com.you.plot.core.common.utils.MapConstants
 import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Route
@@ -48,7 +50,7 @@ import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
 import com.you.plot.feature.route.detail.viewmodel.RouteDetailUiState
 import com.you.plot.feature.route.detail.viewmodel.RouteDetailViewModel
-import com.you.plot.feature.route.plotter.view.components.PlotterMap
+import com.you.plot.core.ui.components.maps.PlotterMap
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +63,17 @@ fun RouteDetailScreen(
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(state.isDeleted) { if (state.isDeleted) onBack() }
+
+    state.deleteError?.let { err ->
+        AlertDialog(
+            onDismissRequest = { viewModel.clearDeleteError() },
+            title = { Text("Cannot delete route") },
+            text = { Text(err) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.clearDeleteError() }) { Text("OK") }
+            },
+        )
+    }
 
     RouteDetailContent(
         state = state,
@@ -201,19 +214,35 @@ private fun RouteDetailContent(
             .padding(padding)) {
 
             if (showMap) {
+                val orderedWps = route.waypoints.sortedBy { it.orderIndex }
+                // First and last waypoints are the start/finish markers rendered separately —
+                // pass only the true intermediates to the map as via-points.
+                val intermediates = orderedWps
+                    .drop(1)
+                    .dropLast(if (orderedWps.size > 1) 1 else 0)
+                    .map { it.position }
+                val geometry = route.polyline.ifEmpty { orderedWps.map { it.position } }
+                val displayCandidate = RouteCandidate(
+                    id = 0,
+                    waypoints = geometry,
+                    elevationProfile = route.elevationProfile,
+                    totalDist = route.totalDist,
+                    elevationGain = route.elevationGain,
+                    elevationLoss = route.elevationLoss,
+                    colorArgb = MapConstants.CANDIDATE_COLORS.first(),
+                )
                 PlotterMap(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(240.dp),
                     startPoint = route.startPoint,
                     endPoint = route.endPoint,
-                    waypoints = emptyList(),
-                    candidates = emptyList(),
-                    selectedCandidateId = null,
+                    waypoints = intermediates,
+                    candidates = listOf(displayCandidate),
+                    selectedCandidateId = 0,
                     isRoundTrip = route.isRoundTrip,
-                    startPointName = route.waypoints.minByOrNull { it.orderIndex }?.name ?: "Start",
-                    endPointName = route.waypoints.maxByOrNull { it.orderIndex }?.name ?: "Finish",
-//                    routePolyline = route.waypoints.sortedBy { it.orderIndex }.map { it.position },
+                    startPointName = orderedWps.firstOrNull()?.name ?: "Start",
+                    endPointName = orderedWps.lastOrNull()?.name ?: "Finish",
                     onMapTap = {},
                 )
             }

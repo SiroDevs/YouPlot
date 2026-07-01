@@ -45,6 +45,9 @@ import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Route
+import com.you.plot.core.ui.components.dialog.PickerDialog
+import com.you.plot.core.ui.components.general.displayLabel
+import com.you.plot.core.ui.components.general.icon
 import com.you.plot.feature.plan.planner.utils.PlannerUiState
 import com.you.plot.feature.plan.planner.view.components.PlanDaysStepper
 import com.you.plot.feature.plan.planner.view.components.PlanSliderCard
@@ -63,6 +66,7 @@ internal fun PlannerStep1(state: PlannerUiState, vm: PlannerViewModel) {
         onNumberOfDaysChange = vm::setNumberOfDays,
         onAvgDistancePerDayChange = vm::setAvgDistancePerDay,
         onAvgSpeedChange = vm::setAvgSpeed,
+        onSportTypeChange = vm::setSportType,
     )
 }
 
@@ -77,9 +81,21 @@ private fun PlannerStep1Content(
     onNumberOfDaysChange: (Int) -> Unit,
     onAvgDistancePerDayChange: (Double) -> Unit,
     onAvgSpeedChange: (Double) -> Unit,
+    onSportTypeChange: (SportType) -> Unit = {},
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showSportPicker by remember { mutableStateOf(false) }
+
+    if (showSportPicker) {
+        PickerDialog(
+            title = "Sport Type",
+            options = SportType.entries.map { it to it.displayLabel },
+            selected = state.sportType,
+            onDismiss = { showSportPicker = false },
+            onConfirm = { onSportTypeChange(it); showSportPicker = false },
+        )
+    }
 
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = state.startDate)
     val timePickerState = rememberTimePickerState(initialHour = state.startHour, initialMinute = state.startMinute)
@@ -149,6 +165,47 @@ private fun PlannerStep1Content(
             value = state.description, onValueChange = onDescriptionChange,
             label = { Text("Description (optional)") }, modifier = Modifier.fillMaxWidth(), minLines = 2,
         )
+
+        // Sport type — inherited from the route on load but user can override for this plan.
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showSportPicker = true },
+        ) {
+            Row(
+                Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    state.sportType.icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp),
+                )
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Sport Type",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        state.sportType.displayLabel,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Text(
+                    "Change",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
 
         Row(
             Modifier.fillMaxWidth(),

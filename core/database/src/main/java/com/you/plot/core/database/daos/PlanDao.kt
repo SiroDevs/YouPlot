@@ -1,19 +1,3 @@
-/*
- * Copyright 2026 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.you.plot.core.database.daos
 
 import androidx.room.Dao
@@ -26,10 +10,16 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlanDao {
-    @Query("SELECT * FROM plans ORDER BY createdAt DESC")
+    @Query("SELECT * FROM plans WHERE deletedAt IS NULL ORDER BY createdAt DESC")
     fun getAllPlans(): Flow<List<PlanEntity>>
 
-    @Query("SELECT * FROM plans WHERE routeId = :routeId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM plans WHERE deletedAt IS NULL AND isFavorite = 1 ORDER BY createdAt DESC")
+    fun getFavoritePlans(): Flow<List<PlanEntity>>
+
+    @Query("SELECT * FROM plans WHERE deletedAt IS NOT NULL ORDER BY deletedAt DESC")
+    fun getTrashedPlans(): Flow<List<PlanEntity>>
+
+    @Query("SELECT * FROM plans WHERE routeId = :routeId AND deletedAt IS NULL ORDER BY createdAt DESC")
     fun getPlansByRouteId(routeId: Long): Flow<List<PlanEntity>>
 
     @Query("SELECT * FROM plans WHERE id = :id")
@@ -41,6 +31,18 @@ interface PlanDao {
     @Update
     suspend fun updatePlan(plan: PlanEntity)
 
+    @Query("UPDATE plans SET deletedAt = :now WHERE id = :id")
+    suspend fun softDeletePlan(id: Long, now: Long)
+
+    @Query("UPDATE plans SET deletedAt = NULL WHERE id = :id")
+    suspend fun restorePlan(id: Long)
+
+    @Query("UPDATE plans SET isFavorite = :fav WHERE id = :id")
+    suspend fun setFavorite(id: Long, fav: Boolean)
+
     @Query("DELETE FROM plans WHERE id = :id")
     suspend fun deletePlan(id: Long)
+
+    @Query("DELETE FROM plans WHERE deletedAt IS NOT NULL AND deletedAt < :cutoff")
+    suspend fun purgeExpired(cutoff: Long)
 }

@@ -28,6 +28,8 @@ fun DashboardScreen(
     onSettings: () -> Unit,
     onAbout: () -> Unit,
     onHelpFeedback: () -> Unit,
+    onStartPoints: () -> Unit = {},
+    onTrashBin: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     DashboardContent(
@@ -43,5 +45,7 @@ fun DashboardScreen(
         onAbout = onAbout,
         onHelpFeedback = onHelpFeedback,
         onSetPlanFilter = viewModel::setPlanFilter,
+        onStartPoints = onStartPoints,
+        onTrashBin = onTrashBin,
     )
 }

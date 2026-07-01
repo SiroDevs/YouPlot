@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
-import com.you.plot.feature.route.plotter.view.components.PlotterMap
+import com.you.plot.core.ui.components.maps.PlotterMap
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage1
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage2
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage3
@@ -57,17 +57,8 @@ fun PlotterScreen(
         viewModel.onPermissionResult(granted)
     }
 
-    // First launch: request permission proactively on Stage 1
-    LaunchedEffect(Unit) {
-        permissionLauncher.launch(
-            arrayOf(
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION,
-            )
-        )
-    }
-
-    // Triggered when user taps "Use your location" without permission
+    // Permission is requested only when the user taps "Use your location" — the app
+    // no longer auto-selects the current location as the start point on Stage 1.
     LaunchedEffect(state.needsLocationPermission) {
         if (state.needsLocationPermission) {
             permissionLauncher.launch(

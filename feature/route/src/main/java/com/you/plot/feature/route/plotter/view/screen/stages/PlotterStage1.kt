@@ -12,7 +12,7 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.WaypointSearchResult
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
-import com.you.plot.feature.route.plotter.view.components.LocationSearchBar
+import com.you.plot.core.ui.components.maps.LocationSearchBar
 import com.you.plot.feature.route.plotter.view.components.SelectedPointChip
 import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 

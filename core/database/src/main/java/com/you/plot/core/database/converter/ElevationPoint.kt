@@ -1,22 +1,7 @@
-/*
- * Copyright 2026 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.you.plot.core.database.converter
 
 import com.you.plot.core.common.entity.ElevationPoint
+import com.you.plot.core.common.entity.LatLng
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -32,5 +17,21 @@ fun String.toElevationList(): List<ElevationPoint> {
     return (0 until arr.length()).map { i ->
         val obj = arr.getJSONObject(i)
         ElevationPoint(obj.getDouble("d"), obj.getDouble("e"))
+    }
+}
+
+@JvmName("latLngListToJson")
+fun List<LatLng>.polylineJson(): String {
+    val arr = JSONArray()
+    forEach { p -> arr.put(JSONObject().apply { put("lat", p.latitude); put("lng", p.longitude) }) }
+    return arr.toString()
+}
+
+fun String.toLatLngList(): List<LatLng> {
+    if (isBlank()) return emptyList()
+    val arr = JSONArray(this)
+    return (0 until arr.length()).map { i ->
+        val obj = arr.getJSONObject(i)
+        LatLng(obj.getDouble("lat"), obj.getDouble("lng"))
     }
 }

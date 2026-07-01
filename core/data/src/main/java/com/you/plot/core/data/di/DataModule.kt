@@ -4,10 +4,12 @@ import com.you.plot.core.data.impls.LocationRepoImpl
 import com.you.plot.core.data.impls.PlanRepoImpl
 import com.you.plot.core.data.impls.RouteRepoImpl
 import com.you.plot.core.data.impls.ActivityRepoImpl
+import com.you.plot.core.data.impls.StartPointRepoImpl
 import com.you.plot.core.domain.repos.LocationRepo
 import com.you.plot.core.domain.repos.PlanRepo
 import com.you.plot.core.domain.repos.RouteRepo
 import com.you.plot.core.domain.repos.ActivityRepo
+import com.you.plot.core.domain.repos.StartPointRepo
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -29,4 +31,7 @@ abstract class DataModule {
 
     @Binds @Singleton
     abstract fun bindLocationRepo(impl: LocationRepoImpl): LocationRepo
+
+    @Binds @Singleton
+    abstract fun bindStartPointRepo(impl: StartPointRepoImpl): StartPointRepo
 }

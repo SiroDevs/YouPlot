@@ -8,28 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CalendarToday
-import androidx.compose.material.icons.outlined.DirectionsBike
-import androidx.compose.material.icons.outlined.DirectionsRun
-import androidx.compose.material.icons.outlined.DirectionsWalk
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.Loop
-import androidx.compose.material.icons.outlined.NordicWalking
-import androidx.compose.material.icons.outlined.Route
-import androidx.compose.material.icons.outlined.TrendingDown
-import androidx.compose.material.icons.outlined.TrendingUp
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
@@ -42,14 +23,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.ElevationPoint
 import com.you.plot.core.common.entity.SportType
+import com.you.plot.core.common.utils.countryFlag
 import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.ui.components.dialog.PickerDialog
-import com.you.plot.feature.route.plotter.view.components.ElevationProfileGraph
+import com.you.plot.core.ui.components.general.displayLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,20 +85,138 @@ fun RouteInfoPanel(
                 createdAt = createdAt,
                 description = description,
             )
-            1 -> WaypointsTab(waypoints = waypoints, totalDist = distanceKm)
+            1 -> WaypointsTab(
+                waypoints = waypoints,
+                totalDist = distanceKm,
+                elevationProfile = elevationProfile,
+            )
         }
     }
 }
 
 @Composable
-private fun WaypointsTab(waypoints: List<Waypoint>, totalDist: Double) {
+private fun WaypointsTab(
+    waypoints: List<Waypoint>,
+    totalDist: Double,
+    elevationProfile: List<ElevationPoint>,
+) {
+    val ordered = waypoints.sortedBy { it.orderIndex }
+    val gains = remember(ordered, elevationProfile) {
+        computeSegmentGains(ordered, elevationProfile)
+    }
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp),
     ) {
-        items(waypoints.sortedBy { it.orderIndex }) { wp ->
-            RouteDetailWaypointRow(wp = wp, total = totalDist)
+        item { WaypointTableHeader() }
+        items(ordered.size) { idx ->
+            WaypointTableRow(
+                wp = ordered[idx],
+                total = totalDist,
+                gainSinceLast = gains[idx],
+            )
         }
         item { Spacer(Modifier.height(96.dp)) }
     }
+}
+
+@Composable
+private fun WaypointTableHeader() {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        HeaderCell("Name", Modifier.weight(2f))
+        HeaderCell("Dist", Modifier.weight(1f), TextAlign.End)
+        HeaderCell("Elev.↑", Modifier.weight(1f), TextAlign.End)
+        HeaderCell("%", Modifier.weight(0.6f), TextAlign.End)
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+}
+
+@Composable
+private fun HeaderCell(label: String, modifier: Modifier = Modifier, align: TextAlign = TextAlign.Start) {
+    Text(
+        label,
+        modifier = modifier,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        fontWeight = FontWeight.SemiBold,
+        textAlign = align,
+    )
+}
+
+@Composable
+private fun WaypointTableRow(wp: Waypoint, total: Double, gainSinceLast: Double) {
+    val pct = if (total > 0) (wp.distFromStart / total * 100).toInt().coerceIn(0, 100) else 0
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            Modifier.weight(2f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            if (wp.countryCode.isNotBlank()) {
+                Text(countryFlag(wp.countryCode), style = MaterialTheme.typography.bodyMedium)
+            }
+            Text(
+                wp.name,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+        Text(
+            "%.1f km".format(wp.distFromStart),
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.End,
+        )
+        Text(
+            if (gainSinceLast > 0) "%.0f m".format(gainSinceLast) else "—",
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.End,
+        )
+        Text(
+            "$pct%",
+            modifier = Modifier.weight(0.6f),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.End,
+        )
+    }
+}
+
+/**
+ * For each waypoint (in order), integrate positive elevation deltas along the
+ * elevation profile from the prior waypoint up to this one. Index 0 is the
+ * starting point so its gain is 0.
+ */
+private fun computeSegmentGains(
+    waypoints: List<Waypoint>,
+    profile: List<ElevationPoint>,
+): List<Double> {
+    if (waypoints.isEmpty() || profile.size < 2) return List(waypoints.size) { 0.0 }
+    val gains = DoubleArray(waypoints.size)
+    for (i in 1 until waypoints.size) {
+        val from = waypoints[i - 1].distFromStart
+        val to = waypoints[i].distFromStart
+        var gain = 0.0
+        var prevElev: Double? = null
+        for (pt in profile) {
+            if (pt.distanceKm < from) continue
+            if (pt.distanceKm > to) break
+            val e = pt.elevation
+            if (prevElev != null && e > prevElev) gain += e - prevElev
+            prevElev = e
+        }
+        gains[i] = gain
+    }
+    return gains.toList()
 }

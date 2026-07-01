@@ -2,6 +2,7 @@ package com.you.plot.feature.plan.planner.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.domain.entity.ActivityPlan
 import com.you.plot.core.domain.entity.Event
 import com.you.plot.core.domain.entity.Route
@@ -55,6 +56,7 @@ class PlannerViewModel @Inject constructor(
                         it.copy(
                             selectedRoute = route,
                             planName = "${route.name} Plan",
+                            sportType = route.sportType,
                             currentStep = 1,   // skip Step 0 – route already chosen
                         )
                     }
@@ -62,6 +64,8 @@ class PlannerViewModel @Inject constructor(
             }
         }
     }
+
+    fun setSportType(type: SportType) = _state.update { it.copy(sportType = type) }
 
     fun setPlanSource(source: PlanSource) {
         _state.update {
@@ -79,6 +83,7 @@ class PlannerViewModel @Inject constructor(
                 selectedRoute = route,
                 selectedTemplate = null,
                 planName = "${route.name} Plan",
+                sportType = route.sportType,
                 avgDailyDistOverride = null,
             )
         }
@@ -91,6 +96,7 @@ class PlannerViewModel @Inject constructor(
                 selectedRoute = null,
                 planName = "${plan.name} (Copy)",
                 description = plan.description,
+                sportType = plan.sportType,
                 numberOfDays = plan.numberOfDays,
                 avgSpeed = plan.avgSpeed,
                 avgDailyDistOverride = plan.avgDailyDist,
@@ -195,6 +201,7 @@ class PlannerViewModel @Inject constructor(
             routeId = routeId,
             name = s.planName,
             description = s.description,
+            sportType = s.sportType,
             startDate = s.startTime,
             numberOfDays = s.numberOfDays,
             avgSpeed = s.avgSpeed.coerceAtLeast(1.0),
@@ -239,6 +246,7 @@ class PlannerViewModel @Inject constructor(
                     routeId = routeId,
                     name = s.planName.ifBlank { "Plan" },
                     description = s.description,
+                    sportType = s.sportType,
                     startDate = s.startTime,
                     numberOfDays = s.numberOfDays,
                     avgSpeed = s.avgSpeed,

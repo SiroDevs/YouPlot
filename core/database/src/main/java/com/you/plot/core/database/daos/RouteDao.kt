@@ -1,19 +1,3 @@
-/*
- * Copyright 2026 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.you.plot.core.database.daos
 
 import androidx.room.Dao
@@ -26,8 +10,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RouteDao {
-    @Query("SELECT * FROM routes ORDER BY createdAt DESC")
+    @Query("SELECT * FROM routes WHERE deletedAt IS NULL ORDER BY createdAt DESC")
     fun getAllRoutes(): Flow<List<RouteEntity>>
+
+    @Query("SELECT * FROM routes WHERE deletedAt IS NULL AND isFavorite = 1 ORDER BY createdAt DESC")
+    fun getFavoriteRoutes(): Flow<List<RouteEntity>>
+
+    @Query("SELECT * FROM routes WHERE deletedAt IS NOT NULL ORDER BY deletedAt DESC")
+    fun getTrashedRoutes(): Flow<List<RouteEntity>>
 
     @Query("SELECT * FROM routes WHERE id = :id")
     suspend fun getRouteById(id: Long): RouteEntity?
@@ -38,6 +28,21 @@ interface RouteDao {
     @Update
     suspend fun updateRoute(route: RouteEntity)
 
+    @Query("UPDATE routes SET deletedAt = :now WHERE id = :id")
+    suspend fun softDeleteRoute(id: Long, now: Long)
+
+    @Query("UPDATE routes SET deletedAt = NULL WHERE id = :id")
+    suspend fun restoreRoute(id: Long)
+
+    @Query("UPDATE routes SET isFavorite = :fav WHERE id = :id")
+    suspend fun setFavorite(id: Long, fav: Boolean)
+
     @Query("DELETE FROM routes WHERE id = :id")
     suspend fun deleteRoute(id: Long)
+
+    @Query("DELETE FROM routes WHERE deletedAt IS NOT NULL AND deletedAt < :cutoff")
+    suspend fun purgeExpired(cutoff: Long)
+
+    @Query("SELECT COUNT(*) FROM plans WHERE routeId = :routeId AND deletedAt IS NULL")
+    suspend fun countActivePlansForRoute(routeId: Long): Int
 }

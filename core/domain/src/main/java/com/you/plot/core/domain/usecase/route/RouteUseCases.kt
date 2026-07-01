@@ -30,5 +30,39 @@ class SaveRouteUseCase @Inject constructor(
 class DeleteRouteUseCase @Inject constructor(
     private val repository: RouteRepo
 ) {
+    /**
+     * Soft-deletes a route, moving it to the trash bin. Fails if the route still
+     * has active (non-trashed) plans attached — the caller must clear those first.
+     */
+    suspend operator fun invoke(id: Long): Result<Unit> {
+        val active = repository.countActivePlansForRoute(id)
+        if (active > 0) return Result.failure(RouteHasActivePlansException(active))
+        repository.softDeleteRoute(id)
+        return Result.success(Unit)
+    }
+}
+
+class RouteHasActivePlansException(val planCount: Int) : Exception(
+    "Route has $planCount active plan${if (planCount == 1) "" else "s"} attached. Delete the plans first."
+)
+
+class GetTrashedRoutesUseCase @Inject constructor(private val repository: RouteRepo) {
+    operator fun invoke() = repository.getTrashedRoutes()
+}
+
+class GetFavoriteRoutesUseCase @Inject constructor(private val repository: RouteRepo) {
+    operator fun invoke() = repository.getFavoriteRoutes()
+}
+
+class SetRouteFavoriteUseCase @Inject constructor(private val repository: RouteRepo) {
+    suspend operator fun invoke(id: Long, favorite: Boolean) =
+        repository.setRouteFavorite(id, favorite)
+}
+
+class RestoreRouteUseCase @Inject constructor(private val repository: RouteRepo) {
+    suspend operator fun invoke(id: Long) = repository.restoreRoute(id)
+}
+
+class PermanentlyDeleteRouteUseCase @Inject constructor(private val repository: RouteRepo) {
     suspend operator fun invoke(id: Long) = repository.deleteRoute(id)
 }

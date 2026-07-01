@@ -1,4 +1,4 @@
-package com.you.plot.feature.route.plotter.view.components
+package com.you.plot.core.ui.components.maps
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

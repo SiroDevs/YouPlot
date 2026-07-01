@@ -1,5 +1,19 @@
 package com.you.plot.core.common.utils
 
+/** Returns the unicode flag emoji for a 2-letter ISO country code, or a globe for blank/unknown. */
+fun countryFlag(code: String): String {
+    val cc = code.trim().uppercase()
+    if (cc.length != 2 || cc.any { it !in 'A'..'Z' }) return "🌐"
+    val base = 0x1F1E6 - 'A'.code
+    val first = String(Character.toChars(base + cc[0].code))
+    val second = String(Character.toChars(base + cc[1].code))
+    return first + second
+}
+
+/** Looks up the human-readable name for a country code. Returns null if unknown. */
+fun countryName(code: String): String? =
+    COUNTRY_LIST.firstOrNull { it.first.equals(code, ignoreCase = true) && it.first.isNotBlank() }?.second
+
 val COUNTRY_LIST = listOf(
     "" to "🌍 All countries",
     "af" to "Afghanistan",

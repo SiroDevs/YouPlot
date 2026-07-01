@@ -14,9 +14,10 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.designsystem.theme.AppTheme
+import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
-import com.you.plot.feature.route.plotter.view.components.PlotterMap
+import com.you.plot.core.ui.components.maps.PlotterMap
 import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable
@@ -70,8 +71,44 @@ private fun PlotterStage5Panel(
         elevationProfile = candidate?.elevationProfile ?: emptyList(),
         sportType = state.sportType,
         isRoundTrip = state.isRoundTrip,
-        waypoints = emptyList(),
+        waypoints = buildPreviewWaypoints(state, distanceKm),
     )
+}
+
+/**
+ * Assembles a preview list for the waypoints table on stage 5. When the user hasn't
+ * selected any intermediate waypoints, we still surface start + finish so the table
+ * isn't empty.
+ */
+private fun buildPreviewWaypoints(state: PlotterUiState, distanceKm: Double): List<Waypoint> {
+    val start = state.startPoint ?: return emptyList()
+    val end = state.endPoint ?: return emptyList()
+    val intermediates = state.activeWaypoints
+    val allPoints = buildList {
+        add(start); addAll(intermediates); add(end)
+    }
+    val cc = state.selectedCtryCode
+    return allPoints.mapIndexed { idx, pt ->
+        val cumDist = if (allPoints.size > 1)
+            distanceKm * idx.toDouble() / (allPoints.size - 1)
+        else 0.0
+        val name = when (idx) {
+            0 -> state.startPointName.ifBlank { "Start" }
+            allPoints.lastIndex -> if (state.isRoundTrip)
+                state.startPointName.ifBlank { "Start" }
+            else state.endPointName.ifBlank { "Finish" }
+            else -> "Waypoint $idx"
+        }
+        Waypoint(
+            routeId = 0L,
+            name = name,
+            position = pt,
+            orderIndex = idx,
+            distFromStart = cumDist,
+            isStopPlanned = idx != 0 && idx != allPoints.lastIndex,
+            countryCode = cc,
+        )
+    }
 }
 
 @Preview(showBackground = true)

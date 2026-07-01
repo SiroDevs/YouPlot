@@ -6,6 +6,7 @@ import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.utils.MapConstants
 import com.you.plot.core.common.utils.buildElevationStats
 import com.you.plot.core.common.utils.buildFallbackCandidates
+import com.you.plot.core.common.utils.countryName
 import com.you.plot.core.common.utils.decodePolyline6
 import com.you.plot.core.domain.entity.WaypointSearchResult
 import kotlinx.coroutines.Dispatchers
@@ -190,11 +191,19 @@ class PlotterRepo @Inject constructor(
             }
     }
 
+    /**
+     * Photon has no `countrycodes` parameter, so bias the query by appending the country
+     * name to the search terms, then filter server responses that carry a mismatching
+     * `countrycode` property. Falls back to Nominatim (via [searchLocations]) on failure —
+     * Nominatim actually supports countrycodes and returns country-scoped hits.
+     */
     suspend fun searchLocationsWithCountry(query: String, countryCode: String): List<WaypointSearchResult> =
         withContext(Dispatchers.IO) {
+            if (countryCode.isBlank()) return@withContext searchLocations(query)
             runCatching {
-                val encoded = URLEncoder.encode(query, "UTF-8")
-                val urlString = "${MapConstants.PHOTON_BASE}/api/?q=$encoded&limit=10&lang=en&osm_tag=:&bbox=&countrycodes=$countryCode"
+                val biasedQuery = countryName(countryCode)?.let { "$query, $it" } ?: query
+                val encoded = URLEncoder.encode(biasedQuery, "UTF-8")
+                val urlString = "${MapConstants.PHOTON_BASE}/api/?q=$encoded&limit=10&lang=en"
                 val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
                     setRequestProperty("User-Agent", osmUserAgent)
                     connectTimeout = 8_000; readTimeout = 8_000
@@ -206,7 +215,7 @@ class PlotterRepo @Inject constructor(
                     val feat = features.getJSONObject(i)
                     val props = feat.getJSONObject("properties")
                     val cc = props.optString("countrycode").lowercase()
-                    if (countryCode.isNotBlank() && cc != countryCode.lowercase()) return@mapNotNull null
+                    if (cc.isNotBlank() && cc != countryCode.lowercase()) return@mapNotNull null
                     val coords = feat.getJSONObject("geometry").getJSONArray("coordinates")
                     val lon = coords.getDouble(0); val lat = coords.getDouble(1)
                     val parts = listOfNotNull(
@@ -220,6 +229,29 @@ class PlotterRepo @Inject constructor(
                         latLng = LatLng(lat, lon),
                     )
                 }
-            }.getOrElse { searchLocations(query) }
+            }.getOrElse {
+                runCatching { nominatimSearch(query, countryCode) }.getOrElse { emptyList() }
+            }
         }
+
+    private fun nominatimSearch(query: String, countryCode: String): List<WaypointSearchResult> {
+        val encoded = URLEncoder.encode(query, "UTF-8")
+        val urlString = "${MapConstants.NOMINATIM_BASE}search" +
+            "?q=$encoded&format=jsonv2&limit=10&addressdetails=1&countrycodes=$countryCode"
+        val conn = (URL(urlString).openConnection() as HttpURLConnection).apply {
+            setRequestProperty("User-Agent", osmUserAgent)
+            setRequestProperty("Accept-Language", "en")
+            connectTimeout = 8_000; readTimeout = 8_000
+        }
+        val json = conn.inputStream.bufferedReader().readText()
+        conn.disconnect()
+        val arr = org.json.JSONArray(json)
+        return (0 until arr.length()).map { i ->
+            val obj = arr.getJSONObject(i)
+            WaypointSearchResult(
+                displayName = obj.getString("display_name").take(80),
+                latLng = LatLng(obj.getDouble("lat"), obj.getDouble("lon")),
+            )
+        }
+    }
 }

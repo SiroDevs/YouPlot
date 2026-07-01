@@ -27,4 +27,5 @@ data class WaypointEntity(
     val elevation: Double,
     val distFromStart: Double = 0.0,
     val isStopPlanned: Boolean,
+    val countryCode: String = "",
 )

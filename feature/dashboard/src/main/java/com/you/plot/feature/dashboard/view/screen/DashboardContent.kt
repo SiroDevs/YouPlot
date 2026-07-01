@@ -1,19 +1,3 @@
-/*
- * Copyright 2026 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.you.plot.feature.dashboard.view.screen
 
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.PinDrop
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -73,6 +59,8 @@ fun DashboardContent(
     onAbout: () -> Unit,
     onHelpFeedback: () -> Unit,
     onSetPlanFilter: (PlanFilter) -> Unit,
+    onStartPoints: () -> Unit = {},
+    onTrashBin: () -> Unit = {},
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var fabExpanded by remember { mutableStateOf(false) }
@@ -82,6 +70,9 @@ fun DashboardContent(
             AppTopBar(
                 title = "YouPlot",
                 actions = {
+                    IconButton(onClick = onStartPoints) {
+                        Icon(Icons.Outlined.PinDrop, contentDescription = "Start points")
+                    }
                     Box {
                         IconButton(onClick = { menuExpanded = true }) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More options")
@@ -90,6 +81,11 @@ fun DashboardContent(
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false },
                         ) {
+                            DropdownMenuItem(
+                                text = { Text("Trash Bin") },
+                                leadingIcon = { Icon(Icons.Outlined.Delete, null) },
+                                onClick = { menuExpanded = false; onTrashBin() },
+                            )
                             DropdownMenuItem(
                                 text = { Text("Settings") },
                                 onClick = { menuExpanded = false; onSettings() },

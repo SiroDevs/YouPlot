@@ -18,6 +18,7 @@ data class RouteDetailUiState(
     val route: Route? = null,
     val isLoading: Boolean = true,
     val isDeleted: Boolean = false,
+    val deleteError: String? = null,
 )
 
 @HiltViewModel
@@ -41,8 +42,14 @@ class RouteDetailViewModel @Inject constructor(
 
     fun deleteRoute() {
         viewModelScope.launch {
-            deleteRouteUseCase(routeId)
-            _state.update { it.copy(isDeleted = true) }
+            deleteRouteUseCase(routeId).fold(
+                onSuccess = { _state.update { it.copy(isDeleted = true) } },
+                onFailure = { e ->
+                    _state.update { it.copy(deleteError = e.message ?: "Cannot delete route") }
+                },
+            )
         }
     }
+
+    fun clearDeleteError() = _state.update { it.copy(deleteError = null) }
 }

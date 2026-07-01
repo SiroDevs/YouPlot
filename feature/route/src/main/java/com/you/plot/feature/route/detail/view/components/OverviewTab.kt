@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.ElevationPoint
 import com.you.plot.core.common.entity.SportType
-import com.you.plot.feature.route.plotter.view.components.ElevationProfileGraph
+import com.you.plot.core.ui.components.maps.ElevationProfileGraph
 
 @Composable
 fun OverviewTab(

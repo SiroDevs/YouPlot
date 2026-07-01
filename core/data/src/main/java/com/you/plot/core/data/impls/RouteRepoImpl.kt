@@ -22,6 +22,12 @@ class RouteRepoImpl @Inject constructor(
     override fun getAllRoutes(): Flow<List<Route>> =
         routeDao.getAllRoutes().map { list -> list.map { it.toDomain() } }
 
+    override fun getFavoriteRoutes(): Flow<List<Route>> =
+        routeDao.getFavoriteRoutes().map { list -> list.map { it.toDomain() } }
+
+    override fun getTrashedRoutes(): Flow<List<Route>> =
+        routeDao.getTrashedRoutes().map { list -> list.map { it.toDomain() } }
+
     override suspend fun getRouteById(id: Long): Route? =
         routeDao.getRouteById(id)?.toDomain()
 
@@ -31,6 +37,19 @@ class RouteRepoImpl @Inject constructor(
     override suspend fun deleteRoute(id: Long) = routeDao.deleteRoute(id)
 
     override suspend fun updateRoute(route: Route) = routeDao.updateRoute(route.toEntity())
+
+    override suspend fun softDeleteRoute(id: Long) =
+        routeDao.softDeleteRoute(id, System.currentTimeMillis())
+
+    override suspend fun restoreRoute(id: Long) = routeDao.restoreRoute(id)
+
+    override suspend fun setRouteFavorite(id: Long, favorite: Boolean) =
+        routeDao.setFavorite(id, favorite)
+
+    override suspend fun countActivePlansForRoute(routeId: Long): Int =
+        routeDao.countActivePlansForRoute(routeId)
+
+    override suspend fun purgeExpiredRoutes(cutoff: Long) = routeDao.purgeExpired(cutoff)
 }
 
 class PlanRepoImpl @Inject constructor(
@@ -73,6 +92,26 @@ class PlanRepoImpl @Inject constructor(
         eventDao.deleteEventsByPlan(plan.id)
         eventDao.insertEvents(plan.events.map { it.toEntity() })
     }
+
+    override fun getFavoritePlans(): Flow<List<ActivityPlan>> =
+        planDao.getFavoritePlans().map { list ->
+            list.map { entity -> entity.toDomain(eventDao.getEventsByPlan(entity.id)) }
+        }
+
+    override fun getTrashedPlans(): Flow<List<ActivityPlan>> =
+        planDao.getTrashedPlans().map { list ->
+            list.map { entity -> entity.toDomain(eventDao.getEventsByPlan(entity.id)) }
+        }
+
+    override suspend fun softDeletePlan(id: Long) =
+        planDao.softDeletePlan(id, System.currentTimeMillis())
+
+    override suspend fun restorePlan(id: Long) = planDao.restorePlan(id)
+
+    override suspend fun setPlanFavorite(id: Long, favorite: Boolean) =
+        planDao.setFavorite(id, favorite)
+
+    override suspend fun purgeExpiredPlans(cutoff: Long) = planDao.purgeExpired(cutoff)
 }
 
 class ActivityRepoImpl @Inject constructor(

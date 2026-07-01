@@ -16,6 +16,7 @@ fun List<Waypoint>.toJson(): String {
             put("orderIndex", wp.orderIndex); put("elevation", wp.elevation)
             put("distFromStart", wp.distFromStart)
             put("isStopPlanned", wp.isStopPlanned)
+            put("countryCode", wp.countryCode)
         })
     }
     return arr.toString()
@@ -33,6 +34,7 @@ fun String.toWaypointList(): List<Waypoint> {
             elevation = obj.getDouble("elevation"),
             distFromStart = obj.optDouble("distFromStart", 0.0),
             isStopPlanned = obj.getBoolean("isStopPlanned"),
+            countryCode = obj.optString("countryCode", ""),
         )
     }
 }

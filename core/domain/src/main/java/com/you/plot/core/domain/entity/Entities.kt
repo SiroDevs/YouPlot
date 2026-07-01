@@ -19,6 +19,7 @@ data class Waypoint(
     val elevation: Double = 0.0,
     val distFromStart: Double = 0.0,
     val isStopPlanned: Boolean = false,
+    val countryCode: String = "",
 )
 
 data class Route(
@@ -35,6 +36,9 @@ data class Route(
     val elevationLoss: Double = 0.0,
     val isRoundTrip: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
+    val polyline: List<LatLng> = emptyList(),
+    val isFavorite: Boolean = false,
+    val deletedAt: Long? = null,
 )
 
 data class Event(
@@ -54,12 +58,27 @@ data class ActivityPlan(
     val routeId: Long,
     val name: String,
     val description: String = "",
+    val sportType: SportType = SportType.RUNNING,
     val startDate: Long,
     val numberOfDays: Int,
     val avgSpeed: Double,
     val avgDailyDist: Double,
     val events: List<Event> = emptyList(),
     val createdAt: Long = System.currentTimeMillis(),
+    val isFavorite: Boolean = false,
+    val deletedAt: Long? = null,
+)
+
+data class StartPoint(
+    val id: Long = 0L,
+    val name: String,
+    val position: LatLng,
+    val countryCode: String = "",
+    val usageCount: Int = 0,
+    val lastUsedAt: Long? = null,
+    val createdAt: Long = System.currentTimeMillis(),
+    val isFavorite: Boolean = false,
+    val deletedAt: Long? = null,
 )
 
 data class WaypointProgress(

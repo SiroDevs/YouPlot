@@ -21,7 +21,7 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
-import com.you.plot.feature.route.plotter.view.components.ElevationProfileGraph
+import com.you.plot.core.ui.components.maps.ElevationProfileGraph
 import com.you.plot.feature.route.plotter.view.components.RouteCandidateCard
 import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 

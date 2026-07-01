@@ -50,13 +50,21 @@ object Routes {
     // Route screens
     const val ROUTE_LIST = "route/list"
     const val ROUTE_DETAIL = "route/detail/{routeId}"
-    const val ROUTE_PLOTTER = "route/plot"
+    const val ROUTE_PLOTTER = "route/plot?startPointId={startPointId}"
 
     // Plan screens
     const val PLAN_LIST = "plan/list"
     const val PLAN_CREATE = "plan/create"
     const val PLAN_CREATE_FOR_ROUTE = "plan/create/{routeId}"
     const val PLAN_DETAIL = "plan/detail/{planId}"
+
+    // Start points
+    const val START_POINT_LIST = "startpoint/list"
+    const val START_POINT_ADD = "startpoint/form/0"
+    const val START_POINT_EDIT = "startpoint/form/{startPointId}"
+
+    // Trash bin
+    const val TRASH_BIN = "trashbin"
 
     // Tracker
     const val TRACKER = "tracker/{planId}"
@@ -70,5 +78,10 @@ object Routes {
     fun routeDetail(routeId: Long) = "route/detail/$routeId"
     fun planDetail(planId: Long) = "plan/detail/$planId"
     fun planCreateForRoute(routeId: Long) = "plan/create/$routeId"
+    fun startPointEdit(id: Long) = "startpoint/form/$id"
     fun tracker(planId: Long) = "tracker/$planId"
+
+    /** Opens the plotter; if [startPointId] is non-zero, pre-fills the start point. */
+    fun routePlotter(startPointId: Long = 0L): String =
+        if (startPointId > 0L) "route/plot?startPointId=$startPointId" else "route/plot"
 }

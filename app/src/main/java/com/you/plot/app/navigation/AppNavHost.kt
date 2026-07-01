@@ -18,6 +18,9 @@ import com.you.plot.feature.plan.list.view.screen.PlanListScreen
 import com.you.plot.feature.route.detail.view.screen.RouteDetailScreen
 import com.you.plot.feature.route.list.view.RouteListScreen
 import com.you.plot.feature.route.plotter.view.screen.PlotterScreen
+import com.you.plot.feature.startpoint.form.view.StartPointFormScreen
+import com.you.plot.feature.startpoint.list.view.screen.StartPointListScreen
+import com.you.plot.feature.trash.view.screen.TrashBinScreen
 import com.you.plot.feature.settings.view.screen.SettingsScreen
 import com.you.plot.feature.tracker.view.screen.TrackerScreen
 
@@ -35,7 +38,7 @@ fun AppNavHost(
         composable(Routes.DASHBOARD) {
             DashboardScreen(
                 viewModel = hiltViewModel(),
-                onPlotRoute = { navController.navigate(Routes.ROUTE_PLOTTER) },
+                onPlotRoute = { navController.navigate(Routes.routePlotter()) },
                 onViewAllRoutes = { navController.navigate(Routes.ROUTE_LIST) },
                 onViewAllPlans = { navController.navigate(Routes.PLAN_LIST) },
                 onRouteClick = { routeId -> navController.navigate(Routes.routeDetail(routeId)) },
@@ -45,13 +48,15 @@ fun AppNavHost(
                 onSettings = { navController.navigate(Routes.SETTINGS) },
                 onAbout = { navController.navigate(Routes.ABOUT) },
                 onHelpFeedback = { navController.navigate(Routes.HELP_FEEDBACK) },
+                onStartPoints = { navController.navigate(Routes.START_POINT_LIST) },
+                onTrashBin = { navController.navigate(Routes.TRASH_BIN) },
             )
         }
 
         composable(Routes.ROUTE_LIST) {
             RouteListScreen(
                 viewModel = hiltViewModel(),
-                onCreateRoute = { navController.navigate(Routes.ROUTE_PLOTTER) },
+                onCreateRoute = { navController.navigate(Routes.routePlotter()) },
                 onRouteClick = { routeId -> navController.navigate(Routes.routeDetail(routeId)) },
             )
         }
@@ -67,7 +72,13 @@ fun AppNavHost(
             )
         }
 
-        composable(Routes.ROUTE_PLOTTER) {
+        composable(
+            route = Routes.ROUTE_PLOTTER,
+            arguments = listOf(navArgument("startPointId") {
+                type = NavType.LongType
+                defaultValue = 0L
+            }),
+        ) {
             PlotterScreen(
                 viewModel = hiltViewModel(),
                 onBack = { navController.popBackStack() },
@@ -76,6 +87,36 @@ fun AppNavHost(
                         popUpTo(Routes.ROUTE_PLOTTER) { inclusive = true }
                     }
                 },
+            )
+        }
+
+        composable(Routes.START_POINT_LIST) {
+            StartPointListScreen(
+                viewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() },
+                onAddNew = { navController.navigate(Routes.START_POINT_ADD) },
+                onEdit = { id -> navController.navigate(Routes.startPointEdit(id)) },
+                onStartRouteFrom = { sp ->
+                    navController.navigate(Routes.routePlotter(sp.id))
+                },
+            )
+        }
+
+        composable(
+            route = Routes.START_POINT_EDIT,
+            arguments = listOf(navArgument("startPointId") { type = NavType.LongType }),
+        ) {
+            StartPointFormScreen(
+                viewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() },
+            )
+        }
+
+        composable(Routes.TRASH_BIN) {
+            TrashBinScreen(
+                viewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() },
             )
         }
 

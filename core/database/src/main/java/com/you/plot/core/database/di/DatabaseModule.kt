@@ -27,4 +27,6 @@ object DatabaseModule {
     @Provides fun providePlanDao(db: AppDatabase): PlanDao = db.planDao()
     @Provides fun provideEventDao(db: AppDatabase): EventDao = db.eventDao()
     @Provides fun provideActivityDao(db: AppDatabase): ActivityDao = db.activityDao()
+    @Provides fun provideStartPointDao(db: AppDatabase): StartPointDao = db.startPointDao()
+    @Provides fun provideListingDao(db: AppDatabase): ListingDao = db.listingDao()
 }

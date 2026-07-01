@@ -1,6 +1,7 @@
 package com.you.plot.feature.tracker.view.screen
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
@@ -61,6 +62,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@SuppressLint("ConstantLocale")
 val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
 
 @OptIn(ExperimentalMaterial3Api::class)

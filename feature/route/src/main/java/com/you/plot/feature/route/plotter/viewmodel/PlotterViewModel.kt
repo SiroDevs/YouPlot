@@ -13,8 +13,11 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.domain.entity.Waypoint
+import androidx.lifecycle.SavedStateHandle
 import com.you.plot.core.domain.usecase.route.DeleteRouteUseCase
 import com.you.plot.core.domain.usecase.route.SaveRouteUseCase
+import com.you.plot.core.domain.usecase.startpoint.GetStartPointByIdUseCase
+import com.you.plot.core.domain.usecase.startpoint.RecordStartPointUsageUseCase
 import com.you.plot.core.data.repos.PlotterRepo
 import com.you.plot.core.common.utils.buildWaypointSuggestions
 import com.you.plot.core.domain.entity.WaypointSearchResult
@@ -39,15 +42,33 @@ import kotlin.coroutines.resume
 
 @HiltViewModel
 class PlotterViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val saveRouteUseCase: SaveRouteUseCase,
     private val deleteRouteUseCase: DeleteRouteUseCase,
     private val plotterRepo: PlotterRepo,
+    private val getStartPointById: GetStartPointByIdUseCase,
+    private val recordStartPointUsage: RecordStartPointUsageUseCase,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PlotterUiState())
     val state: StateFlow<PlotterUiState> = _state.asStateFlow()
     private var searchJob: Job? = null
+
+    init {
+        val startPointId = savedStateHandle.get<Long>("startPointId") ?: 0L
+        if (startPointId > 0L) viewModelScope.launch {
+            val sp = getStartPointById(startPointId) ?: return@launch
+            _state.update {
+                it.copy(
+                    startPoint = sp.position,
+                    startPointName = sp.name,
+                    searchQuery = sp.name,
+                    selectedCtryCode = sp.countryCode.ifBlank { it.selectedCtryCode },
+                )
+            }
+        }
+    }
 
     fun advanceStage() {
         val s = _state.value
@@ -378,6 +399,7 @@ class PlotterViewModel @Inject constructor(
                         orderIndex = index,
                         distFromStart = cumDist,
                         isStopPlanned = index != 0 && index != allPoints.lastIndex,
+                        countryCode = s.selectedCtryCode,
                     )
                 }
                 val autoName = if (s.startPointName.isNotBlank() && s.endPointName.isNotBlank()) {
@@ -387,7 +409,7 @@ class PlotterViewModel @Inject constructor(
                 } else {
                     "New Route"
                 }
-                saveRouteUseCase(
+                val routeId = saveRouteUseCase(
                     Route(
                         name = s.name.ifBlank { autoName },
                         description = s.description,
@@ -400,8 +422,16 @@ class PlotterViewModel @Inject constructor(
                         elevationGain = candidate.elevationGain,
                         elevationLoss = candidate.elevationLoss,
                         isRoundTrip = s.isRoundTrip,
+                        polyline = candidate.waypoints,
                     ),
                 )
+                // Track this start point so users see their most-used spots ranked first.
+                recordStartPointUsage(
+                    name = s.startPointName.ifBlank { "Start" },
+                    position = start,
+                    countryCode = s.selectedCtryCode,
+                )
+                routeId
             }.onSuccess { id -> _state.update { it.copy(isSaving = false, savedRouteId = id) } }
                 .onFailure { e -> _state.update { it.copy(isSaving = false, error = e.message) } }
         }

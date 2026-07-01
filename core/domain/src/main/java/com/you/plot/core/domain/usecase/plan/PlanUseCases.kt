@@ -42,7 +42,54 @@ class SavePlanUseCase @Inject constructor(
 class DeletePlanUseCase @Inject constructor(
     private val repository: PlanRepo
 ) {
+    /** Soft-deletes; moves the plan into the trash bin. */
+    suspend operator fun invoke(id: Long) = repository.softDeletePlan(id)
+}
+
+class GetTrashedPlansUseCase @Inject constructor(private val repository: PlanRepo) {
+    operator fun invoke() = repository.getTrashedPlans()
+}
+
+class GetFavoritePlansUseCase @Inject constructor(private val repository: PlanRepo) {
+    operator fun invoke() = repository.getFavoritePlans()
+}
+
+class SetPlanFavoriteUseCase @Inject constructor(private val repository: PlanRepo) {
+    suspend operator fun invoke(id: Long, favorite: Boolean) =
+        repository.setPlanFavorite(id, favorite)
+}
+
+class RestorePlanUseCase @Inject constructor(private val repository: PlanRepo) {
+    suspend operator fun invoke(id: Long) = repository.restorePlan(id)
+}
+
+class PermanentlyDeletePlanUseCase @Inject constructor(private val repository: PlanRepo) {
     suspend operator fun invoke(id: Long) = repository.deletePlan(id)
+}
+
+/**
+ * Duplicates an existing plan starting from a new date; events are shifted by the
+ * date delta and reparented so the caller can then edit them.
+ */
+class ClonePlanUseCase @Inject constructor(
+    private val repository: PlanRepo,
+) {
+    suspend operator fun invoke(sourceId: Long, newStartDate: Long, newName: String? = null): Long? {
+        val source = repository.getPlanById(sourceId) ?: return null
+        val offset = newStartDate - source.startDate
+        val cloned = source.copy(
+            id = 0L,
+            name = newName ?: "${source.name} (Copy)",
+            startDate = newStartDate,
+            createdAt = System.currentTimeMillis(),
+            deletedAt = null,
+            isFavorite = false,
+            events = source.events.map {
+                it.copy(id = 0L, planId = 0L, plannedTime = it.plannedTime + offset)
+            },
+        )
+        return repository.savePlan(cloned)
+    }
 }
 
 /** Generates a default daily schedule from route + speed parameters */
