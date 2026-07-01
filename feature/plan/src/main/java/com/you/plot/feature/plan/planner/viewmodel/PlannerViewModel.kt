@@ -11,8 +11,12 @@ import com.you.plot.core.domain.usecase.plan.GenerateEventsUseCase
 import com.you.plot.core.domain.usecase.plan.GetAllPlansUseCase
 import com.you.plot.core.domain.usecase.plan.SavePlanUseCase
 import com.you.plot.core.domain.usecase.route.GetAllRoutesUseCase
-import com.you.plot.feature.plan.planner.utils.PlannerUiState
 import com.you.plot.feature.plan.planner.utils.PlanSource
+import com.you.plot.feature.plan.planner.utils.PlannerUiState
+import com.you.plot.feature.plan.planner.utils.cloneTemplateCustomEvents
+import com.you.plot.feature.plan.planner.utils.mergeAndOrder
+import com.you.plot.feature.plan.planner.utils.toDraftPlan
+import com.you.plot.feature.plan.planner.utils.validateDetailsStep
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -162,16 +166,7 @@ class PlannerViewModel @Inject constructor(
             }
 
             1 -> {
-                val routeId = s.selectedRoute?.id ?: s.selectedTemplate?.routeId
-                if (routeId == null) {
-                    setError("No route associated with this plan"); return
-                }
-                if (s.numberOfDays < 1) {
-                    setError("Number of days must be at least 1"); return
-                }
-                if (s.avgSpeed <= 0) {
-                    setError("Speed must be greater than 0"); return
-                }
+                s.validateDetailsStep()?.let { setError(it); return }
                 _state.update { it.copy(isGenerating = true) }
                 viewModelScope.launch {
                     runCatching { generateEvents() }
@@ -179,7 +174,7 @@ class PlannerViewModel @Inject constructor(
                             _state.update {
                                 it.copy(
                                     isGenerating = false,
-                                    error = "Failed to generate schedule: ${e.message}"
+                                    error = "Failed to generate schedule: ${e.message}",
                                 )
                             }
                         }
@@ -197,36 +192,15 @@ class PlannerViewModel @Inject constructor(
         val routeId = s.selectedRoute?.id ?: s.selectedTemplate?.routeId ?: run {
             setError("No route associated"); return
         }
-        val draft = ActivityPlan(
-            routeId = routeId,
-            name = s.planName,
-            description = s.description,
-            sportType = s.sportType,
-            startDate = s.startTime,
-            numberOfDays = s.numberOfDays,
-            avgSpeed = s.avgSpeed.coerceAtLeast(1.0),
-            avgDailyDist = s.avgDailyDist.coerceAtLeast(0.1),
-        )
-        val events = generateEventsUseCase(draft)
-        val templateCustom = if (s.selectedTemplate != null) {
-            val offset = s.startTime - s.selectedTemplate.startDate
-            s.selectedTemplate.events
-                .filter { it.waypointId == null }
-                .map {
-                    it.copy(
-                        id = 0L,
-                        planId = 0L,
-                        plannedTime = it.plannedTime + offset
-                    )
-                }
-        } else emptyList()
+        val events = generateEventsUseCase(s.toDraftPlan(routeId))
+        val templateCustom = cloneTemplateCustomEvents(s.selectedTemplate, s.startTime)
         _state.update {
             it.copy(
                 generatedEvents = events,
                 customEvents = templateCustom,
                 currentStep = 2,
                 selectedDay = 1,
-                isGenerating = false
+                isGenerating = false,
             )
         }
     }
@@ -239,19 +213,10 @@ class PlannerViewModel @Inject constructor(
         _state.update { it.copy(isSaving = true) }
         viewModelScope.launch {
             runCatching {
-                val allEvents = (s.generatedEvents + s.customEvents)
-                    .sortedWith(compareBy({ it.dayNumber }, { it.plannedTime }))
-                    .mapIndexed { i, e -> e.copy(orderIndex = i) }
-                val plan = ActivityPlan(
-                    routeId = routeId,
+                val orderedEvents = mergeAndOrder(s.generatedEvents, s.customEvents)
+                val plan = s.toDraftPlan(routeId).copy(
                     name = s.planName.ifBlank { "Plan" },
-                    description = s.description,
-                    sportType = s.sportType,
-                    startDate = s.startTime,
-                    numberOfDays = s.numberOfDays,
-                    avgSpeed = s.avgSpeed,
-                    avgDailyDist = s.avgDailyDist,
-                    events = allEvents,
+                    events = orderedEvents,
                 )
                 savePlanUseCase(plan)
             }.onSuccess { id ->

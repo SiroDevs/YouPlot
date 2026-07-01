@@ -1,41 +1,18 @@
 package com.you.plot.feature.tracker.view.screen
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.location.LocationManager
 import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,23 +24,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.common.entity.ActivityStatus
 import com.you.plot.core.ui.components.action.AppTopBar
 import com.you.plot.feature.tracker.utils.vibrate
 import com.you.plot.feature.tracker.view.components.FullScreenStopReminder
-import com.you.plot.feature.tracker.view.components.StatCard
-import com.you.plot.feature.tracker.view.components.TrackerMap
+import com.you.plot.feature.tracker.view.components.TrackerActivePane
+import com.you.plot.feature.tracker.view.components.TrackerPermissionDialogs
+import com.you.plot.feature.tracker.view.components.TrackerReadyPane
 import com.you.plot.feature.tracker.view.components.WaypointBottomSheet
 import com.you.plot.feature.tracker.viewmodel.TrackerViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
-@SuppressLint("ConstantLocale")
-val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,22 +45,16 @@ fun TrackerScreen(
     val context = LocalContext.current
 
     val fineLocationLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        viewModel.onLocationPermissionResult(granted)
-    }
+        ActivityResultContracts.RequestPermission(),
+    ) { granted -> viewModel.onLocationPermissionResult(granted) }
 
     val backgroundLocationLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        viewModel.onBackgroundLocationResult(granted)
-    }
+        ActivityResultContracts.RequestPermission(),
+    ) { granted -> viewModel.onBackgroundLocationResult(granted) }
 
     val activityRecognitionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        viewModel.onActivityRecognitionResult(granted)
-    }
+        ActivityResultContracts.RequestPermission(),
+    ) { granted -> viewModel.onActivityRecognitionResult(granted) }
 
     LaunchedEffect(Unit) {
         fineLocationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -101,10 +65,7 @@ fun TrackerScreen(
             viewModel.onBackgroundLocationResult(true)
             viewModel.onActivityRecognitionResult(true)
         }
-        val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-            lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-        viewModel.onLocationServicesResult(enabled)
+        viewModel.onLocationServicesResult(context.isLocationOn())
     }
 
     LaunchedEffect(state.showFullScreenStopReminder) {
@@ -114,8 +75,8 @@ fun TrackerScreen(
     if (state.showFullScreenStopReminder && state.pendingStopWaypoint != null) {
         FullScreenStopReminder(
             waypoint = state.pendingStopWaypoint!!,
-            onStop = { viewModel.onStopAcknowledged() },
-            onIgnore = { viewModel.onStopIgnored() },
+            onStop = viewModel::onStopAcknowledged,
+            onIgnore = viewModel::onStopIgnored,
         )
         return
     }
@@ -131,42 +92,14 @@ fun TrackerScreen(
         )
     }
 
-    if (state.showPermissionRationale) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissPermissionRationale() },
-            icon = { Icon(Icons.Default.Warning, null) },
-            title = { Text("Permissions Required") },
-            text = {
-                Text(
-                    "YouPlot needs Location (precise + background) and Activity Recognition " +
-                        "permissions to track your activity. Please grant them and ensure " +
-                        "location services are on."
-                )
-            },
-            confirmButton = {
-                Button(onClick = {
-                    viewModel.dismissPermissionRationale()
-                    fineLocationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                }) { Text("Grant") }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewModel.dismissPermissionRationale() }) { Text("Cancel") }
-            },
-        )
-    }
-
-    if (!state.locationServicesEnabled && state.locationPermissionGranted) {
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text("Location Services Off") },
-            text = { Text("Please enable location services to start tracking.") },
-            confirmButton = {
-                Button(onClick = {
-                    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                }) { Text("Open Settings") }
-            },
-        )
-    }
+    TrackerPermissionDialogs(
+        showRationale = state.showPermissionRationale,
+        locationServicesEnabled = state.locationServicesEnabled,
+        locationPermissionGranted = state.locationPermissionGranted,
+        onDismissRationale = viewModel::dismissPermissionRationale,
+        fineLocationLauncher = fineLocationLauncher,
+        context = context,
+    )
 
     val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
@@ -174,12 +107,7 @@ fun TrackerScreen(
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 160.dp,
-        topBar = {
-            AppTopBar(
-                title = "Activity",
-                onNavIconClick = onBack,
-            )
-        },
+        topBar = { AppTopBar(title = "Activity", onNavIconClick = onBack) },
         sheetContent = {
             WaypointBottomSheet(
                 waypoints = state.activity?.waypointProgress ?: emptyList(),
@@ -196,168 +124,30 @@ fun TrackerScreen(
         }
 
         val activity = state.activity
-
         if (activity == null) {
-            Box(Modifier
-                .fillMaxSize()
-                .padding(padding), contentAlignment = Alignment.Center) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    Text("Ready to start?", style = MaterialTheme.typography.headlineMedium)
-                    if (!state.allPermissionsGranted) {
-                        Text(
-                            "Waiting for permissions ...",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Button(
-                        onClick = { viewModel.startActivity() },
-                        modifier = Modifier.fillMaxWidth(0.65f),
-                        enabled = state.allPermissionsGranted,
-                    ) {
-                        Icon(Icons.Default.PlayArrow, null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Start Activity")
-                    }
-                }
-            }
-        } else {
-            Column(
-                Modifier
+            TrackerReadyPane(
+                allPermissionsGranted = state.allPermissionsGranted,
+                onStart = viewModel::startActivity,
+                modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Spacer(Modifier.height(4.dp))
-
-                TrackerMap(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .clip(RoundedCornerShape(12.dp)),
-                    currentLocation = activity.currentLocation,
-                    waypoints = activity.waypointProgress,
-                )
-
-                val elapsed = activity.elapsedTime
-                val h = elapsed / 3600;
-                val m = (elapsed % 3600) / 60;
-                val s = elapsed % 60
-                val nextEta = state.nextUnreachedWaypoint?.estimatedArrival
-                val doneEta = state.estimatedCompletion
-
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatCard(
-                        "Distance",
-                        "%.2f km".format(activity.distCovered),
-                        Modifier.weight(1f)
-                    )
-                    StatCard(
-                        "Speed",
-                        "%.1f km/h".format(activity.currentSpeed),
-                        Modifier.weight(1f)
-                    )
-                    StatCard("Elapsed", "%02d:%02d:%02d".format(h, m, s), Modifier.weight(1f))
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatCard(
-                        "Next WP ETA",
-                        nextEta?.let { timeFmt.format(Date(it)) } ?: "—",
-                        Modifier.weight(1f),
-                    )
-                    StatCard(
-                        "Done ETA",
-                        doneEta?.let { timeFmt.format(Date(it)) } ?: "—",
-                        Modifier.weight(1f),
-                    )
-                    StatCard(
-                        "Status",
-                        activity.status.name.lowercase().replaceFirstChar { it.uppercase() },
-                        Modifier.weight(1f),
-                    )
-                }
-
-                // Controls
-                when (activity.status) {
-                    ActivityStatus.IN_PROGRESS -> {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            OutlinedButton(
-                                onClick = { viewModel.pauseActivity() },
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                Icon(Icons.Default.Pause, null)
-                                Spacer(Modifier.width(4.dp))
-                                Text("Pause")
-                            }
-                            Button(
-                                onClick = { viewModel.completeActivity() },
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error,
-                                ),
-                            ) {
-                                Icon(Icons.Default.Stop, null)
-                                Spacer(Modifier.width(4.dp))
-                                Text("Finish")
-                            }
-                        }
-                    }
-
-                    ActivityStatus.PAUSED -> {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Button(
-                                onClick = { viewModel.resumeActivity() },
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                Icon(Icons.Default.PlayArrow, null)
-                                Spacer(Modifier.width(4.dp))
-                                Text("Resume")
-                            }
-                            OutlinedButton(
-                                onClick = { viewModel.completeActivity() },
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                Text("Finish")
-                            }
-                        }
-                    }
-
-                    ActivityStatus.COMPLETED -> {
-                        Card(
-                            Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            ),
-                        ) {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    "Activity complete! 🎉",
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                            }
-                        }
-                    }
-
-                    else -> {}
-                }
-
-                Spacer(Modifier.height(170.dp))
-            }
+                    .padding(padding),
+            )
+        } else {
+            TrackerActivePane(
+                activity = activity,
+                nextEta = state.nextUnreachedWaypoint?.estimatedArrival,
+                doneEta = state.estimatedCompletion,
+                onPause = viewModel::pauseActivity,
+                onResume = viewModel::resumeActivity,
+                onFinish = viewModel::completeActivity,
+                modifier = Modifier.padding(padding),
+            )
         }
     }
+}
+
+private fun Context.isLocationOn(): Boolean {
+    val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+        lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 }

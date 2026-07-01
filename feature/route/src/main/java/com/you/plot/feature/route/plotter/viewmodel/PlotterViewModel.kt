@@ -2,27 +2,28 @@ package com.you.plot.feature.route.plotter.viewmodel
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.you.plot.core.common.entity.DestinationMode
-import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.common.entity.LatLng
-import com.you.plot.core.domain.entity.Route
+import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.common.entity.SportType
+import com.you.plot.core.common.utils.buildWaypointSuggestions
+import com.you.plot.core.data.repos.PlotterRepo
+import com.you.plot.core.data.service.CurrentLocationResolver
+import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.domain.entity.Waypoint
-import androidx.lifecycle.SavedStateHandle
+import com.you.plot.core.domain.entity.WaypointSearchResult
 import com.you.plot.core.domain.usecase.route.DeleteRouteUseCase
 import com.you.plot.core.domain.usecase.route.SaveRouteUseCase
 import com.you.plot.core.domain.usecase.startpoint.GetStartPointByIdUseCase
 import com.you.plot.core.domain.usecase.startpoint.RecordStartPointUsageUseCase
-import com.you.plot.core.data.repos.PlotterRepo
-import com.you.plot.core.common.utils.buildWaypointSuggestions
-import com.you.plot.core.domain.entity.WaypointSearchResult
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.feature.route.plotter.utils.PlotterUtils
+import com.you.plot.feature.route.plotter.utils.buildRouteWaypoints
+import com.you.plot.feature.route.plotter.utils.deriveAutoRouteName
+import com.you.plot.feature.route.plotter.utils.hasLocationPermission
 import com.you.plot.feature.route.plotter.utils.previousStage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -34,11 +35,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.collections.firstOrNull
-import kotlin.coroutines.resume
 
 @HiltViewModel
 class PlotterViewModel @Inject constructor(
@@ -48,6 +46,7 @@ class PlotterViewModel @Inject constructor(
     private val plotterRepo: PlotterRepo,
     private val getStartPointById: GetStartPointByIdUseCase,
     private val recordStartPointUsage: RecordStartPointUsageUseCase,
+    private val currentLocationResolver: CurrentLocationResolver,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -81,7 +80,7 @@ class PlotterViewModel @Inject constructor(
                     it.copy(
                         stage = PlotterStage.STAGE_2,
                         searchQuery = "",
-                        searchResults = emptyList()
+                        searchResults = emptyList(),
                     )
                 }
             }
@@ -115,7 +114,7 @@ class PlotterViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         stage = PlotterStage.STAGE_4,
-                        routeCandidates = emptyList()
+                        routeCandidates = emptyList(),
                     )
                 }
                 fetchRouteCandidates()
@@ -169,7 +168,7 @@ class PlotterViewModel @Inject constructor(
                     startPoint = result.latLng,
                     startPointName = result.displayName.substringBefore(",").trim(),
                     searchQuery = result.displayName,
-                    searchResults = emptyList()
+                    searchResults = emptyList(),
                 )
             }
 
@@ -178,7 +177,7 @@ class PlotterViewModel @Inject constructor(
                     endPoint = result.latLng,
                     endPointName = result.displayName.substringBefore(",").trim(),
                     searchQuery = result.displayName,
-                    searchResults = emptyList()
+                    searchResults = emptyList(),
                 )
             }
 
@@ -200,7 +199,7 @@ class PlotterViewModel @Inject constructor(
             it.copy(
                 startPoint = latLng,
                 startPointName = "Locating ...",
-                isReverseGeocoding = true
+                isReverseGeocoding = true,
             )
         }
         viewModelScope.launch {
@@ -209,7 +208,7 @@ class PlotterViewModel @Inject constructor(
                 it.copy(
                     startPointName = name,
                     searchQuery = name,
-                    isReverseGeocoding = false
+                    isReverseGeocoding = false,
                 )
             }
         }
@@ -221,7 +220,7 @@ class PlotterViewModel @Inject constructor(
                 it.copy(
                     endPoint = latLng,
                     endPointName = "Locating ...",
-                    isReverseGeocoding = true
+                    isReverseGeocoding = true,
                 )
             }
             viewModelScope.launch {
@@ -231,12 +230,8 @@ class PlotterViewModel @Inject constructor(
         }
     }
 
-    private suspend fun resolveLocationName(latLng: LatLng): String {
-        return withContext(Dispatchers.IO) {
-            plotterRepo.reverseGeocode(latLng) ?: plotterRepo.resolveAreaLabel(
-                latLng
-            )
-        }
+    private suspend fun resolveLocationName(latLng: LatLng): String = withContext(Dispatchers.IO) {
+        plotterRepo.reverseGeocode(latLng) ?: plotterRepo.resolveAreaLabel(latLng)
     }
 
     fun onWaypointMoved(index: Int, newLatLng: LatLng) {
@@ -251,24 +246,20 @@ class PlotterViewModel @Inject constructor(
         _state.update {
             it.copy(
                 manualWaypoints = it.manualWaypoints.toMutableList()
-                    .also { l -> l.removeAt(index) })
+                    .also { l -> l.removeAt(index) },
+            )
         }
     }
 
     @SuppressLint("MissingPermission")
     fun onUseMyLocation() {
-        val hasPermission =
-            context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
-                android.content.pm.PackageManager.PERMISSION_GRANTED ||
-                context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                android.content.pm.PackageManager.PERMISSION_GRANTED
-        if (!hasPermission) {
+        if (!context.hasLocationPermission()) {
             _state.update { it.copy(needsLocationPermission = true) }
             return
         }
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true) }
-            val latLng = withContext(Dispatchers.IO) { resolveCurrentLocation() }
+            val latLng = currentLocationResolver.resolve()
             if (latLng == null) {
                 _state.update { it.copy(isSearching = false) }
                 setError("Couldn't get your location. Make sure location is enabled.")
@@ -282,7 +273,7 @@ class PlotterViewModel @Inject constructor(
                 PlotterStage.STAGE_1 -> _state.update {
                     it.copy(
                         startPoint = latLng, startPointName = name,
-                        searchQuery = name, searchResults = emptyList()
+                        searchQuery = name, searchResults = emptyList(),
                     )
                 }
 
@@ -308,7 +299,7 @@ class PlotterViewModel @Inject constructor(
             it.copy(
                 destinationMode = mode,
                 endPoint = null,
-                distSuggestions = emptyList()
+                distSuggestions = emptyList(),
             )
         }
 
@@ -369,46 +360,22 @@ class PlotterViewModel @Inject constructor(
         _state.update { it.copy(isSaving = true) }
         viewModelScope.launch {
             runCatching {
-                val allPoints = buildList {
-                    add(start); addAll(s.activeWaypoints); add(end)
-                    if (s.isRoundTrip) add(start)
-                }
                 val totalDist =
                     if (s.isRoundTrip) candidate.totalDist * 2 else candidate.totalDist
-
-                val waypointEntities = allPoints.mapIndexed { index, latLng ->
-                    val humanName = when (index) {
-                        0 -> s.startPointName.ifBlank { "Start" }
-                        allPoints.lastIndex -> if (s.isRoundTrip) s.startPointName.ifBlank { "Start" }
-                        else s.endPointName.ifBlank { "Finish" }
-
-                        else -> {
-                            val geocoded = withContext(Dispatchers.IO) {
-                                plotterRepo.reverseGeocode(latLng)
-                            }
-                            geocoded ?: "Waypoint $index"
-                        }
-                    }
-                    val cumDist = if (allPoints.size > 1)
-                        totalDist * index.toDouble() / (allPoints.size - 1)
-                    else 0.0
-                    Waypoint(
-                        routeId = 0L,
-                        name = humanName,
-                        position = latLng,
-                        orderIndex = index,
-                        distFromStart = cumDist,
-                        isStopPlanned = index != 0 && index != allPoints.lastIndex,
-                        countryCode = s.selectedCtryCode,
-                    )
-                }
-                val autoName = if (s.startPointName.isNotBlank() && s.endPointName.isNotBlank()) {
-                    "${s.startPointName} → ${s.endPointName}"
-                } else if (s.startPointName.isNotBlank()) {
-                    "${s.startPointName} Route"
-                } else {
-                    "New Route"
-                }
+                val waypointEntities = buildRouteWaypoints(
+                    start = start,
+                    end = end,
+                    intermediates = s.activeWaypoints,
+                    isRoundTrip = s.isRoundTrip,
+                    totalDist = totalDist,
+                    startName = s.startPointName,
+                    endName = s.endPointName,
+                    countryCode = s.selectedCtryCode,
+                    resolveName = { latLng ->
+                        withContext(Dispatchers.IO) { plotterRepo.reverseGeocode(latLng) }
+                    },
+                )
+                val autoName = deriveAutoRouteName(s.startPointName, s.endPointName)
                 val routeId = saveRouteUseCase(
                     Route(
                         name = s.name.ifBlank { autoName },
@@ -425,7 +392,6 @@ class PlotterViewModel @Inject constructor(
                         polyline = candidate.waypoints,
                     ),
                 )
-                // Track this start point so users see their most-used spots ranked first.
                 recordStartPointUsage(
                     name = s.startPointName.ifBlank { "Start" },
                     position = start,
@@ -439,46 +405,4 @@ class PlotterViewModel @Inject constructor(
 
     fun clearError() = _state.update { it.copy(error = null) }
     private fun setError(msg: String) = _state.update { it.copy(error = msg) }
-
-    @SuppressLint("MissingPermission")
-    private suspend fun resolveCurrentLocation(): LatLng? = withContext(Dispatchers.IO) {
-        val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val providers = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
-            .filter { runCatching { lm.isProviderEnabled(it) }.getOrDefault(false) }
-        if (providers.isEmpty()) return@withContext null
-
-        val twoMinMs = 2 * 60 * 1000L
-        val fresh = providers.firstNotNullOfOrNull { p ->
-            lm.getLastKnownLocation(p)?.takeIf { System.currentTimeMillis() - it.time < twoMinMs }
-        }
-        if (fresh != null) return@withContext LatLng(fresh.latitude, fresh.longitude)
-
-        val live = suspendCancellableCoroutine<Location?> { cont ->
-            val listener = object : LocationListener {
-                override fun onLocationChanged(loc: Location) {
-                    lm.removeUpdates(this); if (cont.isActive) cont.resume(loc)
-                }
-
-                @Deprecated("Deprecated in API 29")
-                override fun onStatusChanged(p: String?, s: Int, e: android.os.Bundle?) {
-                }
-            }
-            try {
-                lm.requestLocationUpdates(
-                    providers.first(), 0L, 0f, listener, android.os.Looper.getMainLooper()
-                )
-                cont.invokeOnCancellation { lm.removeUpdates(listener) }
-                viewModelScope.launch {
-                    delay(5_000);
-                    lm.removeUpdates(listener);
-                    if (cont.isActive) cont.resume(null)
-                }
-            } catch (_: SecurityException) {
-                cont.resume(null)
-            }
-        }
-        live?.let { LatLng(it.latitude, it.longitude) }
-            ?: providers.firstNotNullOfOrNull { lm.getLastKnownLocation(it) }
-                ?.let { LatLng(it.latitude, it.longitude) }
-    }
 }

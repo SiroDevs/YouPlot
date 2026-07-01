@@ -20,16 +20,12 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Bundle
-import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.data.repos.PlotterRepo
+import com.you.plot.core.data.service.CurrentLocationResolver
 import com.you.plot.core.domain.entity.StartPoint
 import com.you.plot.core.domain.entity.WaypointSearchResult
 import com.you.plot.core.domain.usecase.startpoint.GetStartPointByIdUseCase
@@ -44,10 +40,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.coroutines.resume
 
 data class StartPointFormUiState(
     val id: Long = 0L,
@@ -70,6 +64,7 @@ class StartPointFormViewModel @Inject constructor(
     private val plotterRepo: PlotterRepo,
     private val saveStartPoint: SaveStartPointUseCase,
     private val getById: GetStartPointByIdUseCase,
+    private val currentLocationResolver: CurrentLocationResolver,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -141,18 +136,13 @@ class StartPointFormViewModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     fun onUseMyLocation() {
-        val hasPermission =
-            context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED ||
-                context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED
-        if (!hasPermission) {
+        if (!hasLocationPermission()) {
             _state.update { it.copy(needsLocationPermission = true) }
             return
         }
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true) }
-            val latLng = withContext(Dispatchers.IO) { resolveCurrentLocation() }
+            val latLng = currentLocationResolver.resolve()
             if (latLng == null) {
                 _state.update { it.copy(isSearching = false, error = "Couldn't get your location.") }
                 return@launch
@@ -199,43 +189,9 @@ class StartPointFormViewModel @Inject constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private suspend fun resolveCurrentLocation(): LatLng? = withContext(Dispatchers.IO) {
-        val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val providers = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
-            .filter { runCatching { lm.isProviderEnabled(it) }.getOrDefault(false) }
-        if (providers.isEmpty()) return@withContext null
-        val twoMinMs = 2 * 60 * 1000L
-        providers.firstNotNullOfOrNull { p ->
-            lm.getLastKnownLocation(p)?.takeIf { System.currentTimeMillis() - it.time < twoMinMs }
-        }?.let { return@withContext LatLng(it.latitude, it.longitude) }
-
-        val live = suspendCancellableCoroutine<Location?> { cont ->
-            val listener = object : LocationListener {
-                override fun onLocationChanged(loc: Location) {
-                    lm.removeUpdates(this); if (cont.isActive) cont.resume(loc)
-                }
-
-                @Deprecated("Deprecated in API 29")
-                override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {
-                }
-            }
-            try {
-                lm.requestLocationUpdates(
-                    providers.first(), 0L, 0f, listener, Looper.getMainLooper(),
-                )
-                cont.invokeOnCancellation { lm.removeUpdates(listener) }
-                viewModelScope.launch {
-                    delay(5_000)
-                    lm.removeUpdates(listener)
-                    if (cont.isActive) cont.resume(null)
-                }
-            } catch (_: SecurityException) {
-                cont.resume(null)
-            }
-        }
-        live?.let { LatLng(it.latitude, it.longitude) }
-            ?: providers.firstNotNullOfOrNull { lm.getLastKnownLocation(it) }
-                ?.let { LatLng(it.latitude, it.longitude) }
-    }
+    private fun hasLocationPermission(): Boolean =
+        context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED ||
+            context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
 }

@@ -15,6 +15,11 @@ private const val PIN_W = 72
 private const val PIN_H = 90
 private const val CIRCLE_R = 28f
 
+/**
+ * Draws a droplet-style pin bitmap the map layer can render as a marker icon.
+ * Shared by every screen that composes [PlotterMap] — sits in core:ui because
+ * PlotterMap itself does, and features can't be depended on from a core module.
+ */
 fun makePinMarker(context: Context, color: Int, label: String): Bitmap {
     val bmp = createBitmap(PIN_W, PIN_H)
     val canvas = Canvas(bmp)

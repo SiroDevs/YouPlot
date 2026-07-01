@@ -29,11 +29,7 @@ import com.you.plot.core.database.model.WaypointEntity
         StartPointEntity::class,
         WaypointEntity::class,
     ],
-    // Bumped for the WIP schema changes across this feature drop — start points,
-    // listings, plan sport type, waypoint country codes, favorite/soft-delete
-    // fields, and the route polyline column. `fallbackToDestructiveMigration()`
-    // in DatabaseModule wipes local data on open.
-    version = 2,
+    version = 1,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {

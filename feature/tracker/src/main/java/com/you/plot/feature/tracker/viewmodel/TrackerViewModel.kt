@@ -3,10 +3,8 @@ package com.you.plot.feature.tracker.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.you.plot.core.domain.entity.ActivityActivity
-import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.ActivityStatus
-import com.you.plot.core.domain.entity.WaypointProgress
+import com.you.plot.core.domain.entity.ActivityActivity
 import com.you.plot.core.domain.repos.LocationRepo
 import com.you.plot.core.domain.usecase.tracker.CompleteActivityUseCase
 import com.you.plot.core.domain.usecase.tracker.GetActiveActivityUseCase
@@ -15,6 +13,8 @@ import com.you.plot.core.domain.usecase.tracker.ResumeActivityUseCase
 import com.you.plot.core.domain.usecase.tracker.StartActivityUseCase
 import com.you.plot.core.domain.usecase.tracker.UpdateActivityLocationUseCase
 import com.you.plot.core.domain.usecase.tracker.distanceTo
+import com.you.plot.feature.tracker.service.AutoPauseDetector
+import com.you.plot.feature.tracker.service.StopVerifier
 import com.you.plot.feature.tracker.utils.TrackerUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -24,11 +24,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-private const val STOP_VERIFY_KM = 1.0
-private const val STOP_SKIPPED_KM  = 5.0
-private const val PAUSE_SPEED_THRESHOLD_KMH = 1.0
-private const val PAUSE_DWELL_TICKS = 3
 
 @HiltViewModel
 class TrackerViewModel @Inject constructor(
@@ -49,10 +44,8 @@ class TrackerViewModel @Inject constructor(
     private var locationJob: Job? = null
     private var elapsedSeconds = 0L
     private var activityId = 0L
-    private var stopVerifyWaypoint: WaypointProgress? = null
-    private var stopVerifyStartLocation: LatLng? = null
-    private var distanceSinceStop = 0.0
-    private var stationaryTicks = 0
+    private val autoPauseDetector = AutoPauseDetector()
+    private val stopVerifier = StopVerifier()
 
     init {
         loadOrCreateActivity()
@@ -113,13 +106,12 @@ class TrackerViewModel @Inject constructor(
     private fun startLocationTracking() {
         locationJob?.cancel()
         locationJob = viewModelScope.launch {
-            locationRepository.getLocationUpdates(intervalMs = 5_000L).collect { location ->
-                elapsedSeconds += 5
+            locationRepository.getLocationUpdates(intervalMs = LOCATION_TICK_MS).collect { location ->
+                elapsedSeconds += LOCATION_TICK_SECONDS
 
-                // Derive speed from distance delta / tick interval
                 val prev = _state.value.activity?.currentLocation
                 val deltaDist = prev?.distanceTo(location) ?: 0.0
-                val speedKmh = (deltaDist / (5.0 / 3600.0)).coerceAtMost(200.0) // cap at 200 km/h
+                val speedKmh = (deltaDist / (LOCATION_TICK_SECONDS / 3600.0)).coerceAtMost(SPEED_CAP_KMH)
 
                 updateLocationUseCase(
                     activityId = activityId,
@@ -132,10 +124,26 @@ class TrackerViewModel @Inject constructor(
                 _state.update { it.copy(activity = updated) }
 
                 checkWaypointStopReminder(updated)
-                handleStopVerification(location, speedKmh)
-                handleAutoPause(speedKmh)
+                val advance = stopVerifier.advance(location)
+                when (advance.outcome) {
+                    StopVerifier.Outcome.SKIPPED -> markWaypointSkipped(advance.waypoint)
+                    StopVerifier.Outcome.CONFIRMED -> _state.update { it.copy(pendingStopWaypoint = null) }
+                    StopVerifier.Outcome.ONGOING -> Unit
+                }
+                if (autoPauseDetector.shouldPause(speedKmh)) pauseActivity()
             }
         }
+    }
+
+    private fun markWaypointSkipped(waypoint: com.you.plot.core.domain.entity.WaypointProgress?) {
+        val target = waypoint ?: return
+        val current = _state.value.activity ?: return
+        val updated = current.copy(
+            waypointProgress = current.waypointProgress.map { wp ->
+                if (wp.waypoint.id == target.waypoint.id) wp.copy(wasSkipped = true) else wp
+            },
+        )
+        _state.update { it.copy(activity = updated, pendingStopWaypoint = null) }
     }
 
     private fun checkWaypointStopReminder(activity: ActivityActivity?) {
@@ -159,9 +167,7 @@ class TrackerViewModel @Inject constructor(
 
     fun onStopAcknowledged() {
         val wp = _state.value.pendingStopWaypoint ?: return
-        stopVerifyWaypoint = wp
-        stopVerifyStartLocation = _state.value.activity?.currentLocation
-        distanceSinceStop = 0.0
+        stopVerifier.begin(wp, _state.value.activity?.currentLocation)
         _state.update { it.copy(showFullScreenStopReminder = false) }
     }
 
@@ -172,55 +178,12 @@ class TrackerViewModel @Inject constructor(
                 showFullScreenStopReminder = false,
             )
         }
-        stopVerifyWaypoint = null
-        stopVerifyStartLocation = null
-        distanceSinceStop = 0.0
-    }
-
-    private fun handleStopVerification(location: LatLng, speedKmh: Double) {
-        val verifyWp = stopVerifyWaypoint ?: return
-        val startLoc = stopVerifyStartLocation ?: return
-
-        distanceSinceStop += startLoc.distanceTo(location)
-        stopVerifyStartLocation = location
-
-        when {
-            distanceSinceStop >= STOP_SKIPPED_KM -> {
-                // User never actually stopped → mark as skipped
-                val updated = _state.value.activity?.copy(
-                    waypointProgress = _state.value.activity!!.waypointProgress.map { wp ->
-                        if (wp.waypoint.id == verifyWp.waypoint.id) wp.copy(wasSkipped = true) else wp
-                    }
-                )
-                _state.update { it.copy(activity = updated, pendingStopWaypoint = null) }
-                stopVerifyWaypoint = null
-            }
-
-            distanceSinceStop >= STOP_VERIFY_KM -> {
-                _state.update { it.copy(pendingStopWaypoint = null) }
-                stopVerifyWaypoint = null
-            }
-        }
-    }
-
-    private fun handleAutoPause(speedKmh: Double) {
-        val activity = _state.value.activity ?: return
-        if (activity.status != ActivityStatus.IN_PROGRESS) return
-
-        if (speedKmh < PAUSE_SPEED_THRESHOLD_KMH) {
-            stationaryTicks++
-            if (stationaryTicks >= PAUSE_DWELL_TICKS) {
-                stationaryTicks = 0
-                pauseActivity()
-            }
-        } else {
-            stationaryTicks = 0
-        }
+        stopVerifier.cancel()
     }
 
     fun pauseActivity() {
         locationJob?.cancel()
-        stationaryTicks = 0
+        autoPauseDetector.reset()
         viewModelScope.launch {
             pauseActivityUseCase(activityId)
             _state.update { it.copy(activity = getActiveActivityUseCase()) }
@@ -248,5 +211,11 @@ class TrackerViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         locationJob?.cancel()
+    }
+
+    companion object {
+        private const val LOCATION_TICK_MS = 5_000L
+        private const val LOCATION_TICK_SECONDS = 5L
+        private const val SPEED_CAP_KMH = 200.0
     }
 }

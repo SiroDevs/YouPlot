@@ -3,11 +3,6 @@ package com.you.plot.core.database.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * A user-created list that can group any of Route/Plan/StartPoint. The concrete item
- * ids are held in [ListingItemEntity] rather than a JSON blob so lookups don't need
- * to deserialize the whole set.
- */
 @Entity(tableName = "listings")
 data class ListingEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,

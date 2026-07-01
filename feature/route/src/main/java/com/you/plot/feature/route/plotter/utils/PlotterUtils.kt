@@ -1,11 +1,14 @@
 package com.you.plot.feature.route.plotter.utils
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.location.LocationManager
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.common.utils.MapConstants
 import com.you.plot.core.common.utils.bearingLabel
 import com.you.plot.core.common.utils.destinationPoint
+import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.core.domain.entity.WaypointSearchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,4 +60,57 @@ fun PlotterStage.previousStage(): PlotterStage? {
         PlotterStage.STAGE_4 -> PlotterStage.STAGE_3
         PlotterStage.STAGE_5 -> PlotterStage.STAGE_4
     }
+}
+
+suspend fun buildRouteWaypoints(
+    start: LatLng,
+    end: LatLng,
+    intermediates: List<LatLng>,
+    isRoundTrip: Boolean,
+    totalDist: Double,
+    startName: String,
+    endName: String,
+    countryCode: String,
+    resolveName: suspend (LatLng) -> String?,
+): List<Waypoint> {
+    val allPoints = buildList {
+        add(start); addAll(intermediates); add(end)
+        if (isRoundTrip) add(start)
+    }
+    return allPoints.mapIndexed { index, latLng ->
+        val humanName = when (index) {
+            0 -> startName.ifBlank { "Start" }
+            allPoints.lastIndex -> {
+                if (isRoundTrip) startName.ifBlank { "Start" }
+                else endName.ifBlank { "Finish" }
+            }
+            else -> resolveName(latLng) ?: "Waypoint $index"
+        }
+        val cumDist = if (allPoints.size > 1)
+            totalDist * index.toDouble() / (allPoints.size - 1)
+        else 0.0
+        Waypoint(
+            routeId = 0L,
+            name = humanName,
+            position = latLng,
+            orderIndex = index,
+            distFromStart = cumDist,
+            isStopPlanned = index != 0 && index != allPoints.lastIndex,
+            countryCode = countryCode,
+        )
+    }
+}
+
+fun deriveAutoRouteName(startName: String, endName: String): String = when {
+    startName.isNotBlank() && endName.isNotBlank() -> "$startName → $endName"
+    startName.isNotBlank() -> "$startName Route"
+    else -> "New Route"
+}
+
+fun Context.hasLocationPermission(): Boolean {
+    val fine = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+        PackageManager.PERMISSION_GRANTED
+    val coarse = checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+        PackageManager.PERMISSION_GRANTED
+    return fine || coarse
 }
