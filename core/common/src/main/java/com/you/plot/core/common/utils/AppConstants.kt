@@ -51,6 +51,7 @@ object Routes {
     // Route screens
     const val ROUTE_LIST = "route/list"
     const val ROUTE_DETAIL = "route/detail/{routeId}"
+    const val ROUTE_EDIT = "route/edit/{routeId}"
     const val ROUTE_PLOTTER = "route/plot?startPointId={startPointId}"
 
     // Plan screens
@@ -77,6 +78,7 @@ object Routes {
 
     // Helpers — always use these in navController.navigate(), never build strings manually
     fun routeDetail(routeId: Long) = "route/detail/$routeId"
+    fun routeEdit(routeId: Long) = "route/edit/$routeId"
     fun planDetail(planId: Long) = "plan/detail/$planId"
     fun planCreateForRoute(routeId: Long) = "plan/create/$routeId"
     fun startPointEdit(id: Long) = "startpoint/form/$id"

@@ -16,6 +16,7 @@ import com.you.plot.feature.plan.planner.view.screen.PlannerScreen
 import com.you.plot.feature.plan.details.view.screen.PlanDetailScreen
 import com.you.plot.feature.plan.list.view.screen.PlanListScreen
 import com.you.plot.feature.route.detail.view.screen.RouteDetailScreen
+import com.you.plot.feature.route.edit.view.screen.RouteEditScreen
 import com.you.plot.feature.route.list.view.RouteListScreen
 import com.you.plot.feature.route.plotter.view.screen.PlotterScreen
 import com.you.plot.feature.startpoint.form.view.StartPointFormScreen
@@ -69,6 +70,17 @@ fun AppNavHost(
                 viewModel = hiltViewModel(),
                 onBack = { navController.popBackStack() },
                 onCreatePlan = { routeId -> navController.navigate(Routes.planCreateForRoute(routeId)) },
+                onEditRoute = { routeId -> navController.navigate(Routes.routeEdit(routeId)) },
+            )
+        }
+
+        composable(
+            route = Routes.ROUTE_EDIT,
+            arguments = listOf(navArgument("routeId") { type = NavType.LongType }),
+        ) {
+            RouteEditScreen(
+                viewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() },
             )
         }
 

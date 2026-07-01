@@ -27,6 +27,16 @@ class SaveRouteUseCase @Inject constructor(
     }
 }
 
+class UpdateRouteUseCase @Inject constructor(
+    private val repository: RouteRepo,
+) {
+    suspend operator fun invoke(route: Route) {
+        require(route.id > 0L) { "Cannot update an unsaved route" }
+        require(route.name.isNotBlank()) { "Route name cannot be empty" }
+        repository.updateRoute(route)
+    }
+}
+
 class DeleteRouteUseCase @Inject constructor(
     private val repository: RouteRepo
 ) {
