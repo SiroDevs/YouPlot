@@ -26,7 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.tracker.utils.vibrate
 import com.you.plot.feature.tracker.view.components.FullScreenStopReminder
 import com.you.plot.feature.tracker.view.components.TrackerActivePane

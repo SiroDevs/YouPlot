@@ -56,7 +56,6 @@ interface StartPointRepo {
     fun getFavorites(): Flow<List<StartPoint>>
     fun getTrashed(): Flow<List<StartPoint>>
     suspend fun getById(id: Long): StartPoint?
-    /** Increments the existing start point at this location, or creates a new one. */
     suspend fun recordUsage(name: String, position: LatLng, countryCode: String): Long
     suspend fun save(startPoint: StartPoint): Long
     suspend fun update(startPoint: StartPoint)

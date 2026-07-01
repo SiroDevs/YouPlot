@@ -1,4 +1,20 @@
-package com.you.plot.core.ui.components.action
+/*
+ * Copyright 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.you.plot.core.ui.action
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -71,7 +87,11 @@ fun AppTopBar(
             }
             if (showStepIndicator) {
                 Spacer(Modifier.height(6.dp))
-                StepPills(current = stepCurrent!!, total = stepTotal!!, showLabel = true)
+                _root_ide_package_.com.you.plot.core.ui.action.StepPills(
+                    current = stepCurrent!!,
+                    total = stepTotal!!,
+                    showLabel = true
+                )
             }
         }
     }
@@ -169,7 +189,7 @@ fun StepIndicator(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
-        StepPills(current = current, total = total)
+        _root_ide_package_.com.you.plot.core.ui.action.StepPills(current = current, total = total)
 
         if (showLabel) {
             Spacer(Modifier.height(2.dp))

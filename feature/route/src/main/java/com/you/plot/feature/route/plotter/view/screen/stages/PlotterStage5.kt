@@ -17,7 +17,7 @@ import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
-import com.you.plot.core.ui.components.maps.PlotterMap
+import com.you.plot.core.ui.maps.PlotterMap
 import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable
@@ -50,7 +50,6 @@ fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
             distanceKm = dist,
             candidate = candidate,
             onSportTypeChange = vm::setSportType,
-            onRoundTripChange = vm::setRoundTrip,
         )
     }
 }
@@ -61,25 +60,20 @@ private fun PlotterStage5Panel(
     distanceKm: Double,
     candidate: RouteCandidate?,
     onSportTypeChange: (SportType) -> Unit,
-    onRoundTripChange: (Boolean) -> Unit,
 ) {
     RouteInfoPanel(
         modifier = Modifier.fillMaxSize(),
         distanceKm = distanceKm,
         elevGainM = candidate?.elevationGain ?: 0.0,
         elevLossM = candidate?.elevationLoss ?: 0.0,
-        elevationProfile = candidate?.elevationProfile ?: emptyList(),
+        elevationPoints = candidate?.elevationPoints ?: emptyList(),
         sportType = state.sportType,
         isRoundTrip = state.isRoundTrip,
+        onSportTypeChange = onSportTypeChange,
         waypoints = buildPreviewWaypoints(state, distanceKm),
     )
 }
 
-/**
- * Assembles a preview list for the waypoints table on stage 5. When the user hasn't
- * selected any intermediate waypoints, we still surface start + finish so the table
- * isn't empty.
- */
 private fun buildPreviewWaypoints(state: PlotterUiState, distanceKm: Double): List<Waypoint> {
     val start = state.startPoint ?: return emptyList()
     val end = state.endPoint ?: return emptyList()
@@ -114,17 +108,22 @@ private fun buildPreviewWaypoints(state: PlotterUiState, distanceKm: Double): Li
 @Preview(showBackground = true)
 @Composable
 private fun PlotterStage5PanelPreview() {
-    val sampleProfile = listOf(
+    val samplePoints = listOf(
         ElevationPoint(0.0, 1700.0),
         ElevationPoint(1.0, 1720.0),
         ElevationPoint(2.0, 1750.0),
         ElevationPoint(3.0, 1735.0),
         ElevationPoint(4.0, 1760.0),
+        ElevationPoint(5.0, 1765.0),
+        ElevationPoint(6.0, 1770.0),
+        ElevationPoint(7.0, 1780.0),
+        ElevationPoint(9.0, 1850.0),
+        ElevationPoint(10.0, 1960.0),
     )
     val candidate = RouteCandidate(
         id = 0,
         waypoints = listOf(LatLng(-1.286, 36.817), LatLng(-1.300, 36.830)),
-        elevationProfile = sampleProfile,
+        elevationPoints = samplePoints,
         totalDist = 8.4,
         elevationGain = 120.0,
         elevationLoss = 95.0,
@@ -145,7 +144,6 @@ private fun PlotterStage5PanelPreview() {
             distanceKm = candidate.totalDist,
             candidate = candidate,
             onSportTypeChange = {},
-            onRoundTripChange = {},
         )
     }
 }

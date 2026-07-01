@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.you.plot.core.data.sample.samplePlans
 import com.you.plot.core.data.sample.sampleRoutes
 import com.you.plot.core.designsystem.theme.AppTheme
-import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.dashboard.dashboard.utils.DashboardUiState
 import com.you.plot.feature.dashboard.dashboard.utils.PlanFilter
 import com.you.plot.feature.dashboard.view.components.DashboardFab
@@ -82,13 +82,13 @@ fun DashboardContent(
                             onDismissRequest = { menuExpanded = false },
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Trash Bin") },
-                                leadingIcon = { Icon(Icons.Outlined.Delete, null) },
-                                onClick = { menuExpanded = false; onTrashBin() },
-                            )
-                            DropdownMenuItem(
                                 text = { Text("Settings") },
                                 onClick = { menuExpanded = false; onSettings() },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Trash Bin") },
+//                                leadingIcon = { Icon(Icons.Outlined.Delete, null) },
+                                onClick = { menuExpanded = false; onTrashBin() },
                             )
                             DropdownMenuItem(
                                 text = { Text("About YouPlot") },

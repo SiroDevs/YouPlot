@@ -45,9 +45,9 @@ import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Route
-import com.you.plot.core.ui.components.dialog.PickerDialog
-import com.you.plot.core.ui.components.general.displayLabel
-import com.you.plot.core.ui.components.general.icon
+import com.you.plot.core.ui.dialog.PickerDialog
+import com.you.plot.core.ui.general.displayLabel
+import com.you.plot.core.ui.general.icon
 import com.you.plot.feature.plan.planner.utils.PlannerUiState
 import com.you.plot.feature.plan.planner.view.components.PlanDaysStepper
 import com.you.plot.feature.plan.planner.view.components.PlanSliderCard

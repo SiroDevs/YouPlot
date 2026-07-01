@@ -20,15 +20,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.ElevationPoint
 import com.you.plot.core.common.entity.SportType
-import com.you.plot.core.ui.components.maps.ElevationProfileGraph
+import com.you.plot.core.ui.maps.ElevationProfile
 
 @Composable
 fun OverviewTab(
     distanceKm: Double,
     elevGainM: Double,
     elevLossM: Double,
-    elevationProfile: List<ElevationPoint>,
+    elevationPoints: List<ElevationPoint>,
     sportType: SportType,
+    onSportTypeChange: () -> Unit,
     isRoundTrip: Boolean,
     createdAt: String?,
     description: String,
@@ -46,7 +47,7 @@ fun OverviewTab(
             }
         }
 
-        if (elevationProfile.isNotEmpty()) {
+        if (elevationPoints.isNotEmpty()) {
             item {
                 Column {
                     Text(
@@ -55,8 +56,8 @@ fun OverviewTab(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(8.dp))
-                    ElevationProfileGraph(
-                        profile = elevationProfile,
+                    ElevationProfile(
+                        points = elevationPoints,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(180.dp),
@@ -74,11 +75,20 @@ fun OverviewTab(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    RouteMetaRow(
-                        sportType = sportType,
-                        isRoundTrip = isRoundTrip,
-                        createdAt = createdAt,
-                    )
+
+                    if (createdAt != null) {
+                        RouteDetailsMetaRow(
+                            sportType = sportType,
+                            isRoundTrip = isRoundTrip,
+                            createdAt = createdAt,
+                        )
+                    } else {
+                        RouteMetaRow(
+                            sportType = sportType,
+                            isRoundTrip = isRoundTrip,
+                            onSportTypeChange = onSportTypeChange,
+                        )
+                    }
 
                     if (description.isNotBlank()) {
                         HorizontalDivider(

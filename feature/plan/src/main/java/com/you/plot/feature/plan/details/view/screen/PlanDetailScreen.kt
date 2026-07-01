@@ -35,10 +35,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.plan.details.view.components.AddReminderDialog
 import com.you.plot.feature.plan.details.view.components.DaySummaryCard
-import com.you.plot.core.ui.components.general.DayTimeline
+import com.you.plot.core.ui.general.DayTimeline
 import com.you.plot.feature.plan.details.view.components.EventCard
 import com.you.plot.feature.plan.details.view.components.ReminderRow
 import com.you.plot.feature.plan.details.viewmodel.PlanDetailViewModel

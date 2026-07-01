@@ -25,9 +25,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.PlotterStage
-import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
-import com.you.plot.core.ui.components.maps.PlotterMap
+import com.you.plot.core.ui.maps.PlotterMap
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage1
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage2
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage3

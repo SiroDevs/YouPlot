@@ -20,7 +20,7 @@ import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Event
 import com.you.plot.core.domain.entity.Route
-import com.you.plot.core.ui.components.general.SummaryRow
+import com.you.plot.core.ui.general.SummaryRow
 import com.you.plot.feature.plan.planner.utils.PlannerUiState
 import com.you.plot.feature.plan.planner.viewmodel.PlannerViewModel
 import java.util.Date

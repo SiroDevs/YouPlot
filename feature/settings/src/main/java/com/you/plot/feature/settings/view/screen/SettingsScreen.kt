@@ -35,13 +35,13 @@ import com.you.plot.core.common.utils.AppConstants
 import com.you.plot.core.data.repos.ThemeRepo
 import com.you.plot.core.designsystem.theme.ThemeSelectorDialog
 import com.you.plot.core.designsystem.theme.themeName
-import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.core.ui.components.action.ToggleItem
-import com.you.plot.core.ui.components.dialog.PickerDialog
-import com.you.plot.core.ui.components.general.InfoDivider
-import com.you.plot.core.ui.components.general.InfoItem
-import com.you.plot.core.ui.components.general.InfoSection
-import com.you.plot.core.ui.components.general.ValueItem
+import com.you.plot.core.ui.action.AppTopBar
+import com.you.plot.core.ui.action.ToggleItem
+import com.you.plot.core.ui.dialog.PickerDialog
+import com.you.plot.core.ui.general.InfoDivider
+import com.you.plot.core.ui.general.InfoItem
+import com.you.plot.core.ui.general.InfoSection
+import com.you.plot.core.ui.general.ValueItem
 import com.you.plot.feature.settings.view.components.SpeedLimitDialog
 import com.you.plot.feature.settings.viewmodel.SettingsViewModel
 

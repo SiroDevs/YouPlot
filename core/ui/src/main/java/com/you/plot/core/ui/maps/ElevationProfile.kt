@@ -1,20 +1,4 @@
-/*
- * Copyright 2026 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.you.plot.core.ui.components.maps
+package com.you.plot.core.ui.maps
 
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -38,12 +22,12 @@ import kotlin.math.log10
 import kotlin.math.pow
 
 @Composable
-fun ElevationProfileGraph(
-    profile: List<ElevationPoint>,
+fun ElevationProfile(
+    points: List<ElevationPoint>,
     modifier: Modifier = Modifier,
     useMetric: Boolean = true,
 ) {
-    if (profile.isEmpty()) return
+    if (points.isEmpty()) return
 
     val lineColor = MaterialTheme.colorScheme.primary
     val fillColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
@@ -73,8 +57,8 @@ fun ElevationProfileGraph(
         val elevUnit = if (useMetric) "m" else "ft"
         val distUnit = if (useMetric) "km" else "mi"
 
-        val elevations = profile.map { it.elevation * elevFactor }
-        val distances = profile.map { it.distanceKm * distFactor }
+        val elevations = points.map { it.elevation * elevFactor }
+        val distances = points.map { it.distanceKm * distFactor }
 
         val minElev = elevations.min()
         val maxElev = elevations.max()
@@ -107,14 +91,12 @@ fun ElevationProfileGraph(
 
         for (tick in yTicks) {
             val y = elevToY(tick)
-            // grid line
             drawLine(
                 gridColor,
                 Offset(leftMargin, y),
                 Offset(leftMargin + plotW, y),
                 strokeWidth = 1.5f
             )
-            // label — right-aligned, centred on tick line
             val label =
                 if (tick % 1.0 == 0.0) "${tick.toInt()} $elevUnit" else "%.1f $elevUnit".format(tick)
             drawContext.canvas.nativeCanvas.drawText(
@@ -156,7 +138,7 @@ fun ElevationProfileGraph(
             val firstY = elevToY(elevations[0])
             moveTo(firstX, topMargin + plotH)
             lineTo(firstX, firstY)
-            for (i in 1 until profile.size) {
+            for (i in 1 until points.size) {
                 lineTo(distToX(distances[i]), elevToY(elevations[i]))
             }
             lineTo(distToX(distances.last()), topMargin + plotH)
@@ -165,7 +147,7 @@ fun ElevationProfileGraph(
         drawPath(fillPath, fillColor)
 
         val linePath = Path()
-        profile.forEachIndexed { i, _ ->
+        points.forEachIndexed { i, _ ->
             val x = distToX(distances[i])
             val y = elevToY(elevations[i])
             if (i == 0) linePath.moveTo(x, y) else linePath.lineTo(x, y)

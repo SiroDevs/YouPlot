@@ -8,9 +8,11 @@ import com.you.plot.core.common.utils.buildElevationStats
 import com.you.plot.core.common.utils.buildFallbackCandidates
 import com.you.plot.core.common.utils.countryName
 import com.you.plot.core.common.utils.decodePolyline6
+import com.you.plot.core.common.utils.haversineKm
 import com.you.plot.core.domain.entity.WaypointSearchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -119,18 +121,13 @@ class PlotterRepo @Inject constructor(
                 val decodedPoints = decodePolyline6(route.getString("geometry"))
                 val distKm = route.getDouble("distance") / 1000.0
 
-                val elevProfile = decodedPoints.mapIndexed { idx, _ ->
-                    ElevationPoint(
-                        distanceKm = distKm * idx.toDouble() / decodedPoints.size,
-                        elevation = 1400.0 + 80 * sin(idx.toDouble() / decodedPoints.size * PI * 2),
-                    )
-                }
-                val (gain, loss) = buildElevationStats(elevProfile)
+                val elevPoints = fetchElevationPoints(decodedPoints, distKm)
+                val (gain, loss) = buildElevationStats(elevPoints)
 
                 RouteCandidate(
                     id = i,
                     waypoints = decodedPoints,
-                    elevationProfile = elevProfile,
+                    elevationPoints = elevPoints,
                     totalDist = distKm,
                     elevationGain = gain,
                     elevationLoss = loss,
@@ -191,12 +188,6 @@ class PlotterRepo @Inject constructor(
             }
     }
 
-    /**
-     * Photon has no `countrycodes` parameter, so bias the query by appending the country
-     * name to the search terms, then filter server responses that carry a mismatching
-     * `countrycode` property. Falls back to Nominatim (via [searchLocations]) on failure —
-     * Nominatim actually supports countrycodes and returns country-scoped hits.
-     */
     suspend fun searchLocationsWithCountry(query: String, countryCode: String): List<WaypointSearchResult> =
         withContext(Dispatchers.IO) {
             if (countryCode.isBlank()) return@withContext searchLocations(query)
@@ -253,5 +244,55 @@ class PlotterRepo @Inject constructor(
                 latLng = LatLng(obj.getDouble("lat"), obj.getDouble("lon")),
             )
         }
+    }
+
+    suspend fun fetchElevationPoints(
+        decodedPoints: List<LatLng>,
+        distKm: Double,
+    ): List<ElevationPoint> = withContext(Dispatchers.IO) {
+        runCatching {
+            val sampled = sampleGeometry(decodedPoints, targetCount = 100)
+            val locationsJson = JSONArray().apply {
+                sampled.forEach { p ->
+                    put(JSONObject().apply {
+                        put("latitude", p.latitude)
+                        put("longitude", p.longitude)
+                    })
+                }
+            }
+            val body = JSONObject().put("locations", locationsJson).toString()
+
+            val conn = (URL(MapConstants.OPEN_ELEVATION)
+                .openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                setRequestProperty("Content-Type", "application/json")
+                connectTimeout = 15_000
+                readTimeout = 30_000
+                doOutput = true
+            }
+            conn.outputStream.use { it.write(body.toByteArray()) }
+            val json = JSONObject(conn.inputStream.bufferedReader().readText())
+            conn.disconnect()
+
+            val results = json.getJSONArray("results")
+            var cumDist = 0.0
+            (0 until results.length()).map { i ->
+                if (i > 0) {
+                    cumDist += haversineKm(sampled[i - 1], sampled[i])
+                }
+                ElevationPoint(
+                    distanceKm = cumDist,
+                    elevation = results.getJSONObject(i).getDouble("elevation"),
+                )
+            }
+        }.getOrElse {
+            fetchElevationPoints(decodedPoints, distKm)
+        }
+    }
+
+    private fun sampleGeometry(geom: List<LatLng>, targetCount: Int): List<LatLng> {
+        if (geom.size <= targetCount) return geom
+        val step = geom.size.toDouble() / targetCount
+        return List(targetCount) { i -> geom[minOf((i * step).toInt(), geom.size - 1)] }
     }
 }

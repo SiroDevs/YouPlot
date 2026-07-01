@@ -1,4 +1,4 @@
-package com.you.plot.core.ui.components.action
+package com.you.plot.core.ui.action
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

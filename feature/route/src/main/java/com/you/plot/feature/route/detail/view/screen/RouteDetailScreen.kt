@@ -46,11 +46,11 @@ import com.you.plot.core.common.utils.dateFmt
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Route
 import com.you.plot.core.domain.entity.Waypoint
-import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
 import com.you.plot.feature.route.detail.viewmodel.RouteDetailUiState
 import com.you.plot.feature.route.detail.viewmodel.RouteDetailViewModel
-import com.you.plot.core.ui.components.maps.PlotterMap
+import com.you.plot.core.ui.maps.PlotterMap
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,7 +96,6 @@ private fun RouteDetailContent(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showMoreMenu by remember { mutableStateOf(false) }
 
-    // ── Delete confirmation ───────────────────────────────────────────────────
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -215,8 +214,6 @@ private fun RouteDetailContent(
 
             if (showMap) {
                 val orderedWps = route.waypoints.sortedBy { it.orderIndex }
-                // First and last waypoints are the start/finish markers rendered separately —
-                // pass only the true intermediates to the map as via-points.
                 val intermediates = orderedWps
                     .drop(1)
                     .dropLast(if (orderedWps.size > 1) 1 else 0)
@@ -225,7 +222,7 @@ private fun RouteDetailContent(
                 val displayCandidate = RouteCandidate(
                     id = 0,
                     waypoints = geometry,
-                    elevationProfile = route.elevationProfile,
+                    elevationPoints = route.elevationPoints,
                     totalDist = route.totalDist,
                     elevationGain = route.elevationGain,
                     elevationLoss = route.elevationLoss,
@@ -251,7 +248,7 @@ private fun RouteDetailContent(
                 distanceKm = route.totalDist,
                 elevGainM = route.elevationGain,
                 elevLossM = route.elevationLoss,
-                elevationProfile = route.elevationProfile,
+                elevationPoints = route.elevationPoints,
                 sportType = route.sportType,
                 isRoundTrip = route.isRoundTrip,
                 waypoints = route.waypoints,
@@ -299,7 +296,7 @@ private fun sampleRoute(): Route {
         startPoint = LatLng(-1.286, 36.817),
         endPoint = LatLng(-1.300, 36.830),
         waypoints = waypoints,
-        elevationProfile = profile,
+        elevationPoints = profile,
         totalDist = 8.4,
         elevationGain = 120.0,
         elevationLoss = 95.0,

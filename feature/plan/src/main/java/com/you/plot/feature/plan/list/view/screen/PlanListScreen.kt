@@ -30,7 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.domain.entity.ActivityPlan
-import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.plan.list.view.components.PlanItem
 import com.you.plot.feature.plan.list.viewmodel.PlanListTab
 import com.you.plot.feature.plan.list.viewmodel.PlanListViewModel

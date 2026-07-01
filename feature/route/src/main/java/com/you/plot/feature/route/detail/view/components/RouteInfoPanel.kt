@@ -30,8 +30,8 @@ import com.you.plot.core.common.entity.ElevationPoint
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.common.utils.countryFlag
 import com.you.plot.core.domain.entity.Waypoint
-import com.you.plot.core.ui.components.dialog.PickerDialog
-import com.you.plot.core.ui.components.general.displayLabel
+import com.you.plot.core.ui.dialog.PickerDialog
+import com.you.plot.core.ui.general.displayLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,14 +39,13 @@ fun RouteInfoPanel(
     distanceKm: Double,
     elevGainM: Double,
     elevLossM: Double,
-    elevationProfile: List<ElevationPoint>,
+    elevationPoints: List<ElevationPoint>,
     sportType: SportType,
     isRoundTrip: Boolean,
     waypoints: List<Waypoint> = emptyList(),
     createdAt: String? = null,
     description: String = "",
     onSportTypeChange: (SportType) -> Unit = {},
-    onRoundTripChange: (Boolean) -> Unit = {},
     modifier: Modifier,
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -59,7 +58,10 @@ fun RouteInfoPanel(
             options = SportType.entries.map { it to it.displayLabel },
             selected = sportType,
             onDismiss = { showSportDialog = false },
-            onConfirm = { onSportTypeChange(it); showSportDialog = false },
+            onConfirm = {
+                onSportTypeChange(it);
+                showSportDialog = false
+            },
         )
     }
 
@@ -79,16 +81,18 @@ fun RouteInfoPanel(
                 distanceKm = distanceKm,
                 elevGainM = elevGainM,
                 elevLossM = elevLossM,
-                elevationProfile = elevationProfile,
+                elevationPoints = elevationPoints,
                 sportType = sportType,
+                onSportTypeChange = { showSportDialog = true },
                 isRoundTrip = isRoundTrip,
                 createdAt = createdAt,
                 description = description,
             )
+
             1 -> WaypointsTab(
                 waypoints = waypoints,
                 totalDist = distanceKm,
-                elevationProfile = elevationProfile,
+                elevationPoints = elevationPoints,
             )
         }
     }
@@ -98,11 +102,11 @@ fun RouteInfoPanel(
 private fun WaypointsTab(
     waypoints: List<Waypoint>,
     totalDist: Double,
-    elevationProfile: List<ElevationPoint>,
+    elevationPoints: List<ElevationPoint>,
 ) {
     val ordered = waypoints.sortedBy { it.orderIndex }
-    val gains = remember(ordered, elevationProfile) {
-        computeSegmentGains(ordered, elevationProfile)
+    val gains = remember(ordered, elevationPoints) {
+        computeSegmentGains(ordered, elevationPoints)
     }
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -137,7 +141,11 @@ private fun WaypointTableHeader() {
 }
 
 @Composable
-private fun HeaderCell(label: String, modifier: Modifier = Modifier, align: TextAlign = TextAlign.Start) {
+private fun HeaderCell(
+    label: String,
+    modifier: Modifier = Modifier,
+    align: TextAlign = TextAlign.Start
+) {
     Text(
         label,
         modifier = modifier,

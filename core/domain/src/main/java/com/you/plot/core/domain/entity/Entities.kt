@@ -30,7 +30,7 @@ data class Route(
     val startPoint: LatLng,
     val endPoint: LatLng,
     val waypoints: List<Waypoint> = emptyList(),
-    val elevationProfile: List<ElevationPoint> = emptyList(),
+    val elevationPoints: List<ElevationPoint> = emptyList(),
     val totalDist: Double,
     val elevationGain: Double = 0.0,
     val elevationLoss: Double = 0.0,

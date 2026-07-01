@@ -28,7 +28,7 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.domain.entity.Route
-import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.plan.planner.utils.PlannerUiState
 import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep0
 import com.you.plot.feature.plan.planner.view.screen.steps.PlannerStep1

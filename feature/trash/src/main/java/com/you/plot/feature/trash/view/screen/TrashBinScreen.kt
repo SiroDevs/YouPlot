@@ -27,7 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.dateFmt
-import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.trash.view.components.TrashRow
 import com.you.plot.feature.trash.viewmodel.TrashBinViewModel
 import java.util.Date

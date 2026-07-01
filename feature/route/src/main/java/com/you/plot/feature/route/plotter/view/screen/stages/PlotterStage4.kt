@@ -21,7 +21,7 @@ import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
-import com.you.plot.core.ui.components.maps.ElevationProfileGraph
+import com.you.plot.core.ui.maps.ElevationProfile
 import com.you.plot.feature.route.plotter.view.components.RouteCandidateCard
 import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
@@ -67,8 +67,8 @@ private fun PlotterStage4Content(
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
                     )
-                    ElevationProfileGraph(
-                        profile = c.elevationProfile,
+                    ElevationProfile(
+                        points = c.elevationPoints,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp),
@@ -96,7 +96,7 @@ private fun PlotterStage4Preview() {
         RouteCandidate(
             id = 0,
             waypoints = listOf(LatLng(-1.286, 36.817), LatLng(-1.300, 36.830)),
-            elevationProfile = sampleProfile,
+            elevationPoints = sampleProfile,
             totalDist = 5.4,
             elevationGain = 80.0,
             elevationLoss = 55.0,
@@ -105,7 +105,7 @@ private fun PlotterStage4Preview() {
         RouteCandidate(
             id = 1,
             waypoints = listOf(LatLng(-1.286, 36.817), LatLng(-1.305, 36.835)),
-            elevationProfile = sampleProfile,
+            elevationPoints = sampleProfile,
             totalDist = 6.2,
             elevationGain = 110.0,
             elevationLoss = 70.0,

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface StartPointDao {
-    /** Ranks start points by most-used first, then most-recently-used. */
     @Query(
         "SELECT * FROM start_points WHERE deletedAt IS NULL " +
             "ORDER BY usageCount DESC, lastUsedAt DESC, createdAt DESC"

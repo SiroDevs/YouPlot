@@ -49,7 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.domain.entity.Route
-import com.you.plot.core.ui.components.action.AppTopBar
+import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.route.list.viewmodel.RouteListTab
 import com.you.plot.feature.route.list.viewmodel.RouteListViewModel
 

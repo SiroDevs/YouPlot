@@ -384,7 +384,7 @@ class PlotterViewModel @Inject constructor(
                         startPoint = start,
                         endPoint = end,
                         waypoints = waypointEntities,
-                        elevationProfile = candidate.elevationProfile,
+                        elevationPoints = candidate.elevationPoints,
                         totalDist = totalDist,
                         elevationGain = candidate.elevationGain,
                         elevationLoss = candidate.elevationLoss,

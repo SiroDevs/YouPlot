@@ -1,4 +1,4 @@
-package com.you.plot.core.ui.components.maps
+package com.you.plot.core.ui.maps
 
 import android.content.Context
 import android.graphics.Bitmap

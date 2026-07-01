@@ -21,10 +21,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.utils.AppConstants
 import androidx.core.net.toUri
-import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.core.ui.components.general.InfoDivider
-import com.you.plot.core.ui.components.general.InfoNavItem
-import com.you.plot.core.ui.components.general.InfoSection
+import com.you.plot.core.ui.action.AppTopBar
+import com.you.plot.core.ui.general.InfoDivider
+import com.you.plot.core.ui.general.InfoNavItem
+import com.you.plot.core.ui.general.InfoSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

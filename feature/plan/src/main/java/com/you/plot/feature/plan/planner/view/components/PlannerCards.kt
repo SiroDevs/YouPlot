@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.you.plot.core.ui.components.general.SummaryRow
+import com.you.plot.core.ui.general.SummaryRow
 
 @Composable
 fun DaySummaryCard(

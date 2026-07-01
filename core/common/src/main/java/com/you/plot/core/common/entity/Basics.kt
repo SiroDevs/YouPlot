@@ -7,7 +7,7 @@ data class LatLng(val latitude: Double, val longitude: Double)
 data class RouteCandidate(
     val id: Int,
     val waypoints: List<LatLng>,
-    val elevationProfile: List<ElevationPoint>,
+    val elevationPoints: List<ElevationPoint>,
     val totalDist: Double,
     val elevationGain: Double,
     val elevationLoss: Double,

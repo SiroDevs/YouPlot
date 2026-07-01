@@ -1,4 +1,4 @@
-package com.you.plot.core.ui.components.general
+package com.you.plot.core.ui.general
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DirectionsBike

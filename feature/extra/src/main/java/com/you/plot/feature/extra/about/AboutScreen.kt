@@ -24,10 +24,10 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
-import com.you.plot.core.ui.components.action.AppTopBar
-import com.you.plot.core.ui.components.general.InfoDivider
-import com.you.plot.core.ui.components.general.InfoItem
-import com.you.plot.core.ui.components.general.InfoSection
+import com.you.plot.core.ui.action.AppTopBar
+import com.you.plot.core.ui.general.InfoDivider
+import com.you.plot.core.ui.general.InfoItem
+import com.you.plot.core.ui.general.InfoSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

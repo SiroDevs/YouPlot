@@ -15,7 +15,7 @@ data class RouteEntity(
     val endLat: Double,
     val endLng: Double,
     val waypoints: String,
-    val elevationProfile: String,
+    val elevationPoints: String,
     val totalDist: Double,
     val elevationGain: Double,
     val elevationLoss: Double,
