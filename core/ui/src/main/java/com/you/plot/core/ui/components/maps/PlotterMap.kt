@@ -34,8 +34,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.you.plot.core.common.entity.LatLng
 import com.you.plot.core.common.utils.boundingBox
 import com.you.plot.core.common.utils.boundingBoxOfAll
-import com.you.plot.feature.route.plotter.utils.makeCircleMarker
-import com.you.plot.feature.route.plotter.utils.makePinMarker
 import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.utils.MapConstants
 import kotlinx.coroutines.withContext
