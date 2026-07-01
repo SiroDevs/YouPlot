@@ -37,6 +37,7 @@ fun AppNavHost(
                 viewModel = hiltViewModel(),
                 onPlotRoute = { navController.navigate(Routes.ROUTE_PLOTTER) },
                 onViewAllRoutes = { navController.navigate(Routes.ROUTE_LIST) },
+                onViewAllPlans = { navController.navigate(Routes.PLAN_LIST) },
                 onRouteClick = { routeId -> navController.navigate(Routes.routeDetail(routeId)) },
                 onCreatePlan = { navController.navigate(Routes.PLAN_CREATE) },
                 onPlanClick = { planId -> navController.navigate(Routes.planDetail(planId)) },

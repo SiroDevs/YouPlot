@@ -4,16 +4,15 @@ import com.you.plot.core.common.entity.SportType
 import com.you.plot.core.data.repos.ThemeMode
 
 data class SportSpeedLimits(
-    val minKmh: Float,
-    val maxKmh: Float,
+    val minSpeed: Float,
+    val maxSpeed: Float,
 )
 
-// Default speed ranges per sport (in km/h)
 val DEFAULT_SPEED_LIMITS = mapOf(
-    SportType.RUNNING to SportSpeedLimits(3f, 30f),   // 20 min/km → 2 min/km
+    SportType.RUNNING to SportSpeedLimits(3f, 30f),
     SportType.CYCLING to SportSpeedLimits(5f, 75f),
-    SportType.HIKING  to SportSpeedLimits(1f, 12f),   // ~60 min/km → 5 min/km
-    SportType.WALKING to SportSpeedLimits(1f, 12f),   // 60 min/km → 5 min/km
+    SportType.HIKING  to SportSpeedLimits(2f, 12f),
+    SportType.WALKING to SportSpeedLimits(1f, 12f),
 )
 
 data class SettingsUiState(

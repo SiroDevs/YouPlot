@@ -58,7 +58,7 @@ fun TrackerMap(
                 position = GeoPoint(wp.waypoint.position.latitude, wp.waypoint.position.longitude)
                 title = wp.waypoint.name
                 snippet =
-                    if (wp.isReached) "Reached" else "%.2f km away".format(wp.distanceRemainingKm)
+                    if (wp.isReached) "Reached" else "%.2f km away".format(wp.distRemaining)
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             }
             mapView.overlays.add(marker)

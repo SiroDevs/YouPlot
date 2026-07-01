@@ -79,7 +79,7 @@ class PlannerViewModel @Inject constructor(
                 selectedRoute = route,
                 selectedTemplate = null,
                 planName = "${route.name} Plan",
-                avgDistancePerDayKmOverride = null,
+                avgDailyDistOverride = null,
             )
         }
     }
@@ -93,32 +93,32 @@ class PlannerViewModel @Inject constructor(
                 description = plan.description,
                 numberOfDays = plan.numberOfDays,
                 avgSpeed = plan.avgSpeed,
-                avgDistancePerDayKmOverride = plan.avgDistPerDay,
+                avgDailyDistOverride = plan.avgDailyDist,
             )
         }
     }
 
     fun setPlanName(name: String) = _state.update { it.copy(planName = name) }
     fun setDescription(desc: String) = _state.update { it.copy(description = desc) }
-    fun setStartDate(millis: Long) = _state.update { it.copy(startDateMillis = millis) }
+    fun setStartDate(millis: Long) = _state.update { it.copy(startDate = millis) }
     fun setStartTime(hour: Int, minute: Int) =
         _state.update { it.copy(startHour = hour, startMinute = minute) }
 
     fun setNumberOfDays(days: Int) = _state.update {
-        it.copy(numberOfDays = days.coerceAtLeast(1), avgDistancePerDayKmOverride = null)
+        it.copy(numberOfDays = days.coerceAtLeast(1), avgDailyDistOverride = null)
     }
 
     fun setAvgSpeed(speed: Double) =
         _state.update { it.copy(avgSpeed = speed.coerceAtLeast(1.0)) }
 
     fun setAvgDistancePerDay(km: Double) =
-        _state.update { it.copy(avgDistancePerDayKmOverride = km.coerceAtLeast(0.1)) }
+        _state.update { it.copy(avgDailyDistOverride = km.coerceAtLeast(0.1)) }
 
     fun selectDay(day: Int) = _state.update { it.copy(selectedDay = day) }
 
     fun addCustomEvent(name: String, hour: Int, minute: Int, duration: Int, day: Int) {
         val s = _state.value
-        val dayStartMillis = s.startTimeMillis + (day - 1) * 86_400_000L
+        val dayStartMillis = s.startTime + (day - 1) * 86_400_000L
         val eventMillis = dayStartMillis + hour * 3_600_000L + minute * 60_000L
         val prevDist = s.eventsForSelectedDay
             .filter { it.plannedTime <= eventMillis }
@@ -167,7 +167,7 @@ class PlannerViewModel @Inject constructor(
                     setError("Speed must be greater than 0"); return
                 }
                 _state.update { it.copy(isGenerating = true) }
-                /*viewModelScope.launch {
+                viewModelScope.launch {
                     runCatching { generateEvents() }
                         .onFailure { e ->
                             _state.update {
@@ -177,8 +177,7 @@ class PlannerViewModel @Inject constructor(
                                 )
                             }
                         }
-                }*/
-                _state.update { it.copy(currentStep = 2) }
+                }
             }
 
             2 -> _state.update { it.copy(currentStep = 3) }
@@ -196,14 +195,14 @@ class PlannerViewModel @Inject constructor(
             routeId = routeId,
             name = s.planName,
             description = s.description,
-            startDateMillis = s.startTimeMillis,
+            startDate = s.startTime,
             numberOfDays = s.numberOfDays,
             avgSpeed = s.avgSpeed.coerceAtLeast(1.0),
-            avgDistPerDay = s.avgDistPerDay.coerceAtLeast(0.1),
+            avgDailyDist = s.avgDailyDist.coerceAtLeast(0.1),
         )
         val events = generateEventsUseCase(draft)
         val templateCustom = if (s.selectedTemplate != null) {
-            val offset = s.startTimeMillis - s.selectedTemplate.startDateMillis
+            val offset = s.startTime - s.selectedTemplate.startDate
             s.selectedTemplate.events
                 .filter { it.waypointId == null }
                 .map {
@@ -240,10 +239,10 @@ class PlannerViewModel @Inject constructor(
                     routeId = routeId,
                     name = s.planName.ifBlank { "Plan" },
                     description = s.description,
-                    startDateMillis = s.startTimeMillis,
+                    startDate = s.startTime,
                     numberOfDays = s.numberOfDays,
                     avgSpeed = s.avgSpeed,
-                    avgDistPerDay = s.avgDistPerDay,
+                    avgDailyDist = s.avgDailyDist,
                     events = allEvents,
                 )
                 savePlanUseCase(plan)

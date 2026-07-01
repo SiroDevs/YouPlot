@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.SportType
 import com.you.plot.feature.settings.utils.SportSpeedLimits
-import com.you.plot.feature.settings.view.screen.kmhToPaceStr
+import com.you.plot.feature.settings.view.screen.speedToPaceStr
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +48,7 @@ fun SpeedLimitDialog(
     onDismiss: () -> Unit,
     onSave: (Float, Float) -> Unit,
 ) {
-    var range by remember { mutableStateOf(limits.minKmh..limits.maxKmh) }
+    var range by remember { mutableStateOf(limits.minSpeed..limits.maxSpeed) }
     val absMax = when (sport) {
         SportType.RUNNING -> 35f
         SportType.CYCLING -> 100f
@@ -69,9 +69,9 @@ fun SpeedLimitDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 val minLabel =
-                    if (usePace) kmhToPaceStr(range.start) else "%.1f km/h".format(range.start)
+                    if (usePace) speedToPaceStr(range.start) else "%.1f km/h".format(range.start)
                 val maxLabel =
-                    if (usePace) kmhToPaceStr(range.endInclusive) else "%.1f km/h".format(range.endInclusive)
+                    if (usePace) speedToPaceStr(range.endInclusive) else "%.1f km/h".format(range.endInclusive)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
                         "Min: $minLabel",

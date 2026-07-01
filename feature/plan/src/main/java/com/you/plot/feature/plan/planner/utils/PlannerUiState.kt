@@ -31,10 +31,10 @@ data class PlannerUiState(
     val selectedTemplate: ActivityPlan? = null,
     val planName: String = "",
     val description: String = "",
-    val startDateMillis: Long = todayAtMidnight(),
+    val startDate: Long = todayAtMidnight(),
     val startHour: Int = 6,
     val startMinute: Int = 0,
-    val avgDistancePerDayKmOverride: Double? = null,
+    val avgDailyDistOverride: Double? = null,
     val numberOfDays: Int = 1,
     val avgSpeed: Double = 10.0,
     val generatedEvents: List<Event> = emptyList(),
@@ -47,13 +47,13 @@ data class PlannerUiState(
     val error: String? = null,
 ) {
     /** Effective start epoch = date midnight + hours offset */
-    val startTimeMillis: Long
-        get() = startDateMillis + startHour * 3_600_000L + startMinute * 60_000L
+    val startTime: Long
+        get() = startDate + startHour * 3_600_000L + startMinute * 60_000L
 
     /** Auto-calculated from route / template, but user can override */
-    val avgDistPerDay: Double
-        get() = avgDistancePerDayKmOverride
-            ?: ((selectedRoute?.totalDist ?: selectedTemplate?.avgDistPerDay?.times(numberOfDays) ?: 0.0)
+    val avgDailyDist: Double
+        get() = avgDailyDistOverride
+            ?: ((selectedRoute?.totalDist ?: selectedTemplate?.avgDailyDist?.times(numberOfDays) ?: 0.0)
                 .div(numberOfDays.coerceAtLeast(1)))
 
     /** All events for the currently selected day, sorted by time */
@@ -70,7 +70,7 @@ data class PlannerUiState(
     val remainingDist: Double
         get() {
             val totalDist = selectedRoute?.totalDist
-                ?: (avgDistPerDay * numberOfDays)
+                ?: (avgDailyDist * numberOfDays)
             return (totalDist - dayTotalDist).coerceAtLeast(0.0)
         }
 

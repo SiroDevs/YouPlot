@@ -27,14 +27,14 @@ import com.you.plot.core.domain.entity.Event
 
 fun ActivityPlan.toEntity() = PlanEntity(
     id = id, routeId = routeId, name = name, description = description,
-    startDateMillis = startDateMillis, numberOfDays = numberOfDays,
-    avgSpeed = avgSpeed, avgDistPerDay = avgDistPerDay, createdAt = createdAt,
+    startDate = startDate, numberOfDays = numberOfDays,
+    avgSpeed = avgSpeed, avgDailyDist = avgDailyDist, createdAt = createdAt,
 )
 
 fun PlanEntity.toDomain(events: List<EventEntity>) = ActivityPlan(
     id = id, routeId = routeId, name = name, description = description,
-    startDateMillis = startDateMillis, numberOfDays = numberOfDays,
-    avgSpeed = avgSpeed, avgDistPerDay = avgDistPerDay,
+    startDate = startDate, numberOfDays = numberOfDays,
+    avgSpeed = avgSpeed, avgDailyDist = avgDailyDist,
     events = events.map { it.toDomain() }, createdAt = createdAt,
 )
 

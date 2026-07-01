@@ -45,8 +45,8 @@ class SettingsViewModel @Inject constructor(
             usePaceForRunWalk = prefsRepo.usePaceForRunWalk,
             sportSpeedLimits = DEFAULT_SPEED_LIMITS.mapValues { (sport, defaults) ->
                 SportSpeedLimits(
-                    minKmh = prefsRepo.getSpeedMin(sport).takeIf { it > 0f } ?: defaults.minKmh,
-                    maxKmh = prefsRepo.getSpeedMax(sport).takeIf { it > 0f } ?: defaults.maxKmh,
+                    minSpeed = prefsRepo.getSpeedMin(sport).takeIf { it > 0f } ?: defaults.minSpeed,
+                    maxSpeed = prefsRepo.getSpeedMax(sport).takeIf { it > 0f } ?: defaults.maxSpeed,
                 )
             },
         )
@@ -73,14 +73,14 @@ class SettingsViewModel @Inject constructor(
         _state.update { it.copy(usePaceForRunWalk = pace) }
     }
 
-    fun setSpeedLimit(sport: SportType, minKmh: Float, maxKmh: Float) {
-        prefsRepo.setSpeedMin(sport, minKmh)
-        prefsRepo.setSpeedMax(sport, maxKmh)
+    fun setSpeedLimit(sport: SportType, minSpeed: Float, maxSpeed: Float) {
+        prefsRepo.setSpeedMin(sport, minSpeed)
+        prefsRepo.setSpeedMax(sport, maxSpeed)
         _state.update {
             it.copy(
                 sportSpeedLimits = it.sportSpeedLimits + (sport to SportSpeedLimits(
-                    minKmh,
-                    maxKmh
+                    minSpeed,
+                    maxSpeed
                 ))
             )
         }

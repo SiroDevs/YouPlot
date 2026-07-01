@@ -52,10 +52,10 @@ class GenerateEventsUseCase @Inject constructor(
     suspend operator fun invoke(plan: ActivityPlan): List<Event> {
         val route = routeRepo.getRouteById(plan.routeId) ?: return emptyList()
         val events = mutableListOf<Event>()
-        val distancePerDay = if (plan.avgDistPerDay > 0)
-            plan.avgDistPerDay else route.totalDist / plan.numberOfDays
+        val distancePerDay = if (plan.avgDailyDist > 0)
+            plan.avgDailyDist else route.totalDist / plan.numberOfDays
 
-        var dayStart = plan.startDateMillis
+        var dayStart = plan.startDate
         var cumulativeDistance = 0.0
         var orderIndex = 0
 

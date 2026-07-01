@@ -81,7 +81,7 @@ private fun PlannerStep1Content(
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = state.startDateMillis)
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = state.startDate)
     val timePickerState = rememberTimePickerState(initialHour = state.startHour, initialMinute = state.startMinute)
 
     if (showDatePicker) {
@@ -118,12 +118,12 @@ private fun PlannerStep1Content(
     }
 
     val totalDistance = state.selectedRoute?.totalDist
-        ?: (state.avgDistPerDay * state.numberOfDays)
+        ?: (state.avgDailyDist * state.numberOfDays)
     val etaHours = if (state.avgSpeed > 0) totalDistance / state.avgSpeed else 0.0
     val etaDays = state.numberOfDays
     val dailyHours = if (etaDays > 0) etaHours / etaDays else etaHours
     val etaText = buildString {
-        append("%.1f km/day".format(state.avgDistPerDay))
+        append("%.1f km/day".format(state.avgDailyDist))
         append(" · ")
         val h = dailyHours.toInt()
         val m = ((dailyHours - h) * 60).roundToInt()
@@ -156,7 +156,7 @@ private fun PlannerStep1Content(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedTextField(
-                value = dateFmt.format(Date(state.startDateMillis)),
+                value = dateFmt.format(Date(state.startDate)),
                 onValueChange = {},
                 label = { Text("Start Date") },
                 readOnly = true,
@@ -188,8 +188,8 @@ private fun PlannerStep1Content(
         PlanSliderCard(
             icon = { Icon(Icons.Default.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp)) },
             label = "Distance per Day",
-            valueLabel = "%.1f km".format(state.avgDistPerDay),
-            value = state.avgDistPerDay.toFloat(),
+            valueLabel = "%.1f km".format(state.avgDailyDist),
+            value = state.avgDailyDist.toFloat(),
             onValueChange = { onAvgDistancePerDayChange(it.toDouble()) },
             valueRange = 1f..100f,
             steps = 98,

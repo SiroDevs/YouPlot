@@ -94,7 +94,6 @@ private fun PlannerScreenContent(
     val displayStep = if (state.selectedRoute != null && state.currentStep >= 1)
         state.currentStep - 1 else state.currentStep
 
-    // Per-step FAB configuration
     data class FabConfig(
         val label: String,
         val isLoading: Boolean = false,
@@ -109,16 +108,16 @@ private fun PlannerScreenContent(
             onClick = onNextStep,
         )
         1 -> FabConfig(
-            label = if (state.isGenerating) "Generating…" else "Generate Schedule",
+            label = if (state.isGenerating) "Generating ..." else "Generate Schedule",
             isLoading = state.isGenerating,
             onClick = { if (!state.isGenerating) onNextStep() },
         )
         2 -> FabConfig(
-            label = "Review",
+            label = "Review Plan",
             onClick = onNextStep,
         )
         3 -> FabConfig(
-            label = if (state.isSaving) "Saving…" else "Save Plan",
+            label = if (state.isSaving) "Saving ..." else "Save Plan",
             isLoading = state.isSaving,
             onClick = { if (!state.isSaving) onSavePlan() },
         )

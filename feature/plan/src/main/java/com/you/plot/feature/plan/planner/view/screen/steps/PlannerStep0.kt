@@ -92,7 +92,7 @@ private fun PlannerStep0Content(
                 state.templatePlans.forEach { plan ->
                     SourceCard(
                         title = plan.name,
-                        subtitle = "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDistPerDay)} km/day",
+                        subtitle = "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDailyDist)} km/day",
                         isSelected = state.selectedTemplate?.id == plan.id,
                         onClick = { onTemplateSelected(plan) },
                     )

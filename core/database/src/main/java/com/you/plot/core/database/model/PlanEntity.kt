@@ -38,9 +38,9 @@ data class PlanEntity(
     val routeId: Long,
     val name: String,
     val description: String,
-    val startDateMillis: Long,
+    val startDate: Long,
     val numberOfDays: Int,
     val avgSpeed: Double,
-    val avgDistPerDay: Double,
+    val avgDailyDist: Double,
     val createdAt: Long,
 )

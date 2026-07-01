@@ -46,7 +46,7 @@ data class PlanDetailUiState(
     /** Distance remaining after the selected day */
     val remainingDist: Double
         get() {
-            val total = plan?.run { avgDistPerDay * numberOfDays } ?: 0.0
+            val total = plan?.run { avgDailyDist * numberOfDays } ?: 0.0
             return (total - dayTotalDist).coerceAtLeast(0.0)
         }
 

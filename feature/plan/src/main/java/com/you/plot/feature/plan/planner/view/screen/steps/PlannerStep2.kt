@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -81,6 +82,7 @@ private fun PlannerStep2Content(
                 text = { Text("Add Event") },
             )
         },
+        floatingActionButtonPosition = FabPosition.Start
     ) { padding ->
         Column(
             Modifier
@@ -103,7 +105,6 @@ private fun PlannerStep2Content(
                 }
             }
 
-            // Horizontal timeline
             DayTimeline(
                 events = state.eventsForSelectedDay,
                 modifier = Modifier
@@ -139,7 +140,6 @@ private fun PlannerStep2Content(
 
                 item(key = "bottom_spacer") { Spacer(Modifier.height(4.dp)) }
 
-                // End-of-day summary
                 item(key = "day_summary") {
                     DaySummaryCard(
                         dayTotalDist = state.dayTotalDist,
@@ -194,7 +194,7 @@ private fun PlannerStep2Preview() {
                 avgSpeed = 18.0,
                 selectedDay = 1,
                 generatedEvents = generated,
-                startDateMillis = 0L,
+                startDate = 0L,
             ),
             onDaySelected = {},
             onAddCustomEvent = { _, _, _, _ -> },

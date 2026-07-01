@@ -9,6 +9,7 @@ enum class PlanFilter { ALL, UPCOMING, PAST }
 data class DashboardUiState(
     val recentRoutes: List<Route> = emptyList(),
     val plans: List<ActivityPlan> = emptyList(),
+    val routesById: Map<Long, Route> = emptyMap(),
     val planFilter: PlanFilter = PlanFilter.ALL,
     val isLoading: Boolean = true,
 ) {
@@ -19,8 +20,8 @@ data class DashboardUiState(
             val now = System.currentTimeMillis()
             return when (planFilter) {
                 PlanFilter.ALL      -> plans
-                PlanFilter.UPCOMING -> plans.filter { it.startDateMillis >= now }
-                PlanFilter.PAST     -> plans.filter { it.startDateMillis < now }
+                PlanFilter.UPCOMING -> plans.filter { it.startDate >= now }
+                PlanFilter.PAST     -> plans.filter { it.startDate < now }
             }
         }
 }

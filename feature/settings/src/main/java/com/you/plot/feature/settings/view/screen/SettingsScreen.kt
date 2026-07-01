@@ -137,7 +137,7 @@ fun SettingsScreen(
                 InfoDivider()
                 ToggleItem(
                     icon = Icons.Default.Speed,
-                    title = "Show Pace for Running & Walking",
+                    title = "Use Pace for Running/Walking",
                     subtitle = if (state.usePaceForRunWalk) "Displaying min/km" else "Displaying km/h",
                     checked = state.usePaceForRunWalk,
                     onCheckedChange = viewModel::setUsePaceForRunWalk
@@ -160,9 +160,9 @@ fun SettingsScreen(
                         title = sport.name.lowercase().replaceFirstChar { it.uppercase() },
                         value = if (limits != null) {
                             if (usePace)
-                                "${kmhToPaceStr(limits.maxKmh)} – ${kmhToPaceStr(limits.minKmh)}"
+                                "${speedToPaceStr(limits.minSpeed)} – ${speedToPaceStr(limits.maxSpeed)} min/km"
                             else
-                                "${limits.minKmh.toInt()}–${limits.maxKmh.toInt()} km/h"
+                                "${limits.minSpeed.toInt()}–${limits.maxSpeed.toInt()} km/h"
                         } else "Default",
                         onClick = { viewModel.showSpeedEditor(sport) },
                     )
@@ -192,13 +192,12 @@ fun SettingsScreen(
     }
 }
 
-/** km/h → "mm:ss min/km" pace string */
-fun kmhToPaceStr(kmh: Float): String {
-    if (kmh <= 0f) return "–"
-    val secPerKm = 3600f / kmh
+fun speedToPaceStr(speed: Float): String {
+    if (speed <= 0f) return "–"
+    val secPerKm = 3600f / speed
     val min = (secPerKm / 60).toInt()
     val sec = (secPerKm % 60).toInt()
-    return "%d:%02d min/km".format(min, sec)
+    return "%d:%02d".format(min, sec)
 }
 
 private val SportType.settingsIcon: ImageVector

@@ -54,19 +54,19 @@ data class ActivityPlan(
     val routeId: Long,
     val name: String,
     val description: String = "",
-    val startDateMillis: Long,
+    val startDate: Long,
     val numberOfDays: Int,
     val avgSpeed: Double,
-    val avgDistPerDay: Double,
+    val avgDailyDist: Double,
     val events: List<Event> = emptyList(),
     val createdAt: Long = System.currentTimeMillis(),
 )
 
 data class WaypointProgress(
     val waypoint: Waypoint,
-    val plannedArrivalMillis: Long,
-    val estimatedArrivalMillis: Long,
-    val distanceRemainingKm: Double,
+    val plannedArrival: Long,
+    val estimatedArrival: Long,
+    val distRemaining: Double,
     val isReached: Boolean = false,
     val wasSkipped: Boolean = false,
 )

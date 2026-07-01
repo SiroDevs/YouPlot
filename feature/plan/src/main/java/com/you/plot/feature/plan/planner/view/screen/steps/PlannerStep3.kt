@@ -40,10 +40,10 @@ private fun PlannerStep3Content(state: PlannerUiState) {
 
         SummaryRow("Plan", state.planName)
         SummaryRow("Route", state.selectedRoute?.name ?: state.selectedTemplate?.name ?: "—")
-        SummaryRow("Start", "${dateFmt.format(Date(state.startDateMillis))} at %02d:%02d".format(state.startHour, state.startMinute))
+        SummaryRow("Start", "${dateFmt.format(Date(state.startDate))} at %02d:%02d".format(state.startHour, state.startMinute))
         SummaryRow("Days", state.numberOfDays.toString())
         SummaryRow("Avg speed", "${"%.1f".format(state.avgSpeed)} km/h")
-        SummaryRow("Avg distance / day", "${"%.1f".format(state.avgDistPerDay)} km")
+        SummaryRow("Avg distance / day", "${"%.1f".format(state.avgDailyDist)} km")
         val totalEvents = state.generatedEvents.size + state.customEvents.size
         SummaryRow("Total events", "$totalEvents across ${state.numberOfDays} day(s)")
 
@@ -76,7 +76,7 @@ private fun PlannerStep3Preview() {
                 numberOfDays = 5,
                 avgSpeed = 18.0,
                 generatedEvents = generated,
-                startDateMillis = 0L,
+                startDate = 0L,
             ),
         )
     }

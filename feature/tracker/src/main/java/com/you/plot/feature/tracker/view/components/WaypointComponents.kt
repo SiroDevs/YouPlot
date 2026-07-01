@@ -102,7 +102,7 @@ fun WaypointProgressRow(progress: WaypointProgress) {
                 Text(progress.waypoint.name, style = MaterialTheme.typography.titleSmall)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "%.2f km away".format(progress.distanceRemainingKm),
+                        "%.2f km away".format(progress.distRemaining),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -122,7 +122,7 @@ fun WaypointProgressRow(progress: WaypointProgress) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    timeFmt.format(Date(progress.plannedArrivalMillis)),
+                    timeFmt.format(Date(progress.plannedArrival)),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium,
                 )
@@ -132,7 +132,7 @@ fun WaypointProgressRow(progress: WaypointProgress) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    timeFmt.format(Date(progress.estimatedArrivalMillis)),
+                    timeFmt.format(Date(progress.estimatedArrival)),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,

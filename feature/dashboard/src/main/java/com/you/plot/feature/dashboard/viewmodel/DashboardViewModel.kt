@@ -32,7 +32,8 @@ class DashboardViewModel @Inject constructor(
             ) { routes, plans ->
                 DashboardUiState(
                     recentRoutes = routes.sortedByDescending { it.createdAt }.take(5),
-                    plans = plans.sortedByDescending { it.startDateMillis },
+                    plans = plans.sortedByDescending { it.startDate },
+                    routesById = routes.associateBy { it.id },
                     planFilter = _state.value.planFilter,
                     isLoading = false,
                 )

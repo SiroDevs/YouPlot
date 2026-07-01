@@ -36,8 +36,8 @@ fun List<WaypointProgress>.toJson(): String {
                     put("isStopPlanned", isStopPlanned)
                 }
             })
-            put("planned", wp.plannedArrivalMillis); put("estimated", wp.estimatedArrivalMillis)
-            put("remaining", wp.distanceRemainingKm); put("reached", wp.isReached)
+            put("planned", wp.plannedArrival); put("estimated", wp.estimatedArrival)
+            put("remaining", wp.distRemaining); put("reached", wp.isReached)
             put("skipped", wp.wasSkipped)
         })
     }
@@ -58,9 +58,9 @@ fun String.toWaypointProgressList(): List<WaypointProgress> {
                 elevation = wObj.getDouble("elevation"),
                 isStopPlanned = wObj.getBoolean("isStopPlanned"),
             ),
-            plannedArrivalMillis = obj.getLong("planned"),
-            estimatedArrivalMillis = obj.getLong("estimated"),
-            distanceRemainingKm = obj.getDouble("remaining"),
+            plannedArrival = obj.getLong("planned"),
+            estimatedArrival = obj.getLong("estimated"),
+            distRemaining = obj.getDouble("remaining"),
             isReached = obj.getBoolean("reached"),
             wasSkipped = obj.getBoolean("skipped"),
         )

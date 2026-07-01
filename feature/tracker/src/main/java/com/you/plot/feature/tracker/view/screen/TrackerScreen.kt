@@ -245,7 +245,7 @@ fun TrackerScreen(
                 val h = elapsed / 3600;
                 val m = (elapsed % 3600) / 60;
                 val s = elapsed % 60
-                val nextEta = state.nextUnreachedWaypoint?.estimatedArrivalMillis
+                val nextEta = state.nextUnreachedWaypoint?.estimatedArrival
                 val doneEta = state.estimatedCompletion
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -103,11 +103,11 @@ fun PlanDetailScreen(
             item {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDistPerDay)} km/day · ${"%.0f".format(plan.avgSpeed)} km/h",
+                    "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDailyDist)} km/day · ${"%.0f".format(plan.avgSpeed)} km/h",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    "Starts ${dateFmt.format(Date(plan.startDateMillis))}",
+                    "Starts ${dateFmt.format(Date(plan.startDate))}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -171,13 +171,13 @@ fun PlanDetailScreen(
 }
 
 private fun buildCalendarIntent(plan: ActivityPlan): Intent {
-    val endMillis = plan.startDateMillis + plan.numberOfDays * 86_400_000L
+    val endMillis = plan.startDate + plan.numberOfDays * 86_400_000L
     return Intent(Intent.ACTION_INSERT).apply {
         data = CalendarContract.Events.CONTENT_URI
         putExtra(CalendarContract.Events.TITLE, plan.name)
         putExtra(CalendarContract.Events.DESCRIPTION,
-            plan.description.ifBlank { "${"%.1f".format(plan.avgDistPerDay)} km/day · ${"%.0f".format(plan.avgSpeed)} km/h" })
-        putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, plan.startDateMillis)
+            plan.description.ifBlank { "${"%.1f".format(plan.avgDailyDist)} km/day · ${"%.0f".format(plan.avgSpeed)} km/h" })
+        putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, plan.startDate)
         putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis)
         putExtra(CalendarContract.Events.ALL_DAY, plan.numberOfDays > 1)
     }

@@ -24,9 +24,9 @@ class StartActivityUseCase @Inject constructor(
             val event = plan.events.firstOrNull { it.waypointId == wp.id }
             WaypointProgress(
                 waypoint = wp,
-                plannedArrivalMillis = event?.plannedTime ?: System.currentTimeMillis(),
-                estimatedArrivalMillis = event?.plannedTime ?: System.currentTimeMillis(),
-                distanceRemainingKm = route.totalDist,
+                plannedArrival = event?.plannedTime ?: System.currentTimeMillis(),
+                estimatedArrival = event?.plannedTime ?: System.currentTimeMillis(),
+                distRemaining = route.totalDist,
             )
         }
 
@@ -107,23 +107,23 @@ fun ActivityActivity.recalculate(
         if (wp.isReached) return@map wp
         val waypointFraction = wp.waypoint.orderIndex.toDouble() /
             waypointProgress.size.coerceAtLeast(1)
-        val totalDist = waypointProgress.lastOrNull()?.distanceRemainingKm
+        val totalDist = waypointProgress.lastOrNull()?.distRemaining
             ?.plus(newDistance) ?: newDistance
         val remaining = (waypointFraction * totalDist - newDistance).coerceAtLeast(0.0)
         val etaMs = if (speedKmh > 0)
             nowMs + ((remaining / speedKmh) * 3_600_000L).toLong()
-        else wp.estimatedArrivalMillis
+        else wp.estimatedArrival
 
         wp.copy(
-            distanceRemainingKm = remaining,
-            estimatedArrivalMillis = etaMs,
+            distRemaining = remaining,
+            estimatedArrival = etaMs,
             isReached = remaining <= 0.05,
         )
     }
 
     // Recalculate estimated completion from current position and speed
     val lastWp = updatedProgress.lastOrNull()
-    val distToFinish = lastWp?.distanceRemainingKm ?: 0.0
+    val distToFinish = lastWp?.distRemaining ?: 0.0
     val newCompletion = if (speedKmh > 0)
         nowMs + ((distToFinish / speedKmh) * 3_600_000L).toLong()
     else estimatedCompletion

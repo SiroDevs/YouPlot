@@ -81,7 +81,7 @@ fun AppTopBar(
             showGoBack -> IconButton(onClick = { onNavIconClick?.invoke() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Rudi Nyuma",
+                    contentDescription = "Go Back",
                 )
             }
             showNavDrawer -> IconButton(onClick = { onNavIconClick?.invoke() }) {

@@ -48,7 +48,12 @@ fun RouteListScreen(
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(
-        topBar = { AppTopBar(title = "Routes") },
+        topBar = {
+            AppTopBar(
+                title = "Routes",
+                showGoBack = true
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateRoute) {
                 Icon(Icons.Default.Add, contentDescription = "Plot route")
@@ -56,25 +61,37 @@ fun RouteListScreen(
         },
     ) { padding ->
         if (state.isLoading) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            Box(Modifier
+                .fillMaxSize()
+                .padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         } else if (state.routes.isEmpty()) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Default.Map, contentDescription = null,
+            Box(Modifier
+                .fillMaxSize()
+                .padding(padding), contentAlignment = Alignment.Center) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Map, contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                        modifier = Modifier.size(56.dp))
+                        modifier = Modifier.size(56.dp)
+                    )
                     Text("No routes yet", style = MaterialTheme.typography.headlineSmall)
-                    Text("Tap + to plot your first route",
+                    Text(
+                        "Tap + to plot your first route",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 verticalArrangement = Arrangement.spacedBy(0.dp),
             ) {
                 item { Spacer(Modifier.height(8.dp)) }
@@ -90,7 +107,9 @@ fun RouteListScreen(
 @Composable
 fun RouteListItem(route: Route, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 5.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 5.dp),
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -113,42 +132,58 @@ fun RouteListItem(route: Route, onClick: () -> Unit) {
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.DirectionsRun, contentDescription = null,
+                        Icon(
+                            Icons.Default.DirectionsRun, contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp))
+                            modifier = Modifier.size(22.dp)
+                        )
                     }
                 }
             }
             Column(Modifier.weight(1f)) {
-                Text(route.name,
+                Text(
+                    route.name,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis)
+                    overflow = TextOverflow.Ellipsis
+                )
                 Spacer(Modifier.height(2.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("%.1f km".format(route.totalDist),
+                    Text(
+                        "%.1f km".format(route.totalDist),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium)
-                    Text("·", style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(route.sportType.name.lowercase().replaceFirstChar { it.uppercase() },
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        "·", style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        route.sportType.name.lowercase().replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     if (route.isRoundTrip) {
-                        Text("·", style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Round trip",
+                        Text(
+                            "·", style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "Round trip",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("↑%.0fm".format(route.elevationGain),
+                Text(
+                    "↑%.0fm".format(route.elevationGain),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
