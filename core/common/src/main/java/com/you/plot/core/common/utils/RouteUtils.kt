@@ -23,9 +23,9 @@ fun haversineKm(a: LatLng, b: LatLng): Double {
     return r * 2 * atan2(sqrt(h), sqrt(1 - h))
 }
 
-fun destinationPoint(start: LatLng, bearingDeg: Double, distanceKm: Double): LatLng {
+fun destinationPoint(start: LatLng, bearingDeg: Double, dist: Double): LatLng {
     val r = 6371.0
-    val d = distanceKm / r
+    val d = dist / r
     val brng = Math.toRadians(bearingDeg)
     val lat1 = Math.toRadians(start.latitude)
     val lon1 = Math.toRadians(start.longitude)

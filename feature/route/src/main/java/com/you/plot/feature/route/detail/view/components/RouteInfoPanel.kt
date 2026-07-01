@@ -1,5 +1,6 @@
 package com.you.plot.feature.route.detail.view.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,7 +37,7 @@ import com.you.plot.core.ui.general.displayLabel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RouteInfoPanel(
-    distanceKm: Double,
+    dist: Double,
     elevGainM: Double,
     elevLossM: Double,
     elevationPoints: List<ElevationPoint>,
@@ -65,7 +66,10 @@ fun RouteInfoPanel(
         )
     }
 
-    Column(Modifier.fillMaxSize()) {
+    Column(Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)
+    ) {
         PrimaryTabRow(selectedTabIndex = selectedTab) {
             tabs.forEachIndexed { i, title ->
                 Tab(
@@ -78,7 +82,7 @@ fun RouteInfoPanel(
 
         when (selectedTab) {
             0 -> OverviewTab(
-                distanceKm = distanceKm,
+                dist = dist,
                 elevGainM = elevGainM,
                 elevLossM = elevLossM,
                 elevationPoints = elevationPoints,
@@ -91,7 +95,7 @@ fun RouteInfoPanel(
 
             1 -> WaypointsTab(
                 waypoints = waypoints,
-                totalDist = distanceKm,
+                totalDist = dist,
                 elevationPoints = elevationPoints,
             )
         }
@@ -218,8 +222,8 @@ private fun computeSegmentGains(
         var gain = 0.0
         var prevElev: Double? = null
         for (pt in profile) {
-            if (pt.distanceKm < from) continue
-            if (pt.distanceKm > to) break
+            if (pt.dist < from) continue
+            if (pt.dist > to) break
             val e = pt.elevation
             if (prevElev != null && e > prevElev) gain += e - prevElev
             prevElev = e

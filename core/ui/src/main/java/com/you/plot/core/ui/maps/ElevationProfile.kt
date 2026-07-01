@@ -4,6 +4,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -20,7 +21,6 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
-
 @Composable
 fun ElevationProfile(
     points: List<ElevationPoint>,
@@ -39,13 +39,14 @@ fun ElevationProfile(
         modifier.background(
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
             RoundedCornerShape(10.dp)
-        )
+        ).padding(10.dp)
     ) {
         val W = size.width
         val H = size.height
 
-        val leftMargin = 108f
-        val bottomMargin = 52f
+        val titleSpace = 34f
+        val leftMargin = titleSpace + 84f
+        val bottomMargin = 64f
         val topMargin = 16f
         val rightMargin = 16f
 
@@ -54,18 +55,18 @@ fun ElevationProfile(
 
         val elevFactor = if (useMetric) 1.0 else 3.28084
         val distFactor = if (useMetric) 1.0 else 0.621371
-        val elevUnit = if (useMetric) "m" else "ft"
-        val distUnit = if (useMetric) "km" else "mi"
+        val elevUnit = if (useMetric) "M" else "FT"
+        val distUnit = if (useMetric) "KM" else "MI"
 
         val elevations = points.map { it.elevation * elevFactor }
-        val distances = points.map { it.distanceKm * distFactor }
+        val distances = points.map { it.dist * distFactor }
 
         val minElev = elevations.min()
         val maxElev = elevations.max()
         val maxDist = distances.max().coerceAtLeast(0.001)
 
-        val yTicks = niceTicks(minElev, maxElev, targetCount = 4)
-        val xTicks = niceTicks(0.0, maxDist, targetCount = 5)
+        val yTicks = niceTicks(minElev, maxElev, targetCount = 7)
+        val xTicks = niceTicks(0.0, maxDist, targetCount = 8)
 
         val yMin = yTicks.first()
         val yMax = yTicks.last()
@@ -88,6 +89,13 @@ fun ElevationProfile(
             typeface = Typeface.MONOSPACE
             textAlign = Paint.Align.CENTER
         }
+        val titlePaint = Paint().apply {
+            isAntiAlias = true
+            color = labelColor.toArgb()
+            textSize = 26f
+            typeface = Typeface.MONOSPACE
+            textAlign = Paint.Align.CENTER
+        }
 
         for (tick in yTicks) {
             val y = elevToY(tick)
@@ -97,8 +105,7 @@ fun ElevationProfile(
                 Offset(leftMargin + plotW, y),
                 strokeWidth = 1.5f
             )
-            val label =
-                if (tick % 1.0 == 0.0) "${tick.toInt()} $elevUnit" else "%.1f $elevUnit".format(tick)
+            val label = if (tick % 1.0 == 0.0) "${tick.toInt()}" else "%.1f".format(tick)
             drawContext.canvas.nativeCanvas.drawText(
                 label,
                 leftMargin - 8f,
@@ -115,9 +122,8 @@ fun ElevationProfile(
                 Offset(x, topMargin + plotH),
                 strokeWidth = 1f
             )
-            val label =
-                if (tick % 1.0 == 0.0) "${tick.toInt()} $distUnit" else "%.1f $distUnit".format(tick)
-            drawContext.canvas.nativeCanvas.drawText(label, x, H - 6f, axisPaint)
+            val label = if (tick % 1.0 == 0.0) "${tick.toInt()}" else "%.1f".format(tick)
+            drawContext.canvas.nativeCanvas.drawText(label, x, topMargin + plotH + 28f, axisPaint)
         }
 
         drawLine(
@@ -132,6 +138,22 @@ fun ElevationProfile(
             Offset(leftMargin + plotW, topMargin + plotH),
             strokeWidth = 2f
         )
+
+        drawContext.canvas.nativeCanvas.drawText(
+            "DISTANCE ($distUnit)",
+            leftMargin + plotW / 2f,
+            H - 6f,
+            titlePaint
+        )
+
+        drawContext.canvas.nativeCanvas.apply {
+            save()
+            val titleX = titleSpace / 2f + 6f
+            val titleY = topMargin + plotH / 2f
+            rotate(-90f, titleX, titleY)
+            drawText("ELEVATION ($elevUnit)", titleX, titleY, titlePaint)
+            restore()
+        }
 
         val fillPath = Path().apply {
             val firstX = distToX(distances[0])
@@ -167,7 +189,8 @@ private fun niceTicks(dataMin: Double, dataMax: Double, targetCount: Int = 5): L
     val normalised = roughStep / magnitude
     val niceStep = when {
         normalised < 1.5 -> 1.0
-        normalised < 3.0 -> 2.0
+        normalised < 2.25 -> 2.0
+        normalised < 3.75 -> 2.5
         normalised < 7.0 -> 5.0
         else -> 10.0
     } * magnitude

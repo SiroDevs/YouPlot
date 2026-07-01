@@ -27,11 +27,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 
-/**
- * App bar that flips between a plain title-with-actions layout and an inline
- * search field. Callers own the search query state so results can update as
- * the user types, and the X button both clears the field and exits search mode.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchableTopBar(
@@ -39,6 +34,7 @@ fun SearchableTopBar(
     searchActive: Boolean,
     searchQuery: String,
     onQueryChange: (String) -> Unit,
+    onBack: () -> Unit,
     onSearchClick: () -> Unit,
     onCloseSearch: () -> Unit,
     modifier: Modifier = Modifier,
@@ -53,16 +49,16 @@ fun SearchableTopBar(
     )
 
     if (!searchActive) {
-        TopAppBar(
-            title = { Text(title, style = MaterialTheme.typography.titleMedium) },
+        AppTopBar(
+            title = title,
+            showGoBack = true,
+            onNavIconClick = onBack,
             actions = {
                 IconButton(onClick = onSearchClick) {
                     Icon(Icons.Default.Search, contentDescription = "Search")
                 }
                 trailingActions()
             },
-            windowInsets = WindowInsets(0, 0, 0, 0),
-            colors = colors,
         )
         return
     }

@@ -58,6 +58,7 @@ import com.you.plot.feature.route.list.viewmodel.RouteListViewModel
 fun RouteListScreen(
     viewModel: RouteListViewModel,
     onCreateRoute: () -> Unit,
+    onBack: () -> Unit,
     onRouteClick: (Long) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -82,6 +83,7 @@ fun RouteListScreen(
         topBar = {
             SearchableTopBar(
                 title = "Routes",
+                onBack = onBack,
                 searchActive = state.searchActive,
                 searchQuery = state.searchQuery,
                 onQueryChange = viewModel::setSearchQuery,

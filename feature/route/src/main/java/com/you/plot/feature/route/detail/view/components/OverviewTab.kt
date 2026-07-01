@@ -24,7 +24,7 @@ import com.you.plot.core.ui.maps.ElevationProfile
 
 @Composable
 fun OverviewTab(
-    distanceKm: Double,
+    dist: Double,
     elevGainM: Double,
     elevLossM: Double,
     elevationPoints: List<ElevationPoint>,
@@ -36,14 +36,14 @@ fun OverviewTab(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(10.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                RouteDetailStatCard("→ Distance", "%.1f km".format(distanceKm), Modifier.weight(1f))
-                RouteDetailStatCard("↑ Elev. Gain", "%.0f m".format(elevGainM), Modifier.weight(1f))
-                RouteDetailStatCard("↓ Elev. Loss", "%.0f m".format(elevLossM), Modifier.weight(1f))
+                RouteDetailStatCard("→ Distance", "%.1f km".format(dist), Modifier.weight(1f))
+                RouteDetailStatCard("↑ Elevation Gain", "%.0f m".format(elevGainM), Modifier.weight(1f))
+                RouteDetailStatCard("↓ Elevation Loss", "%.0f m".format(elevLossM), Modifier.weight(1f))
             }
         }
 
@@ -55,12 +55,12 @@ fun OverviewTab(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(5.dp))
                     ElevationProfile(
                         points = elevationPoints,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(180.dp),
+                            .height(200.dp),
                     )
                 }
             }

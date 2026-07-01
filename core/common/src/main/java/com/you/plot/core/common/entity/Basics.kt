@@ -1,6 +1,6 @@
 package com.you.plot.core.common.entity
 
-data class ElevationPoint(val distanceKm: Double, val elevation: Double)
+data class ElevationPoint(val dist: Double, val elevation: Double)
 
 data class LatLng(val latitude: Double, val longitude: Double)
 

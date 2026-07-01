@@ -142,9 +142,9 @@ fun RouteCandidate.statsFor(isRoundTrip: Boolean): RouteStats {
         polyline = waypoints,
     )
     val roundGainLoss = elevationGain + elevationLoss
-    val forwardEnd = elevationPoints.lastOrNull()?.distanceKm ?: 0.0
+    val forwardEnd = elevationPoints.lastOrNull()?.dist ?: 0.0
     val mirroredProfile = elevationPoints.asReversed().drop(1).map { pt ->
-        pt.copy(distanceKm = 2 * forwardEnd - pt.distanceKm)
+        pt.copy(dist = 2 * forwardEnd - pt.dist)
     }
     return RouteStats(
         totalDist = totalDist * 2,

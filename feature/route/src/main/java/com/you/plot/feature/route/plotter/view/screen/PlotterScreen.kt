@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.PlotterStage
 import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
-import com.you.plot.core.ui.maps.PlotterMap
+import com.you.plot.core.ui.maps.RouteMap
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage1
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage2
 import com.you.plot.feature.route.plotter.view.screen.stages.PlotterStage3
@@ -38,6 +38,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.you.plot.feature.route.plotter.view.components.RouteDetailsDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +51,7 @@ fun PlotterScreen(
     onRouteSaved: (Long) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    var showRouteDetailsDialog by remember { mutableStateOf(false) }
 
     // System permission launcher
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -57,8 +62,6 @@ fun PlotterScreen(
         viewModel.onPermissionResult(granted)
     }
 
-    // Permission is requested only when the user taps "Use your location" — the app
-    // no longer auto-selects the current location as the start point on Stage 1.
     LaunchedEffect(state.needsLocationPermission) {
         if (state.needsLocationPermission) {
             permissionLauncher.launch(
@@ -84,10 +87,30 @@ fun PlotterScreen(
         )
     }
 
+    if (showRouteDetailsDialog) {
+        RouteDetailsDialog(
+            initialName = state.name,
+            initialDescription = state.description,
+            onConfirm = { name, description ->
+                viewModel.setName(name)
+                viewModel.setDescription(description)
+                showRouteDetailsDialog = false
+            },
+            onDismiss = {
+                showRouteDetailsDialog = false
+                viewModel.goBack()
+            },
+        )
+    }
+
+    LaunchedEffect(state.stage) {
+        if (state.stage == PlotterStage.STAGE_5) showRouteDetailsDialog = true
+    }
+
     Scaffold(
         topBar = {
             AppTopBar(
-                title = stageTitles[state.stage] ?: "Plot Route",
+                title = stageTitles[state.stage] ?: "Plot A New Route",
                 showGoBack = true,
                 onNavIconClick = {
                     if (state.stage == PlotterStage.STAGE_1) onBack()
@@ -120,11 +143,13 @@ fun PlotterScreen(
             }
         },
     ) { padding ->
-        Box(Modifier
-            .fillMaxSize()
-            .padding(padding)) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             if (state.stage != PlotterStage.STAGE_5)
-                PlotterMap(
+                RouteMap(
                     modifier = Modifier.fillMaxSize(),
                     startPoint = state.startPoint,
                     endPoint = state.endPoint,
@@ -164,9 +189,9 @@ fun PlotterScreen(
 val stageTitles = mapOf(
     PlotterStage.STAGE_1 to "Select Start Point",
     PlotterStage.STAGE_2 to "Select Destination",
-    PlotterStage.STAGE_3 to "Waypoints & Route Type",
-    PlotterStage.STAGE_4 to "Compare Routes",
-    PlotterStage.STAGE_5 to "Save Route",
+    PlotterStage.STAGE_3 to "Add Route Waypoints",
+    PlotterStage.STAGE_4 to "Compare Available Routes",
+    PlotterStage.STAGE_5 to "Save Your Route",
 )
 
 private val PlotterStage.mapsAreTappable: Boolean

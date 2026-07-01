@@ -22,20 +22,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.IosShare
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,10 +47,12 @@ import androidx.compose.ui.unit.dp
 import com.you.plot.core.common.entity.RouteCandidate
 import com.you.plot.core.common.utils.MapConstants
 import com.you.plot.core.common.utils.dateFmt
+import com.you.plot.core.data.sample.sampleRoute
 import com.you.plot.core.designsystem.theme.AppTheme
 import com.you.plot.core.ui.action.AppTopBar
-import com.you.plot.core.ui.maps.PlotterMap
+import com.you.plot.core.ui.maps.RouteMap
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
+import com.you.plot.feature.route.detail.view.components.RouteMoreMenu
 import com.you.plot.feature.route.detail.viewmodel.RouteDetailUiState
 import java.util.Date
 
@@ -104,51 +99,10 @@ fun RouteDetailContent(
                     ) {
                         Icon(Icons.Outlined.Edit, contentDescription = "Edit route")
                     }
-                    // ⋮ More menu
-                    Box {
-                        IconButton(onClick = { showMoreMenu = true }) {
-                            Icon(Icons.Outlined.MoreVert, contentDescription = "More options")
-                        }
-                        DropdownMenu(
-                            expanded = showMoreMenu,
-                            onDismissRequest = { showMoreMenu = false },
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Export Route") },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Outlined.IosShare, null,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                },
-                                onClick = {
-                                    showMoreMenu = false
-                                    onExportClick()
-                                },
-                            )
-                            HorizontalDivider()
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        "Delete Route",
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                },
-                                onClick = {
-                                    showMoreMenu = false
-                                    showDeleteDialog = true
-                                },
-                            )
-                        }
-                    }
+                    RouteMoreMenu(
+                        onExportClick = onExportClick,
+                        onDeleteClick = { showDeleteDialog = true },
+                    )
                 },
             )
         },
@@ -211,7 +165,7 @@ fun RouteDetailContent(
                     elevationLoss = route.elevationLoss,
                     colorArgb = MapConstants.CANDIDATE_COLORS.first(),
                 )
-                PlotterMap(
+                RouteMap(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(240.dp),
@@ -228,7 +182,7 @@ fun RouteDetailContent(
             }
 
             RouteInfoPanel(
-                distanceKm = route.totalDist,
+                dist = route.totalDist,
                 elevGainM = route.elevationGain,
                 elevLossM = route.elevationLoss,
                 elevationPoints = route.elevationPoints,
@@ -248,8 +202,8 @@ fun RouteDetailContent(
 private fun RouteDetailScreenLoadedPreview() {
     AppTheme {
         RouteDetailContent(
-//            state = RouteDetailUiState(isLoading = false, route = sampleRoute()),
-            state = RouteDetailUiState(isLoading = false, route = null),
+            state = RouteDetailUiState(isLoading = false, route = sampleRoute()),
+//            state = RouteDetailUiState(isLoading = false, route = null),
 //            state = RouteDetailUiState(isLoading = true),
             onBack = {},
             onCreatePlan = {},

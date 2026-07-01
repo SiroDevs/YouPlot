@@ -31,8 +31,8 @@ fun RouteMetaRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(
             modifier = Modifier.weight(1f),
@@ -47,6 +47,7 @@ fun RouteMetaRow(
             Button(
                 onClick = onSportTypeChange,
                 contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                modifier = Modifier.height(20.dp),
             ) {
                 Text(
                     sportType.displayLabel,
@@ -56,13 +57,13 @@ fun RouteMetaRow(
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(15.dp),
                 )
             }
         }
 
         VerticalDivider(
-            modifier = Modifier.height(25.dp),
+            modifier = Modifier.height(20.dp),
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
         )
 
@@ -98,7 +99,7 @@ fun RouteDetailsMetaRow(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                "Sport", style = MaterialTheme.typography.labelSmall,
+                "Sport Type:", style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
@@ -115,7 +116,7 @@ fun RouteDetailsMetaRow(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                "Route Type", style = MaterialTheme.typography.labelSmall,
+                "Route Type:", style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
@@ -132,7 +133,7 @@ fun RouteDetailsMetaRow(
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Created", style = MaterialTheme.typography.labelSmall,
+                    "Created:", style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(

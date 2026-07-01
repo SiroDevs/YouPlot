@@ -18,7 +18,7 @@ import com.you.plot.core.domain.entity.Waypoint
 import com.you.plot.feature.route.detail.view.components.RouteInfoPanel
 import com.you.plot.feature.route.plotter.utils.PlotterUiState
 import com.you.plot.feature.route.plotter.utils.statsFor
-import com.you.plot.core.ui.maps.PlotterMap
+import com.you.plot.core.ui.maps.RouteMap
 import com.you.plot.feature.route.plotter.viewmodel.PlotterViewModel
 
 @Composable
@@ -27,7 +27,7 @@ fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
     val stats = candidate?.statsFor(state.isRoundTrip)
 
     Column(Modifier.fillMaxSize()) {
-        PlotterMap(
+        RouteMap(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(220.dp),
@@ -46,7 +46,7 @@ fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
 
         PlotterStage5Panel(
             state = state,
-            distanceKm = stats?.totalDist ?: 0.0,
+            dist = stats?.totalDist ?: 0.0,
             elevGainM = stats?.elevationGain ?: 0.0,
             elevLossM = stats?.elevationLoss ?: 0.0,
             elevationPoints = stats?.elevationPoints ?: emptyList(),
@@ -58,7 +58,7 @@ fun PlotterStage5(state: PlotterUiState, vm: PlotterViewModel) {
 @Composable
 private fun PlotterStage5Panel(
     state: PlotterUiState,
-    distanceKm: Double,
+    dist: Double,
     elevGainM: Double,
     elevLossM: Double,
     elevationPoints: List<ElevationPoint>,
@@ -66,18 +66,18 @@ private fun PlotterStage5Panel(
 ) {
     RouteInfoPanel(
         modifier = Modifier.fillMaxSize(),
-        distanceKm = distanceKm,
+        dist = dist,
         elevGainM = elevGainM,
         elevLossM = elevLossM,
         elevationPoints = elevationPoints,
         sportType = state.sportType,
         isRoundTrip = state.isRoundTrip,
         onSportTypeChange = onSportTypeChange,
-        waypoints = buildPreviewWaypoints(state, distanceKm),
+        waypoints = buildPreviewWaypoints(state, dist),
     )
 }
 
-private fun buildPreviewWaypoints(state: PlotterUiState, distanceKm: Double): List<Waypoint> {
+private fun buildPreviewWaypoints(state: PlotterUiState, dist: Double): List<Waypoint> {
     val start = state.startPoint ?: return emptyList()
     val end = state.endPoint ?: return emptyList()
     val intermediates = state.activeWaypoints
@@ -87,7 +87,7 @@ private fun buildPreviewWaypoints(state: PlotterUiState, distanceKm: Double): Li
     val cc = state.selectedCtryCode
     return allPoints.mapIndexed { idx, pt ->
         val cumDist = if (allPoints.size > 1)
-            distanceKm * idx.toDouble() / (allPoints.size - 1)
+            dist * idx.toDouble() / (allPoints.size - 1)
         else 0.0
         val name = when (idx) {
             0 -> state.startPointName.ifBlank { "Start" }
@@ -144,7 +144,7 @@ private fun PlotterStage5PanelPreview() {
                 routeCandidates = listOf(candidate),
                 selectedCandidateId = 0,
             ),
-            distanceKm = candidate.totalDist,
+            dist = candidate.totalDist,
             elevGainM = candidate.elevationGain,
             elevLossM = candidate.elevationLoss,
             elevationPoints = candidate.elevationPoints,

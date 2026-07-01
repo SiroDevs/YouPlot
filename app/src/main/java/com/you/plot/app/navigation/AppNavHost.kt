@@ -57,6 +57,7 @@ fun AppNavHost(
         composable(Routes.ROUTE_LIST) {
             RouteListScreen(
                 viewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() },
                 onCreateRoute = { navController.navigate(Routes.routePlotter()) },
                 onRouteClick = { routeId -> navController.navigate(Routes.routeDetail(routeId)) },
             )
@@ -135,6 +136,7 @@ fun AppNavHost(
         composable(Routes.PLAN_LIST) {
             PlanListScreen(
                 viewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() },
                 onCreatePlan = { navController.navigate(Routes.PLAN_CREATE) },
                 onPlanClick = { planId -> navController.navigate(Routes.planDetail(planId)) },
                 onStartTracking = { planId -> navController.navigate(Routes.tracker(planId)) },

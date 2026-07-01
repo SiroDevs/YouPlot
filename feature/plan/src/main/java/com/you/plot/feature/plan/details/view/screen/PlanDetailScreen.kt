@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
@@ -21,6 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -121,6 +123,7 @@ fun PlanDetailScreen(
         topBar = {
             AppTopBar(
                 title = state.plan?.name ?: "Plan",
+                showGoBack = true,
                 onNavIconClick = onBack,
                 actions = {
                     state.plan?.let { plan ->
@@ -137,17 +140,21 @@ fun PlanDetailScreen(
                     IconButton(onClick = { viewModel.showAddReminderDialog() }) {
                         Icon(Icons.Default.Notifications, "Add Reminder")
                     }
-                    state.plan?.let { plan ->
-                        IconButton(onClick = { onStartTracking(plan.id) }) {
-                            Icon(Icons.Default.PlayArrow, "Start tracking")
-                        }
-                    }
                 },
             )
         },
+        floatingActionButton = {
+            state.plan?.let { plan ->
+                FloatingActionButton(onClick = { onStartTracking(plan.id) }) {
+                    Icon(Icons.Default.PlayArrow, "Start tracking")
+                }
+            }
+        }
     ) { padding ->
         if (state.isLoading) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            Box(Modifier
+                .fillMaxSize()
+                .padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
             return@Scaffold
@@ -156,13 +163,20 @@ fun PlanDetailScreen(
         val plan = state.plan ?: return@Scaffold
 
         LazyColumn(
-            Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDailyDist)} km/day · ${"%.0f".format(plan.avgSpeed)} km/h",
+                    "${plan.numberOfDays} day(s) · ${"%.1f".format(plan.avgDailyDist)} km/day · ${
+                        "%.0f".format(
+                            plan.avgSpeed
+                        )
+                    } km/h",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
@@ -193,7 +207,9 @@ fun PlanDetailScreen(
             item {
                 DayTimeline(
                     events = state.eventsForDay,
-                    modifier = Modifier.fillMaxWidth().height(88.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(88.dp),
                 )
                 Spacer(Modifier.height(4.dp))
                 HorizontalDivider()
@@ -212,8 +228,10 @@ fun PlanDetailScreen(
             if (state.reminders.isNotEmpty()) {
                 item {
                     Spacer(Modifier.height(8.dp))
-                    Text("Reminders", style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold)
+                    Text(
+                        "Reminders", style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
                     Spacer(Modifier.height(4.dp))
                 }
                 items(state.reminders, key = { it.index }) { reminder ->
@@ -234,8 +252,15 @@ private fun buildCalendarIntent(plan: ActivityPlan): Intent {
     return Intent(Intent.ACTION_INSERT).apply {
         data = CalendarContract.Events.CONTENT_URI
         putExtra(CalendarContract.Events.TITLE, plan.name)
-        putExtra(CalendarContract.Events.DESCRIPTION,
-            plan.description.ifBlank { "${"%.1f".format(plan.avgDailyDist)} km/day · ${"%.0f".format(plan.avgSpeed)} km/h" })
+        putExtra(
+            CalendarContract.Events.DESCRIPTION,
+            plan.description.ifBlank {
+                "${"%.1f".format(plan.avgDailyDist)} km/day · ${
+                    "%.0f".format(
+                        plan.avgSpeed
+                    )
+                } km/h"
+            })
         putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, plan.startDate)
         putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis)
         putExtra(CalendarContract.Events.ALL_DAY, plan.numberOfDays > 1)

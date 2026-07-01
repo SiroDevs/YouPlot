@@ -45,7 +45,7 @@ private fun PlotterStage4Content(
         LazyColumn(
             Modifier
                 .fillMaxWidth()
-                .height(if (state.selectedCandidate != null) 320.dp else 220.dp)
+                .height(if (state.selectedCandidate != null) 400.dp else 250.dp)
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.97f))
                 .padding(horizontal = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -71,7 +71,7 @@ private fun PlotterStage4Content(
                         points = c.elevationPoints,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(100.dp),
+                            .height(220.dp),
                     )
                 }
             }

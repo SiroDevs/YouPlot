@@ -31,6 +31,11 @@ fun sampleRoute(): Route {
         ElevationPoint(3.0, 1742.0),
         ElevationPoint(4.0, 1768.0),
         ElevationPoint(5.0, 1750.0),
+        ElevationPoint(6.0, 1820.0),
+        ElevationPoint(7.0, 1855.0),
+        ElevationPoint(8.0, 1942.0),
+        ElevationPoint(9.0, 1900.0),
+        ElevationPoint(10.0, 1950.0),
     )
     val waypoints = listOf(
         Waypoint(

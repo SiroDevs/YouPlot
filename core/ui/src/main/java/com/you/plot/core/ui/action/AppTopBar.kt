@@ -87,7 +87,7 @@ fun AppTopBar(
             }
             if (showStepIndicator) {
                 Spacer(Modifier.height(6.dp))
-                _root_ide_package_.com.you.plot.core.ui.action.StepPills(
+                StepPills(
                     current = stepCurrent!!,
                     total = stepTotal!!,
                     showLabel = true

@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.you.plot.core.ui.action.AppTopBar
 import com.you.plot.core.ui.maps.LocationSearchBar
-import com.you.plot.core.ui.maps.PlotterMap
+import com.you.plot.core.ui.maps.RouteMap
 import com.you.plot.feature.startpoint.form.viewmodel.StartPointFormViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +93,7 @@ fun StartPointFormScreen(
         Box(Modifier
             .fillMaxSize()
             .padding(padding)) {
-            PlotterMap(
+            RouteMap(
                 modifier = Modifier.fillMaxSize(),
                 startPoint = state.position,
                 endPoint = null,

@@ -8,7 +8,7 @@ import org.json.JSONObject
 @JvmName("elevationListToJson")
 fun List<ElevationPoint>.toJson(): String {
     val arr = JSONArray()
-    forEach { ep -> arr.put(JSONObject().apply { put("d", ep.distanceKm); put("e", ep.elevation) }) }
+    forEach { ep -> arr.put(JSONObject().apply { put("d", ep.dist); put("e", ep.elevation) }) }
     return arr.toString()
 }
 

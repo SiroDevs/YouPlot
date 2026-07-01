@@ -40,6 +40,7 @@ import com.you.plot.feature.plan.list.viewmodel.PlanListViewModel
 fun PlanListScreen(
     viewModel: PlanListViewModel,
     onCreatePlan: () -> Unit,
+    onBack: () -> Unit,
     onPlanClick: (Long) -> Unit,
     onStartTracking: (Long) -> Unit,
 ) {
@@ -50,7 +51,6 @@ fun PlanListScreen(
         viewModel.selectTab(PlanListTab.entries[pagerState.currentPage])
     }
 
-    // When duplicate() finishes, jump into the new plan so the user can adjust it.
     LaunchedEffect(state.clonedPlanId) {
         state.clonedPlanId?.let { id ->
             onPlanClick(id)
@@ -62,6 +62,7 @@ fun PlanListScreen(
         topBar = {
             SearchableTopBar(
                 title = "Plans",
+                onBack = onBack,
                 searchActive = state.searchActive,
                 searchQuery = state.searchQuery,
                 onQueryChange = viewModel::setSearchQuery,

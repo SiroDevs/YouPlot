@@ -281,7 +281,7 @@ class PlotterRepo @Inject constructor(
                     cumDist += haversineKm(sampled[i - 1], sampled[i])
                 }
                 ElevationPoint(
-                    distanceKm = cumDist,
+                    dist = cumDist,
                     elevation = results.getJSONObject(i).getDouble("elevation"),
                 )
             }
@@ -292,8 +292,8 @@ class PlotterRepo @Inject constructor(
             e.printStackTrace()
             if (decodedPoints.isEmpty()) emptyList()
             else listOf(
-                ElevationPoint(distanceKm = 0.0, elevation = 0.0),
-                ElevationPoint(distanceKm = distKm, elevation = 0.0),
+                ElevationPoint(dist = 0.0, elevation = 0.0),
+                ElevationPoint(dist = distKm, elevation = 0.0),
             )
         }
     }

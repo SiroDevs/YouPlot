@@ -80,7 +80,6 @@ class PlotterViewModel @Inject constructor(
         }
     }
 
-    /** Populate stage 1 with the details of a saved start point the user picked. */
     fun onSavedStartPointPicked(sp: StartPoint) = _state.update {
         it.copy(
             startPoint = sp.position,
